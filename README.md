@@ -9,7 +9,8 @@ An Application/Product Lifecycle Management solution handling products with rega
 It will contain support for teams, product owners and single individuals tasks to maintain the product or service.
 
 ## Status
-The project is in an early design and startup phase. It started 2023-01-10 and is currently creating the code framework for the solution so I can start build on functionality. It uses a lot of structuring, functions and ideas from Thomas Honeymans ![Real World Halogen](https://github.com/thomashoneyman/purescript-halogen-realworld).
+The project is in an early design and startup phase. It started 2023-01-10 and I am currently creating the code framework for the solution so I can start build on functionality. It uses a lot of structuring, functions and ideas from Thomas Honeymans [Real World Halogen](https://github.com/thomashoneyman/purescript-halogen-realworld), that is a great place to start for building applications using halogen.
 
+The frontend application is built with purescript using halogen and the backend api and static file server is built with haskell using scotty.
 
 It is just the rest of the application left ;-)
