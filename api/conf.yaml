@@ -1,0 +1,4 @@
+token:
+  issuer: "https:/stenlund.eu"
+  key: changeme
+  valid: 1800

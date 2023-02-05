@@ -1,0 +1,9 @@
+{
+    "user": {
+        "email": "tomas.stenlund@telia.com",
+        "username": "dnulnets",
+        "bio": null,
+        "image": "https://api.realworld.io/images/smiley-cyrus.jpeg",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRvbWFzLnN0ZW5sdW5kQHRlbGlhLmNvbSIsInVzZXJuYW1lIjoiZG51bG5ldHMiLCJpYXQiOjE2NzUzNDE3MzYsImV4cCI6MTY4MDUyNTczNn0.PAXyT-lSXBqCOkUH_xqwk4JDTKF8SNo2XzBJf-jedL4"
+    }
+}
