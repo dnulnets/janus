@@ -6527,8 +6527,8 @@
               rowListCodec: function(v) {
                 return function(codecs) {
                   var tail3 = rowListCodec1($$Proxy.value)(codecs);
-                  var codec3 = from3(get6($$Proxy.value)(codecs));
-                  return recordProp2($$Proxy.value)(codec3)(tail3);
+                  var codec4 = from3(get6($$Proxy.value)(codecs));
+                  return recordProp2($$Proxy.value)(codec4)(tail3);
                 };
               }
             };
@@ -12448,7 +12448,7 @@
         return User.value;
       }
       ;
-      throw new Error("Failed pattern match at Janus.Api.Endpoint (line 74, column 1 - line 74, column 54): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Janus.Api.Endpoint (line 19, column 1 - line 19, column 54): " + [x.constructor.name]);
     },
     from: function(x) {
       if (x instanceof Login) {
@@ -12459,7 +12459,7 @@
         return new Inr(NoArguments.value);
       }
       ;
-      throw new Error("Failed pattern match at Janus.Api.Endpoint (line 74, column 1 - line 74, column 54): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Janus.Api.Endpoint (line 19, column 1 - line 19, column 54): " + [x.constructor.name]);
     }
   };
   var endpointCodec = /* @__PURE__ */ root(/* @__PURE__ */ prefix2("api")(/* @__PURE__ */ sum2(genericEndpoint)(/* @__PURE__ */ gRouteSum(/* @__PURE__ */ gRouteConstructor({
@@ -12475,23 +12475,17 @@
     User: /* @__PURE__ */ gsep2("user")(noArgs)
   })));
 
-  // output/Janus.Data.Email/index.js
-  var Email = function(x) {
-    return x;
-  };
-  var codec = /* @__PURE__ */ wrapIso(/* @__PURE__ */ profunctorGCodec(/* @__PURE__ */ functorReaderT(functorEither))(/* @__PURE__ */ functorWriterT(functorIdentity)))()(Email)(string);
-
   // output/Data.Codec.Argonaut.Compat/index.js
   var pure14 = /* @__PURE__ */ pure(applicativeEither);
   var bimap5 = /* @__PURE__ */ bimap(bifunctorEither);
-  var maybe2 = function(codec3) {
+  var maybe2 = function(codec4) {
     var enc = function(v) {
       if (v instanceof Nothing) {
         return jsonNull;
       }
       ;
       if (v instanceof Just) {
-        return encode4(codec3)(v.value0);
+        return encode4(codec4)(v.value0);
       }
       ;
       throw new Error("Failed pattern match at Data.Codec.Argonaut.Compat (line 36, column 9 - line 38, column 28): " + [v.constructor.name]);
@@ -12502,13 +12496,41 @@
       }
       ;
       if (otherwise) {
-        return bimap5(Named.create("Maybe"))(Just.create)(decode(codec3)(j));
+        return bimap5(Named.create("Maybe"))(Just.create)(decode(codec4)(j));
       }
       ;
       throw new Error("Failed pattern match at Data.Codec.Argonaut.Compat (line 31, column 3 - line 31, column 50): " + [j.constructor.name]);
     };
     return basicCodec(dec)(enc);
   };
+
+  // output/Janus.Data.Email/index.js
+  var Email = function(x) {
+    return x;
+  };
+  var eqEmail = {
+    eq: function(x) {
+      return function(y) {
+        return x === y;
+      };
+    }
+  };
+  var codec = /* @__PURE__ */ wrapIso(/* @__PURE__ */ profunctorGCodec(/* @__PURE__ */ functorReaderT(functorEither))(/* @__PURE__ */ functorWriterT(functorIdentity)))()(Email)(string);
+
+  // output/Janus.Data.UUID/index.js
+  var UUID = function(x) {
+    return x;
+  };
+  var eqUUID = {
+    eq: function(x) {
+      return function(y) {
+        return x === y;
+      };
+    }
+  };
+  var codec2 = /* @__PURE__ */ dimap(/* @__PURE__ */ profunctorGCodec(/* @__PURE__ */ functorReaderT(functorEither))(/* @__PURE__ */ functorWriterT(functorIdentity)))(function(v) {
+    return v;
+  })(UUID)(string);
 
   // output/Janus.Data.Username/index.js
   var Username = function(x) {
@@ -12531,38 +12553,40 @@
       };
     }
   };
-  var codec2 = /* @__PURE__ */ dimap(/* @__PURE__ */ profunctorGCodec(/* @__PURE__ */ functorReaderT(functorEither))(/* @__PURE__ */ functorWriterT(functorIdentity)))(function(v) {
+  var codec3 = /* @__PURE__ */ dimap(/* @__PURE__ */ profunctorGCodec(/* @__PURE__ */ functorReaderT(functorEither))(/* @__PURE__ */ functorWriterT(functorIdentity)))(function(v) {
     return v;
   })(Username)(string);
 
   // output/Janus.Data.Profile/index.js
   var object4 = /* @__PURE__ */ object2();
-  var rowListCodecCons2 = /* @__PURE__ */ rowListCodecCons(rowListCodecNil)()()({
+  var rowListCodecCons2 = /* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons(rowListCodecNil)()()({
     reflectSymbol: function() {
       return "username";
     }
-  })(refl);
-  var rowListCodecCons1 = /* @__PURE__ */ rowListCodecCons(rowListCodecCons2)()();
+  })(refl))()()({
+    reflectSymbol: function() {
+      return "uid";
+    }
+  })(refl))()();
   var emailIsSymbol = {
     reflectSymbol: function() {
       return "email";
     }
   };
-  var profileWithEmailPasswordCodec = /* @__PURE__ */ object4(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons1({
+  var profileWithPasswordCodec = /* @__PURE__ */ object4(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons2({
     reflectSymbol: function() {
       return "password";
     }
-  })(refl))()()(emailIsSymbol)(refl))("Profile")({
-    username: codec2,
+  })(refl))()()(emailIsSymbol)(refl))("ProfileWithPassword")({
+    uid: codec2,
+    username: codec3,
     email: codec,
     password: /* @__PURE__ */ maybe2(string)
   });
-  var profileWithEmailCodec = /* @__PURE__ */ object4(/* @__PURE__ */ rowListCodecCons1(emailIsSymbol)(refl))("Profile")({
-    username: codec2,
+  var profileCodec = /* @__PURE__ */ object4(/* @__PURE__ */ rowListCodecCons2(emailIsSymbol)(refl))("Profile")({
+    uid: codec2,
+    username: codec3,
     email: codec
-  });
-  var profileCodec = /* @__PURE__ */ object4(rowListCodecCons2)("Profile")({
-    username: codec2
   });
 
   // output/Web.Storage.Storage/foreign.js
@@ -12602,18 +12626,9 @@
 
   // output/Janus.Api.Request/index.js
   var bindFlipped10 = /* @__PURE__ */ bindFlipped(bindEffect);
+  var map36 = /* @__PURE__ */ map(functorMaybe);
   var object5 = /* @__PURE__ */ object2();
   var rowListCodecCons3 = /* @__PURE__ */ rowListCodecCons(rowListCodecNil)()();
-  var rowListCodecCons12 = /* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons3({
-    reflectSymbol: function() {
-      return "username";
-    }
-  })(refl))()()({
-    reflectSymbol: function() {
-      return "password";
-    }
-  })(refl);
-  var map36 = /* @__PURE__ */ map(functorMaybe);
   var bind7 = /* @__PURE__ */ bind(bindEither);
   var object1 = /* @__PURE__ */ object5(/* @__PURE__ */ rowListCodecCons3({
     reflectSymbol: function() {
@@ -12670,21 +12685,20 @@
     return bindFlipped10(setItem(tokenKey)(v))(bindFlipped10(localStorage)(windowImpl));
   };
   var removeToken = /* @__PURE__ */ bindFlipped10(/* @__PURE__ */ removeItem(tokenKey))(/* @__PURE__ */ bindFlipped10(localStorage)(windowImpl));
-  var registerCodec = /* @__PURE__ */ object5(/* @__PURE__ */ rowListCodecCons(rowListCodecCons12)()()({
-    reflectSymbol: function() {
-      return "email";
-    }
-  })(refl))("RegisterFields")({
-    email: codec,
-    password: string,
-    username: codec2
-  });
   var readToken = function __do2() {
     var str = bindFlipped10(getItem(tokenKey))(bindFlipped10(localStorage)(windowImpl))();
     return map36(Token)(str);
   };
-  var loginCodec = /* @__PURE__ */ object5(rowListCodecCons12)("LoginFields")({
-    username: codec2,
+  var loginCodec = /* @__PURE__ */ object5(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons3({
+    reflectSymbol: function() {
+      return "username";
+    }
+  })(refl))()()({
+    reflectSymbol: function() {
+      return "password";
+    }
+  })(refl))("LoginRequest")({
+    username: codec3,
     password: string
   });
   var defaultRequest2 = function(v) {
@@ -12707,7 +12721,7 @@
             return new Tuple(DELETE.value, Nothing.value);
           }
           ;
-          throw new Error("Failed pattern match at Janus.Api.Request (line 136, column 30 - line 140, column 35): " + [v1.method.constructor.name]);
+          throw new Error("Failed pattern match at Janus.Api.Request (line 81, column 30 - line 85, column 35): " + [v1.method.constructor.name]);
         }();
         return {
           method: new Left(v2.value0),
@@ -12718,10 +12732,10 @@
             }
             ;
             if (auth instanceof Just) {
-              return [new RequestHeader("Authorization", "Token " + auth.value0)];
+              return [new RequestHeader("Authorization", "Bearer " + auth.value0)];
             }
             ;
-            throw new Error("Failed pattern match at Janus.Api.Request (line 125, column 14 - line 127, column 74): " + [auth.constructor.name]);
+            throw new Error("Failed pattern match at Janus.Api.Request (line 70, column 14 - line 72, column 75): " + [auth.constructor.name]);
           }(),
           content: map36(json)(v2.value1),
           username: Nothing.value,
@@ -12734,8 +12748,8 @@
     };
   };
   var decodeAuthProfile = function(v) {
-    var tokenCodec = prismaticCodec("Token (inner)")(function($96) {
-      return Just.create(Token($96));
+    var tokenCodec = prismaticCodec("Token (inner)")(function($87) {
+      return Just.create(Token($87));
     })(function(v1) {
       return v1;
     })(string);
@@ -12765,7 +12779,7 @@
             }))(res.value0.body))));
           }
           ;
-          throw new Error("Failed pattern match at Janus.Api.Request (line 196, column 3 - line 198, column 130): " + [res.constructor.name]);
+          throw new Error("Failed pattern match at Janus.Api.Request (line 113, column 3 - line 115, column 130): " + [res.constructor.name]);
         });
       };
     };
@@ -12781,22 +12795,6 @@
         })));
         return requestUser1(baseUrl)({
           endpoint: Login.value,
-          method: method3
-        });
-      };
-    };
-  };
-  var register = function(dictMonadAff) {
-    var requestUser1 = requestUser(dictMonadAff);
-    return function(baseUrl) {
-      return function(fields) {
-        var method3 = new Post(new Just(encode4(object22("User")({
-          user: registerCodec
-        }))({
-          user: fields
-        })));
-        return requestUser1(baseUrl)({
-          endpoint: User.value,
           method: method3
         });
       };
@@ -31392,7 +31390,7 @@
               return "ERROR";
             }
             ;
-            throw new Error("Failed pattern match at Janus.Data.Log (line 85, column 31 - line 89, column 23): " + [logReason.constructor.name]);
+            throw new Error("Failed pattern match at Janus.Data.Log (line 43, column 31 - line 47, column 23): " + [logReason.constructor.name]);
           }());
           return pure25({
             reason: logReason,
@@ -31530,10 +31528,10 @@
               return pure25(new Just(v2.value0));
             }
             ;
-            throw new Error("Failed pattern match at Janus.Api.Utils (line 80, column 28 - line 82, column 41): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Janus.Api.Utils (line 77, column 28 - line 79, column 41): " + [v2.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Janus.Api.Utils (line 78, column 1 - line 78, column 89): " + [v.constructor.name, v1.constructor.name]);
+          throw new Error("Failed pattern match at Janus.Api.Utils (line 75, column 1 - line 75, column 89): " + [v.constructor.name, v1.constructor.name]);
         };
       };
     };
@@ -31569,7 +31567,7 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at Janus.Api.Utils (line 67, column 26 - line 73, column 26): " + [v1.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Api.Utils (line 66, column 26 - line 72, column 26): " + [v1.constructor.name]);
                 });
               });
             };
@@ -31705,7 +31703,7 @@
         return Dashboard.value;
       }
       ;
-      throw new Error("Failed pattern match at Janus.Data.Route (line 35, column 1 - line 35, column 48): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Janus.Data.Route (line 20, column 1 - line 20, column 48): " + [x.constructor.name]);
     },
     from: function(x) {
       if (x instanceof Home) {
@@ -31720,7 +31718,7 @@
         return new Inr(new Inr(NoArguments.value));
       }
       ;
-      throw new Error("Failed pattern match at Janus.Data.Route (line 35, column 1 - line 35, column 48): " + [x.constructor.name]);
+      throw new Error("Failed pattern match at Janus.Data.Route (line 20, column 1 - line 20, column 48): " + [x.constructor.name]);
     }
   };
   var routeCodec = /* @__PURE__ */ root(/* @__PURE__ */ sum2(genericRoute)(/* @__PURE__ */ gRouteSum(/* @__PURE__ */ gRouteConstructor({
@@ -31846,9 +31844,9 @@
     }
   })(refl));
   var runAppM = function(store) {
-    var $49 = runStoreT2(store)(reduce);
-    return function($50) {
-      return $49(coerce4($50));
+    var $48 = runStoreT2(store)(reduce);
+    return function($49) {
+      return $48(coerce4($49));
     };
   };
   var monadStoreAppM = /* @__PURE__ */ monadStoreStoreT(monadEffectAff);
@@ -31891,12 +31889,10 @@
       return monadAppM;
     }
   };
-  var authenticate2 = /* @__PURE__ */ authenticate(monadAffAppM)(monadStoreAppM)(logMessagesAppM)(nowAppM);
   var decode3 = /* @__PURE__ */ decode2(logMessagesAppM)(nowAppM);
   var manageUserAppM = /* @__PURE__ */ function() {
     return {
-      loginUser: authenticate2(login(monadAffAppM)),
-      registerUser: authenticate2(register(monadAffAppM)),
+      loginUser: authenticate(monadAffAppM)(monadStoreAppM)(logMessagesAppM)(nowAppM)(login(monadAffAppM)),
       getCurrentUser: bind10(mkAuthRequest2({
         endpoint: User.value,
         method: Get.value
@@ -31904,14 +31900,14 @@
         return map114(map43(function(v) {
           return v.user;
         }))(decode3(object6("User")({
-          user: profileWithEmailCodec
+          user: profileCodec
         }))(mbJson));
       }),
       updateUser: function(user) {
-        var codec3 = object6("User")({
-          user: profileWithEmailPasswordCodec
+        var codec4 = object6("User")({
+          user: profileWithPasswordCodec
         });
-        var method3 = new Put(new Just(encode4(codec3)({
+        var method3 = new Put(new Just(encode4(codec4)({
           user
         })));
         return $$void9(mkAuthRequest2({
@@ -31927,9 +31923,9 @@
   var $lazy_navigateAppM = /* @__PURE__ */ $runtime_lazy12("navigateAppM", "Janus.AppM", function() {
     return {
       navigate: function() {
-        var $51 = print7(routeCodec);
-        return function($52) {
-          return liftEffect8(setHash2($51($52)));
+        var $50 = print7(routeCodec);
+        return function($51) {
+          return liftEffect8(setHash2($50($51)));
         };
       }(),
       logout: discard6(liftEffect8(removeToken))(function() {
@@ -31942,7 +31938,7 @@
       }
     };
   });
-  var navigateAppM = /* @__PURE__ */ $lazy_navigateAppM(150);
+  var navigateAppM = /* @__PURE__ */ $lazy_navigateAppM(61);
 
   // output/Halogen.Store.Connect/index.js
   var bind11 = /* @__PURE__ */ bind(bindHalogenM);
@@ -32172,8 +32168,8 @@
   // output/Janus.Component.HTML.Menu/index.js
   var type_18 = /* @__PURE__ */ type_17(isPropInputType);
   var type_1 = /* @__PURE__ */ type_17(isPropButtonType);
-  var menu2 = function(currentUser) {
-    return function(route) {
+  var menu2 = function(_currentUser) {
+    return function(_route) {
       var span5 = function(s) {
         return function(t) {
           return span3([css("navbar-text pe-3")])([span3([css("fw-bold")])([text5(s)]), text5(t)]);
@@ -32201,11 +32197,19 @@
   var show6 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
   var map45 = /* @__PURE__ */ map(functorMaybe);
   var modify_4 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var selectEq2 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(eqRowNil)()({
+  var selectEq2 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(eqRowNil)()({
     reflectSymbol: function() {
       return "username";
     }
-  })(eqUsername))));
+  })(eqUsername))()({
+    reflectSymbol: function() {
+      return "uid";
+    }
+  })(eqUUID))()({
+    reflectSymbol: function() {
+      return "email";
+    }
+  })(eqEmail))));
   var Receive3 = /* @__PURE__ */ function() {
     function Receive8(value0) {
       this.value0 = value0;
@@ -32236,16 +32240,16 @@
             return v1.username;
           })(v.value0.context))))))(function() {
             return modify_4(function(v1) {
-              var $37 = {};
-              for (var $38 in v1) {
-                if ({}.hasOwnProperty.call(v1, $38)) {
-                  $37[$38] = v1[$38];
+              var $47 = {};
+              for (var $48 in v1) {
+                if ({}.hasOwnProperty.call(v1, $48)) {
+                  $47[$48] = v1[$48];
                 }
                 ;
               }
               ;
-              $37.currentUser = v.value0.context;
-              return $37;
+              $47.currentUser = v.value0.context;
+              return $47;
             });
           });
         };
@@ -32257,8 +32261,8 @@
           "eval": mkEval({
             handleAction,
             handleQuery: defaultEval.handleQuery,
-            receive: function($42) {
-              return Just.create(Receive3.create($42));
+            receive: function($52) {
+              return Just.create(Receive3.create($52));
             },
             initialize: defaultEval.initialize,
             finalize: defaultEval.finalize
@@ -32273,11 +32277,19 @@
   var show7 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
   var map46 = /* @__PURE__ */ map(functorMaybe);
   var modify_5 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var selectEq3 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(eqRowNil)()({
+  var selectEq3 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(eqRowNil)()({
     reflectSymbol: function() {
       return "username";
     }
-  })(eqUsername))));
+  })(eqUsername))()({
+    reflectSymbol: function() {
+      return "uid";
+    }
+  })(eqUUID))()({
+    reflectSymbol: function() {
+      return "email";
+    }
+  })(eqEmail))));
   var Receive4 = /* @__PURE__ */ function() {
     function Receive8(value0) {
       this.value0 = value0;
@@ -32308,16 +32320,16 @@
             return v1.username;
           })(v.value0.context))))))(function() {
             return modify_5(function(v1) {
-              var $37 = {};
-              for (var $38 in v1) {
-                if ({}.hasOwnProperty.call(v1, $38)) {
-                  $37[$38] = v1[$38];
+              var $47 = {};
+              for (var $48 in v1) {
+                if ({}.hasOwnProperty.call(v1, $48)) {
+                  $47[$48] = v1[$48];
                 }
                 ;
               }
               ;
-              $37.currentUser = v.value0.context;
-              return $37;
+              $47.currentUser = v.value0.context;
+              return $47;
             });
           });
         };
@@ -32329,8 +32341,8 @@
           "eval": mkEval({
             handleAction,
             handleQuery: defaultEval.handleQuery,
-            receive: function($42) {
-              return Just.create(Receive4.create($42));
+            receive: function($52) {
+              return Just.create(Receive4.create($52));
             },
             initialize: defaultEval.initialize,
             finalize: defaultEval.finalize
@@ -33599,9 +33611,6 @@
   var updateUser = function(dict) {
     return dict.updateUser;
   };
-  var registerUser = function(dict) {
-    return dict.registerUser;
-  };
   var loginUser = function(dict) {
     return dict.loginUser;
   };
@@ -33612,22 +33621,16 @@
     var lift1 = lift7(dictManageUser.Monad0());
     return {
       loginUser: function() {
-        var $13 = loginUser(dictManageUser);
-        return function($14) {
-          return lift1($13($14));
-        };
-      }(),
-      registerUser: function() {
-        var $15 = registerUser(dictManageUser);
-        return function($16) {
-          return lift1($15($16));
+        var $11 = loginUser(dictManageUser);
+        return function($12) {
+          return lift1($11($12));
         };
       }(),
       getCurrentUser: lift1(getCurrentUser(dictManageUser)),
       updateUser: function() {
-        var $17 = updateUser(dictManageUser);
-        return function($18) {
-          return lift1($17($18));
+        var $13 = updateUser(dictManageUser);
+        return function($14) {
+          return lift1($13($14));
         };
       }(),
       Monad0: function() {
@@ -33710,7 +33713,7 @@
       return "Invalid image URL";
     }
     ;
-    throw new Error("Failed pattern match at Janus.Form.Validation (line 33, column 17 - line 39, column 39): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Janus.Form.Validation (line 21, column 17 - line 27, column 39): " + [v.constructor.name]);
   };
   var check = function(f) {
     return function(err) {
@@ -33723,7 +33726,7 @@
           return new Left(err);
         }
         ;
-        throw new Error("Failed pattern match at Janus.Form.Validation (line 80, column 1 - line 80, column 74): " + [f.constructor.name, err.constructor.name, a2.constructor.name]);
+        throw new Error("Failed pattern match at Janus.Form.Validation (line 44, column 1 - line 44, column 74): " + [f.constructor.name, err.constructor.name, a2.constructor.name]);
       };
     };
   };
@@ -33880,7 +33883,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Janus.Page.Login (line 83, column 32 - line 89, column 40): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at Janus.Page.Login (line 74, column 32 - line 80, column 40): " + [v.constructor.name]);
           });
           return handleSubmitValidate(onSubmit2)(validate2)(validation2);
         }();
@@ -33916,7 +33919,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Janus.Page.Login (line 68, column 18 - line 76, column 22): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Janus.Page.Login (line 61, column 18 - line 69, column 22): " + [v.constructor.name]);
         };
         return formless2({
           liftAction: Eval2.create
@@ -33972,11 +33975,19 @@
     }
   })(ordUnit);
   var slot_3 = /* @__PURE__ */ slot_2(loginIsSymbol)(ordUnit);
-  var selectEq4 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(eqRowNil)()({
+  var selectEq4 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(eqRowNil)()({
     reflectSymbol: function() {
       return "username";
     }
-  })(eqUsername))));
+  })(eqUsername))()({
+    reflectSymbol: function() {
+      return "uid";
+    }
+  })(eqUUID))()({
+    reflectSymbol: function() {
+      return "email";
+    }
+  })(eqEmail))));
   var Navigate = /* @__PURE__ */ function() {
     function Navigate2(value0, value1) {
       this.value0 = value0;
@@ -34036,16 +34047,16 @@
                       var v2 = isJust(v1.currentUser) && elem3(v.value0)([]);
                       if (!v2) {
                         return modify_8(function(v3) {
-                          var $77 = {};
-                          for (var $78 in v3) {
-                            if ({}.hasOwnProperty.call(v3, $78)) {
-                              $77[$78] = v3[$78];
+                          var $87 = {};
+                          for (var $88 in v3) {
+                            if ({}.hasOwnProperty.call(v3, $88)) {
+                              $87[$88] = v3[$88];
                             }
                             ;
                           }
                           ;
-                          $77.route = new Just(v.value0);
-                          return $77;
+                          $87.route = new Just(v.value0);
+                          return $87;
                         });
                       }
                       ;
@@ -34060,9 +34071,9 @@
                 if (v instanceof Initialize4) {
                   return discard12(liftEffect10(log2("Router.Initialize")))(function() {
                     return bind19(map117(function() {
-                      var $100 = parse6(routeCodec);
-                      return function($101) {
-                        return hush($100($101));
+                      var $110 = parse6(routeCodec);
+                      return function($111) {
+                        return hush($110($111));
                       };
                     }())(liftEffect10(getHash)))(function(initialRoute) {
                       return navigate2(fromMaybe(Home.value)(initialRoute));
@@ -34075,21 +34086,21 @@
                     return v1.username;
                   })(v.value0.context))))))(function() {
                     return modify_8(function(v1) {
-                      var $85 = {};
-                      for (var $86 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $86)) {
-                          $85[$86] = v1[$86];
+                      var $95 = {};
+                      for (var $96 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $96)) {
+                          $95[$96] = v1[$96];
                         }
                         ;
                       }
                       ;
-                      $85.currentUser = v.value0.context;
-                      return $85;
+                      $95.currentUser = v.value0.context;
+                      return $95;
                     });
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Janus.Component.Router (line 79, column 18 - line 89, column 48): " + [v.constructor.name]);
+                throw new Error("Failed pattern match at Janus.Component.Router (line 78, column 18 - line 88, column 48): " + [v.constructor.name]);
               };
               var authorize = function(mbProfile) {
                 return function(html2) {
@@ -34103,7 +34114,7 @@
                     return html2;
                   }
                   ;
-                  throw new Error("Failed pattern match at Janus.Component.Router (line 108, column 30 - line 112, column 11): " + [mbProfile.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Component.Router (line 107, column 30 - line 111, column 11): " + [mbProfile.constructor.name]);
                 };
               };
               var render = function(v) {
@@ -34122,14 +34133,14 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at Janus.Component.Router (line 116, column 15 - line 122, column 78): " + [v.route.value0.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Component.Router (line 115, column 15 - line 121, column 78): " + [v.route.value0.constructor.name]);
                 }
                 ;
                 if (v.route instanceof Nothing) {
                   return div_([text5("Oh no! That page wasn't found.")]);
                 }
                 ;
-                throw new Error("Failed pattern match at Janus.Component.Router (line 115, column 35 - line 124, column 59): " + [v.route.constructor.name]);
+                throw new Error("Failed pattern match at Janus.Component.Router (line 114, column 35 - line 123, column 59): " + [v.route.constructor.name]);
               };
               return connect1(selectEq4(function(v) {
                 return v.currentUser;
@@ -34144,8 +34155,8 @@
                 "eval": mkEval({
                   handleAction,
                   handleQuery,
-                  receive: function($102) {
-                    return Just.create(Receive7.create($102));
+                  receive: function($112) {
+                    return Just.create(Receive7.create($112));
                   },
                   initialize: new Just(Initialize4.value),
                   finalize: defaultEval.finalize
