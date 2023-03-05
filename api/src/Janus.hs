@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
-
+{-# LANGUAGE QuasiQuotes       #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE ViewPatterns      #-}
 -- |
 -- Module      : Janus
 -- Description : The concatenated parts of the Janus application.
@@ -10,31 +12,46 @@
 -- Portability : POSIX
 --
 -- This module concats all part of the application.
-module Janus (runApp, waiapp) where
+module Janus where
 
-import Control.Monad.Reader ( ReaderT(runReaderT) )
-
-import Web.Scotty.Trans as T ( scottyT, scottyAppT )
-
+import Control.Monad.IO.Class (MonadIO (..))
+import Control.Monad.Logger
+import Control.Monad.Reader (ReaderT (runReaderT))
+import Data.Text.Encoding (encodeUtf8)
+import Database.Persist.Postgresql
+import Database.Persist.Sql
 import Janus.Core (JScottyM)
-import Janus.Data.Config ( readConfig, Config )
+import qualified Janus.Data.Config as C
+import Janus.Data.Model
+import Janus.Settings (Settings (..))
 import qualified Janus.Static as JS
 import qualified Janus.User as JU
+import Janus.Utils.DB
 import Network.Wai (Application)
+import Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import Web.Scotty.Trans as T (middleware, scottyAppT, scottyT)
 
-app :: JScottyM ()
-app = JS.app <> JU.app
+app :: (MonadIO m) => JScottyM m ()
+app = middleware logStdoutDev <> JS.app <> JU.app
 
-waiapp :: Config -> IO Application
-waiapp c = scottyAppT (`runReaderT` c) app 
+waiapp :: Settings -> IO Application
+waiapp s = scottyAppT (`runReaderT` s) app
 
 -- | Run the application
-runApp :: IO ()
-runApp = do
-  conf <- readConfig "./conf.yaml"
-  jscotty conf app
-  
+runApp :: (MonadIO m, MonadLogger m) => Settings -> m ()
+runApp s = do
+  jscotty s app
   where
+    jscotty s = scottyT 8080 (`runReaderT` s)
 
-    jscotty :: Config -> JScottyM () -> IO ()
-    jscotty c = scottyT 8080 (`runReaderT` c)
+startup :: IO ()
+startup = do
+  putStrLn "JANUS: Reading config"
+  conf <- C.readConfig "./conf.yaml"
+  runStderrLoggingT $ withPostgresqlPool (encodeUtf8 (C.url (C.database conf))) (C.size (C.database conf)) $ \pool -> do
+    logInfoN "JANUS: Migrating database"
+    runDB pool $ runMigration migrateAll
+
+    -- Run the application
+    logInfoN "JANUS: Starting server"
+    runApp $ Settings {config = conf, dbpool = pool}

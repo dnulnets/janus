@@ -1,4 +1,8 @@
 token:
-  issuer: "https:/stenlund.eu"
+  issuer: "https://stenlund.eu"
   key: changeme
   valid: 1800
+database:
+  url: "host=192.168.1.19 dbname=janus user=janus password='janus' port=5432"
+  size: 5
+

@@ -24,6 +24,10 @@ library
                      , Janus.Data.User
                      , Janus.Data.Config
                      , Janus.Core
+                     , Janus.Utils.DB
+                     , Janus.Data.Model
+                     , Janus.Settings
+                     , Janus.Utils.Password
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , scotty
@@ -36,6 +40,14 @@ library
                      , jwt
                      , yaml
                      , transformers
+                     , persistent
+                     , persistent-postgresql
+                     , persistent-template
+                     , monad-logger
+                     , resourcet
+                     , unliftio-core
+                     , cryptonite
+                     , http-types
   default-language:    Haskell2010
   ghc-options:         -Wall
                        -Wcompat
@@ -56,6 +68,12 @@ executable api-exe
                      , wai
                      , wai-extra
                      , api
+                     , text
+                     , persistent
+                     , persistent-postgresql
+                     , persistent-template
+                     , monad-logger
+                     , resourcet
 
   default-language:    Haskell2010
   ghc-options:         -Wall

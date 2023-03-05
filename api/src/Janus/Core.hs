@@ -6,18 +6,16 @@
 -- Maintainer  : tomas.stenlund@telia.com
 -- Stability   : experimental
 -- Portability : POSIX
---
 module Janus.Core (JScottyM, JActionM) where
 
-import Control.Monad.Trans.Reader ( ReaderT )
-import Data.Text.Lazy ( Text )
+import Control.Monad.Trans.Reader (ReaderT)
+import Data.Text.Lazy (Text)
+import Janus.Settings
+import Web.Scotty.Trans (ActionT, ScottyT)
+import Control.Monad.IO.Class (MonadIO)
 
-import Web.Scotty.Trans ( ActionT, ScottyT )
+-- | Type for the Janus Scotty Monad, has a reader for the config
+type JScottyM m = ScottyT Text (ReaderT Settings m)
 
-import Janus.Data.Config ( Config )
-
--- |Type for the Janus Scotty Monad, has a reader for the config
-type JScottyM = ScottyT Text (ReaderT Config IO)
-
--- |Type for the Janus Action Monad, has a reader for the config
-type JActionM = ActionT Text (ReaderT Config IO)
+-- | Type for the Janus Action Monad, has a reader for the config
+type JActionM m = ActionT Text (ReaderT Settings m)

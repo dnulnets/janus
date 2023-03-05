@@ -14,9 +14,10 @@ module Janus.Static (app) where
 
 import Janus.Core (JScottyM)
 import Web.Scotty.Trans (addHeader, file, get)
+import Control.Monad.IO.Class (MonadIO)
 
 -- | The part of the application that serve static files.
-app :: JScottyM ()
+app :: (MonadIO m) => JScottyM m ()
 app = do
   -- The icon
   get "/static/favicon.ico" $ do
