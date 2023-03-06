@@ -9,7 +9,8 @@
 -- Stability   : experimental
 -- Portability : POSIX
 --
--- This module contains the user information regardless of interface.
+-- The user type used within the server application.
+--
 module Janus.Data.User (User (..)) where
 
 import Control.Applicative ( Alternative(empty) )

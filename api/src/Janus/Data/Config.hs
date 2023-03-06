@@ -1,17 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 -- |
--- Module      : Janus.Data.Config
--- Description : The configuration of the application
+-- Module      : Janus
+-- Description : Application configuration
 -- Copyright   : (c) Tomas Stenlund, 2023
--- License     : BSD-3
--- Maintainer  : tomas.stenlund@telia.se
+-- License     : GNU AFFERO GENERAL PUBLIC LICENSE
+-- Maintainer  : tomas.stenlund@telia.com
 -- Stability   : experimental
 -- Portability : POSIX
 --
--- This module contains the data type and handling for the application configuration
-module Janus.Data.Config where
+-- This module contains the data type and handling and parsing of the application configuration
+-- located in a yaml-file.
+--
+module Janus.Data.Config (Database (..), Token (..), Config (..), readConfig) where
 
 import Control.Applicative (Alternative (empty))
 import Data.Text (Text)
@@ -23,7 +24,8 @@ data Database = Database
     url :: Text,
     -- | The size of the connection pool
     size :: Int
-  } deriving (Show)
+  }
+  deriving (Show)
 
 -- | Token generation and validation configuration
 data Token = Token
@@ -33,7 +35,8 @@ data Token = Token
     key :: Text,
     -- | The validity time of the token in seconds
     valid :: Integer
-  } deriving (Show)
+  }
+  deriving (Show)
 
 -- | Application configuration
 data Config = Config
@@ -41,28 +44,29 @@ data Config = Config
     token :: Token,
     -- | The database configuration
     database :: Database
-  } deriving (Show)
+  }
+  deriving (Show)
 
 -- | The instance for json parsing of the configuration
 instance FromJSON Config where
   parseJSON (Object v) = do
     w <- v .: "token"
     x <- v .: "database"
-    Config <$>
-      ( Token
-          <$> w
-          .: "issuer"
-          <*> w
-          .: "key"
-          <*> w
-          .: "valid"
-      ) <*>
-      ( Database
-          <$> x
-          .: "url"
-          <*> x
-          .: "size"
-      )
+    Config
+      <$> ( Token
+              <$> w
+              .: "issuer"
+              <*> w
+              .: "key"
+              <*> w
+              .: "valid"
+          )
+      <*> ( Database
+              <$> x
+              .: "url"
+              <*> x
+              .: "size"
+          )
   parseJSON _ = empty
 
 -- | Reads the configuration file for the Janus application

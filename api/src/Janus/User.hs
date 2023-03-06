@@ -79,7 +79,7 @@ app = do
   post "/api/user/login" $ do
     req <- jsonData
     settings <- lift ask
-    dbuser <- liftIO $ runDB (dbpool settings) $ getBy $ UniqueUserUid $ qusername req
+    dbuser <- liftIO $ runDB (dbpool settings) $ getBy $ UniqueUid $ qusername req
     case dbuser of
       Just (Entity userId user) | authValidatePassword (userPassword user) (qpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime

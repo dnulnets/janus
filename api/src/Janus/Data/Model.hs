@@ -9,6 +9,17 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+-- |
+-- Module      : Janus.Data.Model
+-- Description : Application database model
+-- Copyright   : (c) Tomas Stenlund, 2023
+-- License     : GNU AFFERO GENERAL PUBLIC LICENSE
+-- Maintainer  : tomas.stenlund@telia.com
+-- Stability   : experimental
+-- Portability : POSIX
+--
+-- The database model for the application, it uses the persistence framework.
+--
 module Janus.Data.Model where
 
 import Database.Persist
@@ -22,7 +33,7 @@ User
     guid Text
     password Text
     email Text
-    UniqueUserUid uid
+    UniqueUid uid
     deriving Show
 
 |]
