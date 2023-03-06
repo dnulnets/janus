@@ -4,12 +4,13 @@
 -- Module      : Janus.Static
 -- Description : The static part of the Janus application.
 -- Copyright   : (c) Tomas Stenlund, 2023
--- License     : GNU
+-- License     : GNU AFFERO GENERAL PUBLIC LICENSE
 -- Maintainer  : tomas.stenlund@telia.com
 -- Stability   : experimental
 -- Portability : POSIX
 --
 -- This module contains the static part of the application that servers static pages.
+--
 module Janus.Static (app) where
 
 import Janus.Core (JScottyM)
@@ -17,7 +18,9 @@ import Web.Scotty.Trans (addHeader, file, get)
 import Control.Monad.IO.Class (MonadIO)
 
 -- | The part of the application that serve static files.
-app :: (MonadIO m) => JScottyM m ()
+app :: (MonadIO m) => 
+  -- | The application
+  JScottyM m ()
 app = do
   -- The icon
   get "/static/favicon.ico" $ do

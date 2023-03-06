@@ -1,8 +1,8 @@
 -- |
--- Module      : Accessibility.Utils.Password
--- Description : Password handling
--- Copyright   : (c) Tomas Stenlund, 2019
--- License     : BSD-3
+-- Module      : Janus.Utils.Passwords
+-- Description : Password handling functions.
+-- Copyright   : (c) Tomas Stenlund, 2023
+-- License     : GNU AFFERO GENERAL PUBLIC LICENSE
 -- Maintainer  : tomas.stenlund@telia.com
 -- Stability   : experimental
 -- Portability : POSIX
@@ -17,14 +17,10 @@ where
 --
 -- External imports
 --
-import Crypto.KDF.BCrypt
-  ( hashPassword,
-    validatePassword,
-  )
--- import           Data.ByteString                ( ByteString )
+import Crypto.KDF.BCrypt (hashPassword, validatePassword)
+
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
-import Data.Either (fromRight)
 
 -- | Validates a password by checking a hashed password with the supplied password
 authValidatePassword ::
@@ -46,5 +42,3 @@ authHashPassword ::
   -- | The hashed password
   IO Text
 authHashPassword cost pwd = decodeUtf8 <$> hashPassword (fromIntegral cost) (encodeUtf8 pwd)
-
--- "$2b$10$jRs4Mriaz0BMBljpRc1NyO3/DSQP4J6Fco6izBU2dfbREaLcM6Vwy"

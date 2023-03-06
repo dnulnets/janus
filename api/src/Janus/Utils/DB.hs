@@ -13,9 +13,16 @@
 -- Functionality for various database functions that are generic for the entire application.
 module Janus.Utils.DB (runDB) where
 
-import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.IO.Unlift (MonadUnliftIO)
-import Database.Persist.Postgresql (runSqlPool, ConnectionPool, SqlPersistT)
+import Database.Persist.Postgresql (ConnectionPool, SqlPersistT, runSqlPool)
 
-runDB :: (MonadUnliftIO m) => ConnectionPool -> SqlPersistT m a -> m a
+-- | Runs an sql query and returns with the result
+runDB ::
+  (MonadUnliftIO m) =>
+  -- | The connection pool
+  ConnectionPool ->
+  -- | The query
+  SqlPersistT m a ->
+  -- | The result of the query
+  m a
 runDB pool query = runSqlPool query pool

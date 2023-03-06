@@ -1,17 +1,17 @@
-{-# LANGUAGE OverloadedStrings #-}
+-- |
+-- Module      : Main
+-- Description : Application start
+-- Copyright   : (c) Tomas Stenlund, 2023
+-- License     : GNU AFFERO GENERAL PUBLIC LICENSE
+-- Maintainer  : tomas.stenlund@telia.com
+-- Stability   : experimental
+-- Portability : POSIX
+--
+-- Just calls the bootstrap function of the Janus application.
+--
 module Main (main) where
 
-import Control.Monad.IO.Class (MonadIO (..))
-import Control.Monad.Logger
-import Control.Monad.Trans.Resource (runResourceT)
-import Data.Text.Encoding (encodeUtf8)
-import qualified Database.Persist.Postgresql as Db
-import Database.Persist.Sql
 import Janus (startup)
-import Janus.Data.Config as C
-import Janus.Data.Model
-import Janus.Settings
-import Janus.Utils.DB (runDB)
 
 main :: IO ()
 main = startup

@@ -29,19 +29,25 @@ import Network.Wai (Application)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Web.Scotty.Trans as T (middleware, scottyAppT, scottyT)
 
+-- | The concatenated application
 app :: (MonadIO m) => JScottyM m ()
 app = middleware logStdoutDev <> JS.app <> JU.app
 
-waiapp :: Settings -> IO Application
+-- | The application that can be used for the testbed
+waiapp ::
+  -- | The application settings
+  Settings ->
+  IO Application
 waiapp s = scottyAppT (`runReaderT` s) app
 
 -- | Run the application
-runApp :: (MonadIO m) => Settings -> m ()
-runApp s = do
-  jscotty s app
-  where
-    jscotty ro = scottyT 8080 (`runReaderT` ro)
+runApp :: (MonadIO m) =>
+  -- | The applications settings
+  Settings ->
+  m ()
+runApp s = scottyT 8080 (`runReaderT` s) app
 
+-- | The bootstrap of the application.
 startup :: IO ()
 startup = do
   putStrLn "JANUS: Reading config"

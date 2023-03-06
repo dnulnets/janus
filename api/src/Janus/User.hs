@@ -4,7 +4,7 @@
 -- Module      : Janus.Static
 -- Description : The static part of the Janus application.
 -- Copyright   : (c) Tomas Stenlund, 2023
--- License     : GNU
+-- License     : GNU AFFERO GENERAL PUBLIC LICENSE
 -- Maintainer  : tomas.stenlund@telia.com
 -- Stability   : experimental
 -- Portability : POSIX
@@ -24,8 +24,7 @@ import Data.Aeson
     object,
     (.:),
   )
-import Data.Text (Text, unpack)
-import Data.Text.Encoding (encodeUtf8)
+import Data.Text (Text)
 import Data.Time.Clock.System
   ( SystemTime (systemSeconds),
     getSystemTime,
@@ -81,7 +80,7 @@ app = do
     settings <- lift ask
     dbuser <- liftIO $ runDB (dbpool settings) $ getBy $ UniqueUid $ qusername req
     case dbuser of
-      Just (Entity userId user) | authValidatePassword (userPassword user) (qpassword req) -> do
+      Just (Entity _ user) | authValidatePassword (userPassword user) (qpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         let jwt = createToken (C.key (C.token (config settings))) seconds (C.valid (C.token (config settings))) (C.issuer (C.token (config settings))) (userGuid user)
         let userResponse = LoginResponse {uid = (userGuid user), username = (userUid user), email = (userEmail user), token = jwt}

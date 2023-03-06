@@ -1,17 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 -- |
--- Module      : Heat.Utils.JWT
+-- Module      : Janus.Utils.JWT
 -- Description : JSON Web Token functions
 -- Copyright   : (c) Tomas Stenlund, 2023
--- License     : BSD-3
+-- License     : GNU AFFERO GENERAL PUBLIC LICENSE
 -- Maintainer  : tomas.stenlund@telia.com
 -- Stability   : experimental
 -- Portability : POSIX
 --
 -- This module contains functions to create and verify JSON Web Token
--- and to extract and insert the unregistered claim as a JSON structure
--- where you can store relevant information for your application
+-- and to return with the tokens subject
 module Janus.Utils.JWT
   ( createToken,
     getSubject,
@@ -21,18 +20,19 @@ where
 import Data.Text (Text)
 import Data.Time.Clock (NominalDiffTime)
 import Web.JWT as JWT
-    ( claims,
-      decodeAndVerifySignature,
-      encodeSigned,
-      hmacSecret,
-      numericDate,
-      stringOrURI,
-      stringOrURIToText,
-      toVerify,
-      Algorithm(HS256),
-      JOSEHeader(alg, typ),
-      JWTClaimsSet(sub, iat, exp, iss),
-      NumericDate )
+  ( Algorithm (HS256),
+    JOSEHeader (alg, typ),
+    JWTClaimsSet (exp, iat, iss, sub),
+    NumericDate,
+    claims,
+    decodeAndVerifySignature,
+    encodeSigned,
+    hmacSecret,
+    numericDate,
+    stringOrURI,
+    stringOrURIToText,
+    toVerify,
+  )
 
 -- | Create a token
 createToken ::
