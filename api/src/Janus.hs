@@ -17,7 +17,7 @@ import Control.Monad.IO.Class (MonadIO (..))
 import Control.Monad.Logger (logInfoN, runStderrLoggingT)
 import Control.Monad.Reader (ReaderT (runReaderT))
 import Data.Text.Encoding (encodeUtf8)
-import Database.Persist.Postgresql (runMigration, withPostgresqlPool)
+import Database.Persist.Postgresql (runMigration, withPostgresqlPool, runSqlPool)
 import Janus.Core (JScottyM)
 import qualified Janus.Data.Config as C
 import Janus.Data.Model (migrateAll)
@@ -54,7 +54,7 @@ startup = do
   conf <- C.readConfig "./conf.yaml"
   runStderrLoggingT $ withPostgresqlPool (encodeUtf8 (C.url (C.database conf))) (C.size (C.database conf)) $ \pool -> do
     logInfoN "JANUS: Migrating database"
-    runDB pool $ runMigration migrateAll
+    runSqlPool (runMigration migrateAll) pool
 
     -- Run the application
     logInfoN "JANUS: Starting server"

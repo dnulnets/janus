@@ -19,6 +19,9 @@ import Data.Text.Encoding (encodeUtf8)
 import Data.ByteString.Char8 (unpack)
 import Database.Persist.Postgresql (ConnectionPool, SqlPersistT, runSqlPool)
 import Database.Persist.Sql (toSqlKey, fromSqlKey, Key, ToBackendKey, SqlBackend)
+import Control.Monad.Reader (MonadReader(ask))
+import Janus.Settings (Settings(..))
+import Control.Monad.Trans (lift, liftIO, MonadIO)
 
 -- | Convert from Text to database key
 textToKey :: ToBackendKey SqlBackend record => Text -> Key record
@@ -29,12 +32,13 @@ keyToText :: ToBackendKey SqlBackend record => Key record -> Text
 keyToText key = pack $ show $ fromSqlKey key
 
 -- | Runs an sql query and returns with the result
-runDB ::
-  (MonadUnliftIO m) =>
-  -- | The connection pool
-  ConnectionPool ->
-  -- | The query
-  SqlPersistT m a ->
-  -- | The result of the query
-  m a
-runDB pool query = runSqlPool query pool
+--runDB ::
+--  (MonadUnliftIO m, MonadIO m, MonadReader Settings m) =>
+--  -- | The query
+--  SqlPersistT m a ->
+--  -- | The result of the query
+--  m a
+runDB query = do
+    settings <- ask
+    liftIO $ runSqlPool query (dbpool settings)
+

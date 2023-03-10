@@ -25,6 +25,7 @@ import Data.Aeson
     object,
     (.:),
   )
+import Control.Monad.IO.Unlift (MonadUnliftIO)
 import Data.Text (Text)
 import Data.Text.Lazy (toStrict)
 import Data.Text.Encoding (decodeUtf8', encodeUtf8)
@@ -82,7 +83,7 @@ app = do
   post "/api/user/login" $ do
     req <- jsonData
     settings <- lift ask
-    dbuser <- liftIO $ runDB (dbpool settings) $ DB.getBy $ UniqueUserUID $ qusername req
+    dbuser <- runDB $ DB.getBy $ UniqueUserUID (qusername req)
     case dbuser of
       Just (DB.Entity _ user) | authValidatePassword (userPassword user) (qpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
@@ -100,7 +101,7 @@ app = do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         case getSubject (C.key (C.token (config settings))) seconds b (C.issuer (C.token (config settings))) of
           Just u -> do
-            dbuser <- liftIO $ runDB (dbpool settings) $ DB.getBy $ UniqueUserGUID u
+            dbuser <- runDB $ DB.getBy $ UniqueUserGUID u
             case dbuser of
               Just (DB.Entity _ user) -> do
                 let userResponse = LoginResponse {uid = (userGuid user), username = (userUid user), email = (userEmail user), token = b}
