@@ -48,6 +48,7 @@ library
                      , unliftio-core
                      , cryptonite
                      , http-types
+                     , bytestring
   default-language:    Haskell2010
   ghc-options:         -Wall
                        -Wcompat

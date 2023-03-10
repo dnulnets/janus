@@ -22,7 +22,6 @@
 --
 module Janus.Data.Model where
 
-import Database.Persist
 import Database.Persist.TH
 import Data.Text (Text)
 
@@ -33,7 +32,8 @@ User
     guid Text
     password Text
     email Text
-    UniqueUid uid
+    UniqueUserUID uid
+    UniqueUserGUID guid
     deriving Show
 
 |]

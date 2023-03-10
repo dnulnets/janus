@@ -12438,17 +12438,28 @@
     User2.value = new User2();
     return User2;
   }();
+  var Refresh = /* @__PURE__ */ function() {
+    function Refresh2() {
+    }
+    ;
+    Refresh2.value = new Refresh2();
+    return Refresh2;
+  }();
   var genericEndpoint = {
     to: function(x) {
       if (x instanceof Inl) {
         return Login.value;
       }
       ;
-      if (x instanceof Inr) {
+      if (x instanceof Inr && x.value0 instanceof Inl) {
         return User.value;
       }
       ;
-      throw new Error("Failed pattern match at Janus.Api.Endpoint (line 19, column 1 - line 19, column 54): " + [x.constructor.name]);
+      if (x instanceof Inr && x.value0 instanceof Inr) {
+        return Refresh.value;
+      }
+      ;
+      throw new Error("Failed pattern match at Janus.Api.Endpoint (line 20, column 1 - line 20, column 54): " + [x.constructor.name]);
     },
     from: function(x) {
       if (x instanceof Login) {
@@ -12456,23 +12467,32 @@
       }
       ;
       if (x instanceof User) {
-        return new Inr(NoArguments.value);
+        return new Inr(new Inl(NoArguments.value));
       }
       ;
-      throw new Error("Failed pattern match at Janus.Api.Endpoint (line 19, column 1 - line 19, column 54): " + [x.constructor.name]);
+      if (x instanceof Refresh) {
+        return new Inr(new Inr(NoArguments.value));
+      }
+      ;
+      throw new Error("Failed pattern match at Janus.Api.Endpoint (line 20, column 1 - line 20, column 54): " + [x.constructor.name]);
     }
   };
   var endpointCodec = /* @__PURE__ */ root(/* @__PURE__ */ prefix2("api")(/* @__PURE__ */ sum2(genericEndpoint)(/* @__PURE__ */ gRouteSum(/* @__PURE__ */ gRouteConstructor({
     reflectSymbol: function() {
       return "Login";
     }
-  })()(gRouteNoArguments))(/* @__PURE__ */ gRouteConstructor({
+  })()(gRouteNoArguments))(/* @__PURE__ */ gRouteSum(/* @__PURE__ */ gRouteConstructor({
     reflectSymbol: function() {
       return "User";
     }
-  })()(gRouteNoArguments)))({
+  })()(gRouteNoArguments))(/* @__PURE__ */ gRouteConstructor({
+    reflectSymbol: function() {
+      return "Refresh";
+    }
+  })()(gRouteNoArguments))))({
     Login: /* @__PURE__ */ gsep2("user")(/* @__PURE__ */ gsep2("login")(noArgs)),
-    User: /* @__PURE__ */ gsep2("user")(noArgs)
+    User: /* @__PURE__ */ gsep2("user")(noArgs),
+    Refresh: /* @__PURE__ */ gsep2("user")(/* @__PURE__ */ gsep2("refresh")(noArgs))
   })));
 
   // output/Data.Codec.Argonaut.Compat/index.js
@@ -34193,7 +34213,7 @@
       ;
       if (v instanceof Just) {
         var requestOptions = {
-          endpoint: User.value,
+          endpoint: Refresh.value,
           method: Get.value
         };
         return bind20(request2(defaultRequest2("http://localhost:8080")(new Just(v.value0))(requestOptions)))(function(res) {

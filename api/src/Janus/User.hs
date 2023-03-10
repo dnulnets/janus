@@ -16,6 +16,7 @@ import Control.Applicative (Alternative (empty))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ask)
 import Control.Monad.Trans (lift, liftIO)
+import Control.Monad (join)
 import Data.Aeson
   ( FromJSON (parseJSON),
     KeyValue ((.=)),
@@ -25,21 +26,23 @@ import Data.Aeson
     (.:),
   )
 import Data.Text (Text)
+import Data.Text.Lazy (toStrict)
+import Data.Text.Encoding (decodeUtf8', encodeUtf8)
 import Data.Time.Clock.System
   ( SystemTime (systemSeconds),
     getSystemTime,
   )
-import Database.Persist.Sql
+import qualified Database.Persist.Sql as DB
 import Janus.Core (JScottyM)
 import qualified Janus.Data.Config as C
 import Janus.Data.Model
 import Janus.Settings
 import Janus.Utils.DB
-import Janus.Utils.JWT (createToken)
+import Janus.Utils.JWT (createToken, getSubject)
 import Janus.Utils.Password
 import Network.HTTP.Types.Status
-import Web.Scotty.Trans (json, jsonData, post, status)
--- import Web.Scotty (status)
+import Web.Scotty.Trans (json, jsonData, post, get, status, header)
+import Network.Wai.Middleware.HttpAuth (extractBearerAuth)
 
 -- | User information for the login response
 data LoginResponse = LoginResponse
@@ -75,14 +78,33 @@ instance FromJSON LoginRequest where
 -- | The part of the application that serve user specific functions
 app :: (MonadIO m) => JScottyM m ()
 app = do
+
   post "/api/user/login" $ do
     req <- jsonData
     settings <- lift ask
-    dbuser <- liftIO $ runDB (dbpool settings) $ getBy $ UniqueUid $ qusername req
+    dbuser <- liftIO $ runDB (dbpool settings) $ DB.getBy $ UniqueUserUID $ qusername req
     case dbuser of
-      Just (Entity _ user) | authValidatePassword (userPassword user) (qpassword req) -> do
+      Just (DB.Entity _ user) | authValidatePassword (userPassword user) (qpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         let jwt = createToken (C.key (C.token (config settings))) seconds (C.valid (C.token (config settings))) (C.issuer (C.token (config settings))) (userGuid user)
         let userResponse = LoginResponse {uid = (userGuid user), username = (userUid user), email = (userEmail user), token = jwt}
         json userResponse
+      _ -> status unauthorized401
+
+  get "/api/user/refresh" $ do
+    settings <- lift ask
+    auth <- header "Authorization"
+    let bearer = extractBearerAuth . encodeUtf8 . toStrict <$> auth
+    case decodeUtf8' <$> join bearer of
+      Just (Right b) -> do
+        seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
+        case getSubject (C.key (C.token (config settings))) seconds b (C.issuer (C.token (config settings))) of
+          Just u -> do
+            dbuser <- liftIO $ runDB (dbpool settings) $ DB.getBy $ UniqueUserGUID u
+            case dbuser of
+              Just (DB.Entity _ user) -> do
+                let userResponse = LoginResponse {uid = (userGuid user), username = (userUid user), email = (userEmail user), token = b}
+                json userResponse
+              Nothing -> status unauthorized401
+          Nothing -> status unauthorized401
       _ -> status unauthorized401
