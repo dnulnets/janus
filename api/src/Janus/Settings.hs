@@ -13,6 +13,7 @@ module Janus.Settings (Settings(..)) where
 import Database.Persist.Postgresql (ConnectionPool)
 import Janus.Data.Config
 
+-- | The settings for the application.
 data Settings = Settings {
   config :: Config
   , dbpool :: ConnectionPool

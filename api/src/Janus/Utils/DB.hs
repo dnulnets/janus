@@ -14,6 +14,7 @@
 module Janus.Utils.DB (runDB, textToKey, keyToText) where
 
 import Control.Monad.IO.Unlift (MonadUnliftIO)
+import Control.Monad.Trans.Reader (ReaderT)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.ByteString.Char8 (unpack)
@@ -32,12 +33,7 @@ keyToText :: ToBackendKey SqlBackend record => Key record -> Text
 keyToText key = pack $ show $ fromSqlKey key
 
 -- | Runs an sql query and returns with the result
---runDB ::
---  (MonadUnliftIO m, MonadIO m, MonadReader Settings m) =>
---  -- | The query
---  SqlPersistT m a ->
---  -- | The result of the query
---  m a
+runDB::(MonadReader Settings m, MonadIO m) => ReaderT SqlBackend IO b -> m b
 runDB query = do
     settings <- ask
     liftIO $ runSqlPool query (dbpool settings)

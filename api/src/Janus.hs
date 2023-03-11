@@ -10,14 +10,13 @@
 -- Portability : POSIX
 --
 -- Concatenates the different parts of the application and starts up the database and server.
---
 module Janus (startup, waiapp) where
 
 import Control.Monad.IO.Class (MonadIO (..))
 import Control.Monad.Logger (logInfoN, runStderrLoggingT)
 import Control.Monad.Reader (ReaderT (runReaderT))
 import Data.Text.Encoding (encodeUtf8)
-import Database.Persist.Postgresql (runMigration, withPostgresqlPool, runSqlPool)
+import Database.Persist.Postgresql (runMigration, runSqlPool, withPostgresqlPool)
 import Janus.Core (JScottyM)
 import qualified Janus.Data.Config as C
 import Janus.Data.Model (migrateAll)
@@ -38,10 +37,12 @@ waiapp ::
   -- | The application settings
   Settings ->
   IO Application
-waiapp s = scottyAppT (`runReaderT` s) app
+waiapp s = do
+  scottyAppT (`runReaderT` s) app
 
 -- | Run the application
-runApp :: (MonadIO m) =>
+runApp ::
+  (MonadIO m) =>
   -- | The applications settings
   Settings ->
   m ()
