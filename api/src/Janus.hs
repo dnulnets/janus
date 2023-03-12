@@ -12,31 +12,32 @@
 -- Concatenates the different parts of the application and starts up the database and server.
 module Janus (startup, waiapp) where
 
-import Control.Monad.IO.Class (MonadIO (..))
-import Control.Monad.Logger (logInfoN, runStderrLoggingT)
-import Control.Monad.Reader (ReaderT (runReaderT))
-import Data.Text.Encoding (encodeUtf8)
-import Database.Persist.Postgresql (runMigration, runSqlPool, withPostgresqlPool)
-import Janus.Core (JScottyM)
-import qualified Janus.Data.Config as C
-import Janus.Data.Model (migrateAll)
-import Janus.Settings (Settings (..))
-import qualified Janus.Static as JS
-import qualified Janus.User as JU
-import Janus.Utils.DB (runDB)
-import Network.Wai (Application)
-import Network.Wai.Middleware.RequestLogger (logStdoutDev)
-import Web.Scotty.Trans as T (middleware, scottyAppT, scottyT)
+import           Control.Monad.IO.Class               (MonadIO (..))
+import           Control.Monad.Logger                 (logInfoN,
+                                                       runStderrLoggingT)
+import           Control.Monad.Reader                 (ReaderT (runReaderT))
+import           Data.Text.Encoding                   (encodeUtf8)
+import           Database.Persist.Postgresql          (runMigration, runSqlPool,
+                                                       withPostgresqlPool)
+import           Janus.Core                           (JScottyM)
+import qualified Janus.Data.Config                    as C
+import           Janus.Data.Model                     (migrateAll)
+import           Janus.Settings                       (Settings (..))
+import qualified Janus.Static                         as JS
+import qualified Janus.User                           as JU
+import           Network.Wai                          (Application)
+import           Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import           Web.Scotty.Trans                     as T (middleware,
+                                                            scottyAppT, scottyT)
 
 -- | The concatenated application
-app :: (MonadIO m) => JScottyM m ()
+app :: (MonadIO m) => JScottyM m () -- ^ The Janus Scotty Monad
 app = middleware logStdoutDev <> JS.app <> JU.app
 
 -- | The application that can be used for the testbed
 waiapp ::
-  -- | The application settings
-  Settings ->
-  IO Application
+  Settings ->     -- ^ The applications setting
+  IO Application  -- ^ The application
 waiapp s = do
   scottyAppT (`runReaderT` s) app
 

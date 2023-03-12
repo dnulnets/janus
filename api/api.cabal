@@ -109,6 +109,7 @@ test-suite api-test
                      , text
                      , persistent
                      , time
+                     , transformers
   default-language:    Haskell2010
   ghc-options:         -Wall
                        -Wcompat

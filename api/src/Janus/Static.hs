@@ -13,12 +13,12 @@
 --
 module Janus.Static (app) where
 
-import Janus.Core (JScottyM)
-import Web.Scotty.Trans (addHeader, file, get)
-import Control.Monad.IO.Class (MonadIO)
+import           Control.Monad.IO.Class (MonadIO)
+import           Janus.Core             (JScottyM)
+import           Web.Scotty.Trans       (addHeader, file, get)
 
 -- | The part of the application that serve static files.
-app :: (MonadIO m) => 
+app :: (MonadIO m) =>
   -- | The application
   JScottyM m ()
 app = do

@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Redundant bracket" #-}
 
 -- |
 -- Module      : Janus.Static
@@ -12,45 +14,39 @@
 -- This module contains the static part of the application that servers static pages.
 module Janus.User (app, LoginResponse(..), LoginRequest(..)) where
 
-import Control.Applicative (Alternative (empty))
-import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Reader (ask)
-import Control.Monad.Trans (lift, liftIO)
-import Control.Monad (join)
-import Data.Aeson
-  ( FromJSON (parseJSON),
-    KeyValue ((.=)),
-    ToJSON (toJSON),
-    Value (Object),
-    object,
-    (.:),
-  )
-import Control.Monad.IO.Unlift (MonadUnliftIO)
-import Data.Text (Text)
-import Data.Text.Lazy (toStrict)
-import Data.Text.Encoding (decodeUtf8', encodeUtf8)
-import Data.Time.Clock.System
-  ( SystemTime (systemSeconds),
-    getSystemTime,
-  )
-import qualified Database.Persist.Sql as DB
-import Janus.Core (JScottyM)
-import qualified Janus.Data.Config as C
-import Janus.Data.Model
-import Janus.Settings
-import Janus.Utils.DB
-import Janus.Utils.JWT (createToken, getSubject)
-import Janus.Utils.Password
-import Network.HTTP.Types.Status
-import Web.Scotty.Trans (json, jsonData, post, get, status, header)
-import Network.Wai.Middleware.HttpAuth (extractBearerAuth)
+import           Control.Applicative             (Alternative (empty))
+import           Control.Monad                   (join)
+import           Control.Monad.IO.Class          (MonadIO)
+import           Control.Monad.Reader            (ask)
+import           Control.Monad.Trans             (lift, liftIO)
+import           Data.Aeson                      (FromJSON (parseJSON),
+                                                  KeyValue ((.=)),
+                                                  ToJSON (toJSON),
+                                                  Value (Object), object, (.:))
+import           Data.Text                       (Text)
+import           Data.Text.Encoding              (decodeUtf8', encodeUtf8)
+import           Data.Text.Lazy                  (toStrict)
+import           Data.Time.Clock.System          (SystemTime (systemSeconds),
+                                                  getSystemTime)
+import qualified Database.Persist.Sql            as DB
+import           Janus.Core                      (JScottyM)
+import qualified Janus.Data.Config               as C
+import           Janus.Data.Model
+import           Janus.Settings
+import           Janus.Utils.DB
+import           Janus.Utils.JWT                 (createToken, getSubject)
+import           Janus.Utils.Password
+import           Network.HTTP.Types.Status
+import           Network.Wai.Middleware.HttpAuth (extractBearerAuth)
+import           Web.Scotty.Trans                (get, header, json, jsonData,
+                                                  post, status)
 
 -- | User information for the login response
 data LoginResponse = LoginResponse
-  { uid :: Text,
+  { uid      :: Text,
     username :: Text,
-    email :: Text,
-    token :: Text
+    email    :: Text,
+    token    :: Text
   }
   deriving (Show)
 

@@ -1,6 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE FlexibleContexts #-}
 -- |
 -- Module      : Janus.Utils.DB
 -- Description : Generic database functionality
@@ -13,16 +12,16 @@
 -- Functionality for various database functions that are generic for the entire application.
 module Janus.Utils.DB (runDB, textToKey, keyToText) where
 
-import Control.Monad.IO.Unlift (MonadUnliftIO)
-import Control.Monad.Trans.Reader (ReaderT)
-import Data.Text (Text, pack)
-import Data.Text.Encoding (encodeUtf8)
-import Data.ByteString.Char8 (unpack)
-import Database.Persist.Postgresql (ConnectionPool, SqlPersistT, runSqlPool)
-import Database.Persist.Sql (toSqlKey, fromSqlKey, Key, ToBackendKey, SqlBackend)
-import Control.Monad.Reader (MonadReader(ask))
-import Janus.Settings (Settings(..))
-import Control.Monad.Trans (lift, liftIO, MonadIO)
+import           Control.Monad.Reader        (MonadReader (ask))
+import           Control.Monad.Trans         (MonadIO, liftIO)
+import           Control.Monad.Trans.Reader  (ReaderT)
+import           Data.ByteString.Char8       (unpack)
+import           Data.Text                   (Text, pack)
+import           Data.Text.Encoding          (encodeUtf8)
+import           Database.Persist.Postgresql (runSqlPool)
+import           Database.Persist.Sql        (Key, SqlBackend, ToBackendKey,
+                                              fromSqlKey, toSqlKey)
+import           Janus.Settings              (Settings (..))
 
 -- | Convert from Text to database key
 textToKey :: ToBackendKey SqlBackend record => Text -> Key record

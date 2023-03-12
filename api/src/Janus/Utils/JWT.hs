@@ -17,22 +17,15 @@ module Janus.Utils.JWT
   )
 where
 
-import Data.Text (Text)
-import Data.Time.Clock (NominalDiffTime)
-import Web.JWT as JWT
-  ( Algorithm (HS256),
-    JOSEHeader (alg, typ),
-    JWTClaimsSet (exp, iat, iss, sub),
-    NumericDate,
-    claims,
-    decodeAndVerifySignature,
-    encodeSigned,
-    hmacSecret,
-    numericDate,
-    stringOrURI,
-    stringOrURIToText,
-    toVerify,
-  )
+import           Data.Text       (Text)
+import           Data.Time.Clock (NominalDiffTime)
+import           Web.JWT         as JWT (Algorithm (HS256),
+                                         JOSEHeader (alg, typ),
+                                         JWTClaimsSet (exp, iat, iss, sub),
+                                         NumericDate, claims,
+                                         decodeAndVerifySignature, encodeSigned,
+                                         hmacSecret, numericDate, stringOrURI,
+                                         stringOrURIToText, toVerify)
 
 -- | Create a token
 createToken ::
@@ -76,7 +69,7 @@ getSubject jwtSecret now token issuer = do
   case hasDateExpired (JWT.exp (JWT.claims jwt)) (numericDate now) of
     Just False -> case isCorrectIssuer (stringOrURIToText <$> JWT.iss (JWT.claims jwt)) issuer of
       Just True -> stringOrURIToText <$> JWT.sub (JWT.claims jwt)
-      _ -> Nothing
+      _         -> Nothing
     _ -> Nothing
   where
     -- \| Determines if it is the correct issuer

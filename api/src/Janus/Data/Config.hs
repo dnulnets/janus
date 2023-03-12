@@ -14,14 +14,15 @@
 --
 module Janus.Data.Config (Database (..), Token (..), Config (..), readConfig) where
 
-import Control.Applicative (Alternative (empty))
-import Data.Text (Text)
-import Data.Yaml (FromJSON (parseJSON), Value (Object), decodeFileEither, (.:))
+import           Control.Applicative (Alternative (empty))
+import           Data.Text           (Text)
+import           Data.Yaml           (FromJSON (parseJSON), Value (Object),
+                                      decodeFileEither, (.:))
 
 -- | Database configuration
 data Database = Database
   { -- | The url to the database
-    url :: Text,
+    url  :: Text,
     -- | The size of the connection pool
     size :: Int
   }
@@ -32,16 +33,16 @@ data Token = Token
   { -- | The issuer of the token
     issuer :: Text,
     -- | The secret key used to sign and encrypt the token
-    key :: Text,
+    key    :: Text,
     -- | The validity time of the token in seconds
-    valid :: Integer
+    valid  :: Integer
   }
   deriving (Show)
 
 -- | Application configuration
 data Config = Config
   { -- | The token configuration
-    token :: Token,
+    token    :: Token,
     -- | The database configuration
     database :: Database
   }

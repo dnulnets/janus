@@ -1,27 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE QuasiQuotes       #-}
 
 module Login (spec) where
 
-import Control.Monad.Logger (logInfoN, runStderrLoggingT)
-import Data.Aeson (decode)
-import Data.Text.Encoding (encodeUtf8)
-import Data.Time.Clock.System
-  ( SystemTime (systemSeconds),
-    getSystemTime,
-  )
-import Database.Persist.Sqlite (ConnectionPool, runMigration, runSqlPool, withSqlitePool)
-import Janus (waiapp)
-import qualified Janus.Data.Config as C
-import Janus.Data.Model
-import Janus.Settings
-import Janus.User
-import Janus.Utils.JWT
-import Network.HTTP.Types.Header
-import Network.HTTP.Types.Method
-import Test.Hspec
-import Test.Hspec.Wai
-import Test.Hspec.Wai.JSON
+import           Data.Aeson                (decode)
+import           Data.Text.Encoding        (encodeUtf8)
+import           Data.Time.Clock.System    (SystemTime (systemSeconds),
+                                            getSystemTime)
+import           Janus.User                (LoginResponse (email, token, uid, username))
+import           Janus.Utils.JWT           (createToken, getSubject)
+import           Network.HTTP.Types.Header (hAuthorization)
+import           Network.HTTP.Types.Method (methodGet)
+import           Test.Hspec                (Example (Arg), SpecWith, describe,
+                                            it)
+import           Test.Hspec.Wai            (MatchBody (MatchBody),
+                                            ResponseMatcher (ResponseMatcher, matchBody, matchHeaders, matchStatus),
+                                            WaiExpectation, get, liftIO, post,
+                                            request, shouldRespondWith)
+import           Test.Hspec.Wai.JSON       (json)
 
 -- | Test that the static files are served
 spec :: SpecWith (Arg (WaiExpectation st))
@@ -55,7 +51,7 @@ spec = describe "Login" $ do
     post "/api/user/login" [json|{"user":{"password":"test1","username":"test1"}}|] `shouldRespondWith` (matcher seconds)
 
   where
-    
+
     matcher s =
       ResponseMatcher
         { matchStatus = 200,
@@ -67,7 +63,7 @@ spec = describe "Login" $ do
       Just lr -> if expected s lr then Nothing else Just ("Wrong response: " <> show lr)
       _ -> Just "Unable to parse json"
 
-    expected s lr = (username lr) == "test1" && 
-      (uid lr) == "bf3cfe1f-8dea-4c08-aa38-49d3098fce1e" && 
-      (email lr) == "test1@test.home.local" && 
-      (maybe False ((==) "bf3cfe1f-8dea-4c08-aa38-49d3098fce1e") $ getSubject "testkey" s (token lr) "testissuer")
+    expected s lr = username lr == "test1" &&
+      uid lr == "bf3cfe1f-8dea-4c08-aa38-49d3098fce1e" &&
+      email lr == "test1@test.home.local" &&
+      Just "bf3cfe1f-8dea-4c08-aa38-49d3098fce1e" == getSubject "testkey" s (token lr) "testissuer"

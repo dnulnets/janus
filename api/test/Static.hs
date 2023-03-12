@@ -1,20 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 module Static (spec) where
 
-import Control.Monad.Logger (logInfoN, runStderrLoggingT)
-import Data.Text.Encoding (encodeUtf8)
-import Database.Persist.Sqlite (ConnectionPool, runMigration, runSqlPool, withSqlitePool)
-import Janus (waiapp)
-import Janus.Data.Config (Config (..))
-import qualified Janus.Data.Config as C
-import Janus.Data.Model
-import Janus.Settings
-import Network.HTTP.Types.Header
-import Test.Hspec
-import Test.Hspec.Wai
-import Test.Hspec.Wai.JSON
+import Test.Hspec ( describe, it, Example(Arg), SpecWith )
+import Test.Hspec.Wai ( get, shouldRespondWith, WaiExpectation )
 
 -- | Test that the static files are served
 spec :: SpecWith (Arg (WaiExpectation st))

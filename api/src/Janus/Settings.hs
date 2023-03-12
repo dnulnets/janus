@@ -10,11 +10,11 @@
 -- This module contains the data type and handling for the application configuration
 module Janus.Settings (Settings(..)) where
 
-import Database.Persist.Postgresql (ConnectionPool)
-import Janus.Data.Config
+import           Database.Persist.Postgresql (ConnectionPool)
+import           Janus.Data.Config
 
 -- | The settings for the application.
 data Settings = Settings {
-  config :: Config
+  config   :: Config
   , dbpool :: ConnectionPool
 }

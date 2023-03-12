@@ -12,26 +12,20 @@
 -- The user type used within the server application.
 module Janus.Data.User (User (..)) where
 
-import Control.Applicative (Alternative (empty))
-import Data.Aeson
-  ( FromJSON (parseJSON),
-    KeyValue ((.=)),
-    ToJSON (toEncoding, toJSON),
-    Value (Object),
-    object,
-    pairs,
-    (.:),
-  )
-import Data.Text (Text)
+import           Control.Applicative (Alternative (empty))
+import           Data.Aeson          (FromJSON (parseJSON), KeyValue ((.=)),
+                                      ToJSON (toEncoding, toJSON),
+                                      Value (Object), object, pairs, (.:))
+import           Data.Text           (Text)
 
 -- | The user type, used by the application.
 data User = User
   { -- | User key
-    uid :: Text,
+    uid      :: Text,
     -- | The username used when looging in
     username :: Text,
     -- | The user email address
-    email :: Text
+    email    :: Text
   }
   deriving (Show)
 

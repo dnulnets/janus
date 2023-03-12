@@ -10,10 +10,10 @@
 -- Contains various generic types for the Janus application.
 module Janus.Core (JScottyM, JActionM) where
 
-import Control.Monad.Trans.Reader (ReaderT)
-import Data.Text.Lazy (Text)
-import Janus.Settings (Settings)
-import Web.Scotty.Trans (ActionT, ScottyT)
+import           Control.Monad.Trans.Reader (ReaderT)
+import           Data.Text.Lazy             (Text)
+import           Janus.Settings             (Settings)
+import           Web.Scotty.Trans           (ActionT, ScottyT)
 
 -- | Type for the Janus Scotty Monad, has a reader for the config
 type JScottyM m = ScottyT Text (ReaderT Settings m)

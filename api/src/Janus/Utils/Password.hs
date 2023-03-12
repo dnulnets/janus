@@ -17,10 +17,10 @@ where
 --
 -- External imports
 --
-import Crypto.KDF.BCrypt (hashPassword, validatePassword)
+import           Crypto.KDF.BCrypt  (hashPassword, validatePassword)
 
-import Data.Text (Text)
-import Data.Text.Encoding (decodeUtf8, encodeUtf8)
+import           Data.Text          (Text)
+import           Data.Text.Encoding (decodeUtf8, encodeUtf8)
 
 -- | Validates a password by checking a hashed password with the supplied password
 authValidatePassword ::
