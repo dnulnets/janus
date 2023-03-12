@@ -10,7 +10,7 @@
 -- Portability : POSIX
 --
 -- This module contains the static part of the application that servers static pages.
-module Janus.User (app) where
+module Janus.User (app, LoginResponse(..), LoginRequest(..)) where
 
 import Control.Applicative (Alternative (empty))
 import Control.Monad.IO.Class (MonadIO)
@@ -65,6 +65,21 @@ instance ToJSON LoginResponse where
   -- this generates a Value
   toJSON (LoginResponse _uid _username _email _token) =
     object ["user" .= object ["uid" .= _uid, "username" .= _username, "email" .= _email, "token" .= _token]]
+
+instance FromJSON LoginResponse where
+  parseJSON (Object v) = do
+    w <- v .: "user"
+    LoginResponse
+      <$> w
+      .: "uid"
+      <*> w
+      .: "username"
+      <*> w
+      .: "email"
+      <*> w
+      .: "token"
+  parseJSON _ = empty
+
 
 instance FromJSON LoginRequest where
   parseJSON (Object v) = do
