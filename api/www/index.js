@@ -12579,32 +12579,33 @@
 
   // output/Janus.Data.Profile/index.js
   var object4 = /* @__PURE__ */ object2();
-  var rowListCodecCons2 = /* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons(rowListCodecNil)()()({
+  var rowListCodecCons2 = /* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons(rowListCodecNil)()()({
     reflectSymbol: function() {
       return "username";
     }
-  })(refl))()()({
-    reflectSymbol: function() {
-      return "uid";
-    }
   })(refl))()();
+  var guidIsSymbol = {
+    reflectSymbol: function() {
+      return "guid";
+    }
+  };
   var emailIsSymbol = {
     reflectSymbol: function() {
       return "email";
     }
   };
-  var profileWithPasswordCodec = /* @__PURE__ */ object4(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons2({
+  var profileWithPasswordCodec = /* @__PURE__ */ object4(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons2({
     reflectSymbol: function() {
       return "password";
     }
-  })(refl))()()(emailIsSymbol)(refl))("ProfileWithPassword")({
-    uid: codec2,
+  })(refl))()()(guidIsSymbol)(refl))()()(emailIsSymbol)(refl))("ProfileWithPassword")({
+    guid: codec2,
     username: codec3,
     email: codec,
     password: /* @__PURE__ */ maybe2(string)
   });
-  var profileCodec = /* @__PURE__ */ object4(/* @__PURE__ */ rowListCodecCons2(emailIsSymbol)(refl))("Profile")({
-    uid: codec2,
+  var profileCodec = /* @__PURE__ */ object4(/* @__PURE__ */ rowListCodecCons(/* @__PURE__ */ rowListCodecCons2(guidIsSymbol)(refl))()()(emailIsSymbol)(refl))("Profile")({
+    guid: codec2,
     username: codec3,
     email: codec
   });
@@ -31496,7 +31497,7 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at Janus.Store (line 34, column 16 - line 38, column 36): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Janus.Store (line 36, column 16 - line 40, column 36): " + [v.constructor.name]);
     };
   };
 
@@ -31958,7 +31959,7 @@
       }
     };
   });
-  var navigateAppM = /* @__PURE__ */ $lazy_navigateAppM(61);
+  var navigateAppM = /* @__PURE__ */ $lazy_navigateAppM(62);
 
   // output/Halogen.Store.Connect/index.js
   var bind11 = /* @__PURE__ */ bind(bindHalogenM);
@@ -32223,7 +32224,7 @@
     }
   })(eqUsername))()({
     reflectSymbol: function() {
-      return "uid";
+      return "guid";
     }
   })(eqUUID))()({
     reflectSymbol: function() {
@@ -32303,7 +32304,7 @@
     }
   })(eqUsername))()({
     reflectSymbol: function() {
-      return "uid";
+      return "guid";
     }
   })(eqUUID))()({
     reflectSymbol: function() {
@@ -34001,7 +34002,7 @@
     }
   })(eqUsername))()({
     reflectSymbol: function() {
-      return "uid";
+      return "guid";
     }
   })(eqUUID))()({
     reflectSymbol: function() {
@@ -34230,13 +34231,13 @@
               }));
             }
             ;
-            throw new Error("Failed pattern match at Main (line 49, column 16 - line 54, column 50): " + [res.constructor.name]);
+            throw new Error("Failed pattern match at Main (line 53, column 16 - line 58, column 50): " + [res.constructor.name]);
           }();
           return pure24(hush(user));
         });
       }
       ;
-      throw new Error("Failed pattern match at Main (line 39, column 61 - line 56, column 23): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Main (line 43, column 61 - line 60, column 23): " + [v.constructor.name]);
     }))(function(v) {
       var initialStore = {
         baseUrl: "http://localhost:8080",

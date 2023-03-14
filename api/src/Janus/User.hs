@@ -43,7 +43,7 @@ import           Web.Scotty.Trans                (get, header, json, jsonData,
 
 -- | User information for the login response
 data LoginResponse = LoginResponse
-  { uid      :: Text,
+  { guid      :: Text,
     username :: Text,
     email    :: Text,
     token    :: Text
@@ -59,15 +59,15 @@ data LoginRequest = LoginRequest
 
 instance ToJSON LoginResponse where
   -- this generates a Value
-  toJSON (LoginResponse _uid _username _email _token) =
-    object ["user" .= object ["uid" .= _uid, "username" .= _username, "email" .= _email, "token" .= _token]]
+  toJSON (LoginResponse _guid _username _email _token) =
+    object ["user" .= object ["guid" .= _guid, "username" .= _username, "email" .= _email, "token" .= _token]]
 
 instance FromJSON LoginResponse where
   parseJSON (Object v) = do
     w <- v .: "user"
     LoginResponse
       <$> w
-      .: "uid"
+      .: "guid"
       <*> w
       .: "username"
       <*> w
@@ -94,12 +94,12 @@ app = do
   post "/api/user/login" $ do
     req <- jsonData
     settings <- lift ask
-    dbuser <- runDB $ DB.getBy $ UniqueUserUID (qusername req)
+    dbuser <- runDB $ DB.getBy $ UniqueUserUsername (qusername req)
     case dbuser of
       Just (DB.Entity _ user) | authValidatePassword (userPassword user) (qpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         let jwt = createToken (C.key (C.token (config settings))) seconds (C.valid (C.token (config settings))) (C.issuer (C.token (config settings))) (userGuid user)
-        let userResponse = LoginResponse {uid = (userGuid user), username = (userUid user), email = (userEmail user), token = jwt}
+        let userResponse = LoginResponse {guid = (userGuid user), username = (userUsername user), email = (userEmail user), token = jwt}
         json userResponse
       _ -> status unauthorized401
 
@@ -115,7 +115,7 @@ app = do
             dbuser <- runDB $ DB.getBy $ UniqueUserGUID u
             case dbuser of
               Just (DB.Entity _ user) -> do
-                let userResponse = LoginResponse {uid = (userGuid user), username = (userUid user), email = (userEmail user), token = b}
+                let userResponse = LoginResponse {guid = (userGuid user), username = (userUsername user), email = (userEmail user), token = b}
                 json userResponse
               Nothing -> status unauthorized401
           Nothing -> status unauthorized401

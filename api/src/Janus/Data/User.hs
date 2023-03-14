@@ -21,7 +21,7 @@ import           Data.Text           (Text)
 -- | The user type, used by the application.
 data User = User
   { -- | User key
-    uid      :: Text,
+    guid      :: Text,
     -- | The username used when looging in
     username :: Text,
     -- | The user email address
@@ -34,7 +34,7 @@ instance FromJSON User where
   parseJSON (Object v) =
     User
       <$> v
-      .: "uid"
+      .: "guid"
       <*> v
       .: "username"
       <*> v
@@ -44,9 +44,9 @@ instance FromJSON User where
 -- | Json emitter for the user type.
 instance ToJSON User where
   -- this generates a Value
-  toJSON (User uid username email) =
-    object ["uid" .= uid, "username" .= username, "email" .= email]
+  toJSON (User guid username email) =
+    object ["guid" .= guid, "username" .= username, "email" .= email]
 
   -- this encodes directly to a bytestring Builder
-  toEncoding (User uid username email) =
-    pairs ("uid" .= uid <> "username" .= username <> "email" .= email)
+  toEncoding (User guid username email) =
+    pairs ("guid" .= guid <> "username" .= username <> "email" .= email)

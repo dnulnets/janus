@@ -25,16 +25,17 @@
 module Janus.Data.Model where
 
 import           Data.Text           (Text)
-import           Database.Persist.TH
+import Database.Persist.TH
+    ( mkMigrate, mkPersist, persistLowerCase, share, sqlSettings )
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 
 User
-    uid Text
+    username Text
     guid Text
     password Text
     email Text
-    UniqueUserUID uid
+    UniqueUserUsername username
     UniqueUserGUID guid
     deriving Show
 

@@ -1,3 +1,6 @@
+-- | The main module for the application. It sets up the configuration, adds support for
+-- | retrieving the user if we already have a valid token in our localstore,
+-- | sets the initial state of the global store, handles URL-changes and runs the application.
 module Main (main) where
 
 import Prelude
@@ -27,6 +30,7 @@ import Halogen.VDom.Driver (runUI)
 import Routing.Duplex (parse)
 import Routing.Hash (matchesWith)
 
+-- | The main function for the application.
 main ∷ Effect Unit
 main = HA.runHalogenAff do
 
