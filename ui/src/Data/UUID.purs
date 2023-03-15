@@ -16,6 +16,9 @@ newtype UUID = UUID String
 derive instance ntUUID :: Newtype UUID _
 derive instance eqUUID :: Eq UUID
 
+instance showUUID :: Show UUID where
+  show (UUID n) = n 
+
 -- |Codec for encoding and decoding a UUID
 codec :: JsonCodec UUID
 codec = dimap (\(UUID uuid) -> uuid) UUID CA.string

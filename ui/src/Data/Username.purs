@@ -1,5 +1,5 @@
 module Janus.Data.Username
-  ( Username -- constructor not exported
+  ( Username
   , parse
   , toString
   , codec
@@ -16,6 +16,9 @@ newtype Username = Username String
 
 derive instance eqUsername :: Eq Username
 derive instance ordUsername :: Ord Username
+
+instance showUsername :: Show Username where
+  show (Username n) = n 
 
 codec :: JsonCodec Username
 codec = dimap (\(Username user) -> user) Username CA.string

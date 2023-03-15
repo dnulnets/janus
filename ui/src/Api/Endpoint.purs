@@ -16,7 +16,7 @@ import Routing.Duplex.Generic.Syntax ((/))
 data Endpoint
   = Login 
   | User
-  | Refresh
+  
 derive instance genericEndpoint :: Generic Endpoint _
 
 -- | The codec for the valid routes in the Janus application.
@@ -24,5 +24,4 @@ endpointCodec :: RouteDuplex' Endpoint
 endpointCodec = root $ prefix "api" $ sum
   { "Login": "user" / "login" / noArgs
   , "User": "user" / noArgs
-  , "Refresh": "user" / "refresh" / noArgs
   }

@@ -103,7 +103,7 @@ app = do
         json userResponse
       _ -> status unauthorized401
 
-  get "/api/user/refresh" $ do
+  get "/api/user" $ do
     settings <- lift ask
     auth <- header "Authorization"
     let bearer = extractBearerAuth . encodeUtf8 . toStrict <$> auth

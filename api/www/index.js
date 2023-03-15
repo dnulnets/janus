@@ -742,10 +742,47 @@
       return "[" + ss.join(",") + "]";
     };
   };
+  var cons = function(head6) {
+    return function(tail3) {
+      return [head6].concat(tail3);
+    };
+  };
+  var intercalate = function(separator) {
+    return function(xs) {
+      return xs.join(separator);
+    };
+  };
 
   // output/Data.Show/index.js
   var showString = {
     show: showStringImpl
+  };
+  var showRecordFieldsNil = {
+    showRecordFields: function(v) {
+      return function(v1) {
+        return [];
+      };
+    }
+  };
+  var showRecordFields = function(dict) {
+    return dict.showRecordFields;
+  };
+  var showRecord = function() {
+    return function() {
+      return function(dictShowRecordFields) {
+        var showRecordFields1 = showRecordFields(dictShowRecordFields);
+        return {
+          show: function(record3) {
+            var v = showRecordFields1($$Proxy.value)(record3);
+            if (v.length === 0) {
+              return "{}";
+            }
+            ;
+            return intercalate(" ")(["{", intercalate(", ")(v), "}"]);
+          }
+        };
+      };
+    };
   };
   var showInt = {
     show: showIntImpl
@@ -772,6 +809,25 @@
   var showArray = function(dictShow) {
     return {
       show: showArrayImpl(show(dictShow))
+    };
+  };
+  var showRecordFieldsCons = function(dictIsSymbol) {
+    var reflectSymbol2 = reflectSymbol(dictIsSymbol);
+    return function(dictShowRecordFields) {
+      var showRecordFields1 = showRecordFields(dictShowRecordFields);
+      return function(dictShow) {
+        var show16 = show(dictShow);
+        return {
+          showRecordFields: function(v) {
+            return function(record3) {
+              var tail3 = showRecordFields1($$Proxy.value)(record3);
+              var key = reflectSymbol2($$Proxy.value);
+              var focus3 = unsafeGet(key)(record3);
+              return cons(intercalate(": ")([key, show16(focus3)]))(tail3);
+            };
+          }
+        };
+      };
     };
   };
 
@@ -1427,23 +1483,23 @@
 
   // output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
-    var bind21 = bind(dictMonad.Bind1());
+    var bind22 = bind(dictMonad.Bind1());
     var unless4 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m) {
-        return bind21(mb)(function(b2) {
+        return bind22(mb)(function(b2) {
           return unless4(b2)(m);
         });
       };
     };
   };
   var ap = function(dictMonad) {
-    var bind21 = bind(dictMonad.Bind1());
+    var bind22 = bind(dictMonad.Bind1());
     var pure25 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a2) {
-        return bind21(f)(function(f$prime) {
-          return bind21(a2)(function(a$prime) {
+        return bind22(f)(function(f$prime) {
+          return bind22(a2)(function(a$prime) {
             return pure25(f$prime(a$prime));
           });
         });
@@ -2090,12 +2146,12 @@
     };
   };
   var bindExceptT = function(dictMonad) {
-    var bind21 = bind(dictMonad.Bind1());
+    var bind22 = bind(dictMonad.Bind1());
     var pure25 = pure(dictMonad.Applicative0());
     return {
       bind: function(v) {
         return function(k) {
-          return bind21(v)(either(function($187) {
+          return bind22(v)(either(function($187) {
             return pure25(Left.create($187));
           })(function(a2) {
             var v1 = k(a2);
@@ -2148,19 +2204,19 @@
     var append8 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
-      var bind21 = bind(Bind1);
+      var bind22 = bind(Bind1);
       var pure25 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v) {
           return function(v1) {
-            return bind21(v)(function(rm) {
+            return bind22(v)(function(rm) {
               if (rm instanceof Right) {
                 return pure25(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
-                return bind21(v1)(function(rn) {
+                return bind22(v1)(function(rn) {
                   if (rn instanceof Right) {
                     return pure25(new Right(rn.value0));
                   }
@@ -2238,7 +2294,7 @@
     }
     return m;
   }
-  function _foldM(bind21) {
+  function _foldM(bind22) {
     return function(f) {
       return function(mz) {
         return function(m) {
@@ -2250,7 +2306,7 @@
           }
           for (var k in m) {
             if (hasOwnProperty.call(m, k)) {
-              acc = bind21(acc)(g(k));
+              acc = bind22(acc)(g(k));
             }
           }
           return acc;
@@ -4844,13 +4900,13 @@
     };
   };
   var bindReaderT = function(dictBind) {
-    var bind21 = bind(dictBind);
+    var bind22 = bind(dictBind);
     var applyReaderT1 = applyReaderT(dictBind.Apply0());
     return {
       bind: function(v) {
         return function(k) {
           return function(r) {
-            return bind21(v(r))(function(a2) {
+            return bind22(v(r))(function(a2) {
               var v1 = k(a2);
               return v1(r);
             });
@@ -12438,25 +12494,14 @@
     User2.value = new User2();
     return User2;
   }();
-  var Refresh = /* @__PURE__ */ function() {
-    function Refresh2() {
-    }
-    ;
-    Refresh2.value = new Refresh2();
-    return Refresh2;
-  }();
   var genericEndpoint = {
     to: function(x) {
       if (x instanceof Inl) {
         return Login.value;
       }
       ;
-      if (x instanceof Inr && x.value0 instanceof Inl) {
+      if (x instanceof Inr) {
         return User.value;
-      }
-      ;
-      if (x instanceof Inr && x.value0 instanceof Inr) {
-        return Refresh.value;
       }
       ;
       throw new Error("Failed pattern match at Janus.Api.Endpoint (line 20, column 1 - line 20, column 54): " + [x.constructor.name]);
@@ -12467,11 +12512,7 @@
       }
       ;
       if (x instanceof User) {
-        return new Inr(new Inl(NoArguments.value));
-      }
-      ;
-      if (x instanceof Refresh) {
-        return new Inr(new Inr(NoArguments.value));
+        return new Inr(NoArguments.value);
       }
       ;
       throw new Error("Failed pattern match at Janus.Api.Endpoint (line 20, column 1 - line 20, column 54): " + [x.constructor.name]);
@@ -12481,18 +12522,13 @@
     reflectSymbol: function() {
       return "Login";
     }
-  })()(gRouteNoArguments))(/* @__PURE__ */ gRouteSum(/* @__PURE__ */ gRouteConstructor({
+  })()(gRouteNoArguments))(/* @__PURE__ */ gRouteConstructor({
     reflectSymbol: function() {
       return "User";
     }
-  })()(gRouteNoArguments))(/* @__PURE__ */ gRouteConstructor({
-    reflectSymbol: function() {
-      return "Refresh";
-    }
-  })()(gRouteNoArguments))))({
+  })()(gRouteNoArguments)))({
     Login: /* @__PURE__ */ gsep2("user")(/* @__PURE__ */ gsep2("login")(noArgs)),
-    User: /* @__PURE__ */ gsep2("user")(noArgs),
-    Refresh: /* @__PURE__ */ gsep2("user")(/* @__PURE__ */ gsep2("refresh")(noArgs))
+    User: /* @__PURE__ */ gsep2("user")(noArgs)
   })));
 
   // output/Data.Codec.Argonaut.Compat/index.js
@@ -12528,6 +12564,11 @@
   var Email = function(x) {
     return x;
   };
+  var showEmail = {
+    show: function(v) {
+      return v;
+    }
+  };
   var eqEmail = {
     eq: function(x) {
       return function(y) {
@@ -12540,6 +12581,11 @@
   // output/Janus.Data.UUID/index.js
   var UUID = function(x) {
     return x;
+  };
+  var showUUID = {
+    show: function(v) {
+      return v;
+    }
   };
   var eqUUID = {
     eq: function(x) {
@@ -12558,6 +12604,11 @@
   };
   var toString2 = function(v) {
     return v;
+  };
+  var showUsername = {
+    show: function(v) {
+      return v;
+    }
   };
   var parse7 = function(v) {
     if (v === "") {
@@ -31378,7 +31429,7 @@
   };
   var mkLog = function(dictNow) {
     var Monad0 = dictNow.Monad0();
-    var bind21 = bind(Monad0.Bind1());
+    var bind22 = bind(Monad0.Bind1());
     var nowDateTime3 = nowDateTime2(dictNow);
     var pure25 = pure(Monad0.Applicative0());
     return function(logReason) {
@@ -31390,7 +31441,7 @@
             return $36($37($38));
           };
         }();
-        return bind21(nowDateTime3)(function(now2) {
+        return bind22(nowDateTime3)(function(now2) {
           var headerWith = function(start2) {
             return fold4(["[", start2, ": ", formatTimestamp(now2), "]\n", inputMessage]);
           };
@@ -31507,16 +31558,16 @@
   var mkAuthRequest = function(dictMonadAff) {
     var MonadEffect0 = dictMonadAff.MonadEffect0();
     var Monad0 = MonadEffect0.Monad0();
-    var bind21 = bind(Monad0.Bind1());
+    var bind22 = bind(Monad0.Bind1());
     var liftEffect10 = liftEffect(MonadEffect0);
     var liftAff2 = liftAff(dictMonadAff);
     var pure25 = pure(Monad0.Applicative0());
     return function(dictMonadStore) {
       var getStore3 = getStore(dictMonadStore);
       return function(opts) {
-        return bind21(getStore3)(function(v) {
-          return bind21(liftEffect10(readToken))(function(token) {
-            return bind21(liftAff2(request2(defaultRequest2(v.baseUrl)(token)(opts))))(function(response) {
+        return bind22(getStore3)(function(v) {
+          return bind22(liftEffect10(readToken))(function(token) {
+            return bind22(liftAff2(request2(defaultRequest2(v.baseUrl)(token)(opts))))(function(response) {
               return pure25(hush(map40(function(v1) {
                 return v1.body;
               })(response)));
@@ -31565,7 +31616,7 @@
       return function(dictLogMessages) {
         var Monad0 = dictLogMessages.Monad0();
         var Bind1 = Monad0.Bind1();
-        var bind21 = bind(Bind1);
+        var bind22 = bind(Bind1);
         var applySecond2 = applySecond(Bind1.Apply0());
         var logError2 = logError(dictLogMessages);
         var pure25 = pure(Monad0.Applicative0());
@@ -31574,8 +31625,8 @@
           var logError1 = logError2(dictNow);
           return function(req) {
             return function(fields) {
-              return bind21(getStore3)(function(v) {
-                return bind21(req(v.baseUrl)(fields))(function(v1) {
+              return bind22(getStore3)(function(v) {
+                return bind22(req(v.baseUrl)(fields))(function(v1) {
                   if (v1 instanceof Left) {
                     return applySecond2(logError1(v1.value0))(pure25(Nothing.value));
                   }
@@ -32356,25 +32407,63 @@
   };
   var onValueInput = /* @__PURE__ */ addForeignPropHandler(input)("value")(readString2);
 
+  // output/Janus.Capability.Resource.User/index.js
+  var lift7 = /* @__PURE__ */ lift(monadTransHalogenM);
+  var updateUser = function(dict) {
+    return dict.updateUser;
+  };
+  var loginUser = function(dict) {
+    return dict.loginUser;
+  };
+  var getCurrentUser = function(dict) {
+    return dict.getCurrentUser;
+  };
+  var manageUserHalogenM = function(dictManageUser) {
+    var lift1 = lift7(dictManageUser.Monad0());
+    return {
+      loginUser: function() {
+        var $11 = loginUser(dictManageUser);
+        return function($12) {
+          return lift1($11($12));
+        };
+      }(),
+      getCurrentUser: lift1(getCurrentUser(dictManageUser)),
+      updateUser: function() {
+        var $13 = updateUser(dictManageUser);
+        return function($14) {
+          return lift1($13($14));
+        };
+      }(),
+      Monad0: function() {
+        return monadHalogenM;
+      }
+    };
+  };
+
   // output/Janus.Page.Home/index.js
   var type_19 = /* @__PURE__ */ type_17(isPropButtonType);
   var discard9 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var show7 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
   var map47 = /* @__PURE__ */ map(functorMaybe);
   var modify_5 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var selectEq3 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(eqRowNil)()({
-    reflectSymbol: function() {
-      return "username";
-    }
-  })(eqUsername))()({
-    reflectSymbol: function() {
-      return "guid";
-    }
-  })(eqUUID))()({
+  var bind16 = /* @__PURE__ */ bind(bindHalogenM);
+  var emailIsSymbol2 = {
     reflectSymbol: function() {
       return "email";
     }
-  })(eqEmail))));
+  };
+  var guidIsSymbol2 = {
+    reflectSymbol: function() {
+      return "guid";
+    }
+  };
+  var usernameIsSymbol = {
+    reflectSymbol: function() {
+      return "username";
+    }
+  };
+  var show15 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(/* @__PURE__ */ showRecord()()(/* @__PURE__ */ showRecordFieldsCons(emailIsSymbol2)(/* @__PURE__ */ showRecordFieldsCons(guidIsSymbol2)(/* @__PURE__ */ showRecordFieldsCons(usernameIsSymbol)(showRecordFieldsNil)(showUsername))(showUUID))(showEmail))));
+  var selectEq3 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(eqRowNil)()(usernameIsSymbol)(eqUsername))()(guidIsSymbol2)(eqUUID))()(emailIsSymbol2)(eqEmail))));
   var Receive4 = /* @__PURE__ */ function() {
     function Receive8(value0) {
       this.value0 = value0;
@@ -32399,57 +32488,64 @@
     return function(dictMonadStore) {
       var connect1 = connect2(dictMonadStore);
       return function(dictNavigate) {
-        var render = function(v) {
-          return button([css("btn btn-lg btn-block btn-warning"), type_19(ButtonButton.value), onClick(function(v1) {
-            return Test.value;
-          })])([text5("Test")]);
-        };
-        var initialState = function(v) {
-          return {
-            currentUser: v.context
+        return function(dictManageUser) {
+          var getCurrentUser2 = getCurrentUser(manageUserHalogenM(dictManageUser));
+          var render = function(v) {
+            return button([css("btn btn-lg btn-block btn-warning"), type_19(ButtonButton.value), onClick(function(v1) {
+              return Test.value;
+            })])([text5("Test")]);
           };
-        };
-        var handleAction = function(v) {
-          if (v instanceof Receive4) {
-            return discard9(liftEffect10(log2("Home.Receive " + show7(map47(toString2)(map47(function(v1) {
-              return v1.username;
-            })(v.value0.context))))))(function() {
-              return modify_5(function(v1) {
-                var $49 = {};
-                for (var $50 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $50)) {
-                    $49[$50] = v1[$50];
+          var initialState = function(v) {
+            return {
+              currentUser: v.context
+            };
+          };
+          var handleAction = function(v) {
+            if (v instanceof Receive4) {
+              return discard9(liftEffect10(log2("Home.Receive " + show7(map47(toString2)(map47(function(v1) {
+                return v1.username;
+              })(v.value0.context))))))(function() {
+                return modify_5(function(v1) {
+                  var $67 = {};
+                  for (var $68 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $68)) {
+                      $67[$68] = v1[$68];
+                    }
+                    ;
                   }
                   ;
-                }
-                ;
-                $49.currentUser = v.value0.context;
-                return $49;
+                  $67.currentUser = v.value0.context;
+                  return $67;
+                });
               });
-            });
-          }
-          ;
-          if (v instanceof Test) {
-            return liftEffect10(log2("Test pressed!"));
-          }
-          ;
-          throw new Error("Failed pattern match at Janus.Page.Home (line 51, column 20 - line 58, column 43): " + [v.constructor.name]);
+            }
+            ;
+            if (v instanceof Test) {
+              return discard9(liftEffect10(log2("Test pressed!")))(function() {
+                return bind16(getCurrentUser2)(function(user) {
+                  return liftEffect10(log2(show15(user)));
+                });
+              });
+            }
+            ;
+            throw new Error("Failed pattern match at Janus.Page.Home (line 53, column 20 - line 62, column 39): " + [v.constructor.name]);
+          };
+          return connect1(selectEq3(function(v) {
+            return v.currentUser;
+          }))(mkComponent({
+            initialState,
+            render,
+            "eval": mkEval({
+              handleAction,
+              handleQuery: defaultEval.handleQuery,
+              receive: function($72) {
+                return Just.create(Receive4.create($72));
+              },
+              initialize: defaultEval.initialize,
+              finalize: defaultEval.finalize
+            })
+          }));
         };
-        return connect1(selectEq3(function(v) {
-          return v.currentUser;
-        }))(mkComponent({
-          initialState,
-          render,
-          "eval": mkEval({
-            handleAction,
-            handleQuery: defaultEval.handleQuery,
-            receive: function($54) {
-              return Just.create(Receive4.create($54));
-            },
-            initialize: defaultEval.initialize,
-            finalize: defaultEval.finalize
-          })
-        }));
       };
     };
   };
@@ -32738,7 +32834,7 @@
   var over4 = /* @__PURE__ */ over3()()()();
   var discard10 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure110 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var bind16 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind17 = /* @__PURE__ */ bind(bindHalogenM);
   var $$delete6 = /* @__PURE__ */ $$delete2({
     reflectSymbol: function() {
       return "liftAction";
@@ -33292,7 +33388,7 @@
                       };
                     })(true);
                     var runValidation = function(fieldKey) {
-                      return bind16(bindFlipped14(function() {
+                      return bind17(bindFlipped14(function() {
                         var $285 = request4($$Proxy.value)(unit);
                         var $286 = getField(fieldKey);
                         return function($287) {
@@ -33336,7 +33432,7 @@
                     };
                     var handleAction = function(v) {
                       if (v instanceof Initialize3) {
-                        return bind16(get4)(function(v1) {
+                        return bind17(get4)(function(v1) {
                           return when$prime1(v1.formConfig.validateOnMount)(function(v2) {
                             return for_22(getKeys(v1.fieldObject))(runValidation);
                           });
@@ -33344,7 +33440,7 @@
                       }
                       ;
                       if (v instanceof Receive5) {
-                        return bind16(get4)(function(v1) {
+                        return bind17(get4)(function(v1) {
                           return when$prime1(!unsafeRefEq(v1.input)(v.value0))(function(v2) {
                             return modify_6(function(v3) {
                               var $207 = {};
@@ -33371,10 +33467,10 @@
                           return discard10(for_1(v.value0.value0.value0)(function(event) {
                             return liftEffect10(preventDefault(event));
                           }))(function() {
-                            return discard10(bind16(get4)(function(v1) {
+                            return discard10(bind17(get4)(function(v1) {
                               return for_22(getKeys(v1.fieldObject))(runValidation);
                             }))(function() {
-                              return bind16(get4)(function(v1) {
+                              return bind17(get4)(function(v1) {
                                 return discard10(modify_6(function(state3) {
                                   var $221 = {};
                                   for (var $222 in state3) {
@@ -33482,7 +33578,7 @@
                         }
                         ;
                         if (v.value0.value0 instanceof ChangeField) {
-                          return bind16(get4)(function(v1) {
+                          return bind17(get4)(function(v1) {
                             var modify8 = mkFieldRep(v.value0.value0.value0)(function(v2) {
                               return {
                                 value: v.value0.value0.value1,
@@ -33510,7 +33606,7 @@
                         }
                         ;
                         if (v.value0.value0 instanceof BlurField) {
-                          return bind16(get4)(function(v1) {
+                          return bind17(get4)(function(v1) {
                             return when$prime1(v1.formConfig.validateOnBlur)(function(v2) {
                               return runFormAction(new ValidateField(v.value0.value0.value0));
                             });
@@ -33518,7 +33614,7 @@
                         }
                         ;
                         if (v.value0.value0 instanceof ModifyField) {
-                          return bind16(get4)(function(v1) {
+                          return bind17(get4)(function(v1) {
                             var modify8 = mkFieldRep(v.value0.value0.value0)(v.value0.value0.value1);
                             return discard10(modify_6(function(state3) {
                               var $254 = {};
@@ -33624,39 +33720,6 @@
       },
       Defaults0: function() {
         return dictDefaults;
-      }
-    };
-  };
-
-  // output/Janus.Capability.Resource.User/index.js
-  var lift7 = /* @__PURE__ */ lift(monadTransHalogenM);
-  var updateUser = function(dict) {
-    return dict.updateUser;
-  };
-  var loginUser = function(dict) {
-    return dict.loginUser;
-  };
-  var getCurrentUser = function(dict) {
-    return dict.getCurrentUser;
-  };
-  var manageUserHalogenM = function(dictManageUser) {
-    var lift1 = lift7(dictManageUser.Monad0());
-    return {
-      loginUser: function() {
-        var $11 = loginUser(dictManageUser);
-        return function($12) {
-          return lift1($11($12));
-        };
-      }(),
-      getCurrentUser: lift1(getCurrentUser(dictManageUser)),
-      updateUser: function() {
-        var $13 = updateUser(dictManageUser);
-        return function($14) {
-          return lift1($13($14));
-        };
-      }(),
-      Monad0: function() {
-        return monadHalogenM;
       }
     };
   };
@@ -33775,12 +33838,12 @@
   // output/Janus.Form.Field/index.js
   var append12 = /* @__PURE__ */ append(semigroupArray);
   var value14 = /* @__PURE__ */ value13(isPropString);
-  var bind17 = /* @__PURE__ */ bind(bindMaybe);
+  var bind18 = /* @__PURE__ */ bind(bindMaybe);
   var pure21 = /* @__PURE__ */ pure(applicativeMaybe);
   var type_20 = /* @__PURE__ */ type_17(isPropInputType);
   var textInput = function(v) {
     return function(props) {
-      return fieldset([])([div3([css("mb-3")])([label4([css("form-label"), $$for("j-" + v.label)])([text5(v.label)]), input2(append12([css("form-control"), id3("j-" + v.label), value14(v.state.value), onValueInput(v.action.handleChange), onBlur(v.action.handleBlur)])(props)), maybeElem(bind17(v.state.result)(either(pure21)($$const(Nothing.value))))(function(err) {
+      return fieldset([])([div3([css("mb-3")])([label4([css("form-label"), $$for("j-" + v.label)])([text5(v.label)]), input2(append12([css("form-control"), id3("j-" + v.label), value14(v.state.value), onValueInput(v.action.handleChange), onBlur(v.action.handleBlur)])(props)), maybeElem(bind18(v.state.result)(either(pure21)($$const(Nothing.value))))(function(err) {
         return div3([css("j-invalid-feedback")])([text5(errorToString(err))]);
       })])]);
     };
@@ -33796,7 +33859,7 @@
   var composeKleisli1 = /* @__PURE__ */ composeKleisli(bindHalogenM);
   var modify_7 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var discard11 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var bind18 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind19 = /* @__PURE__ */ bind(bindHalogenM);
   var gets4 = /* @__PURE__ */ gets(monadStateHalogenM);
   var when4 = /* @__PURE__ */ when(applicativeHalogenM);
   var validate2 = /* @__PURE__ */ validate()()()();
@@ -33808,21 +33871,21 @@
   };
   var mapRecordWithIndexCons2 = /* @__PURE__ */ mapRecordWithIndexCons(passwordIsSymbol);
   var constMapping2 = /* @__PURE__ */ constMapping(mappingMkFieldStateFieldS);
-  var usernameIsSymbol = {
+  var usernameIsSymbol2 = {
     reflectSymbol: function() {
       return "username";
     }
   };
-  var mapRecordWithIndexCons1 = /* @__PURE__ */ mapRecordWithIndexCons(usernameIsSymbol);
+  var mapRecordWithIndexCons1 = /* @__PURE__ */ mapRecordWithIndexCons(usernameIsSymbol2);
   var mkFieldStates12 = /* @__PURE__ */ mkFieldStates1(/* @__PURE__ */ hmapRecord()(/* @__PURE__ */ mapRecordWithIndexCons2(constMapping2)(/* @__PURE__ */ mapRecordWithIndexCons1(constMapping2)(mapRecordWithIndexNil)()())()()));
-  var mkFieldActions12 = /* @__PURE__ */ mkFieldActions1(/* @__PURE__ */ hmapWithIndexRecord()(/* @__PURE__ */ mapRecordWithIndexCons2(/* @__PURE__ */ mappingWithIndexMkFieldAc(passwordIsSymbol)(refl)())(/* @__PURE__ */ mapRecordWithIndexCons1(/* @__PURE__ */ mappingWithIndexMkFieldAc(usernameIsSymbol)(refl)())(mapRecordWithIndexNil)()())()()));
+  var mkFieldActions12 = /* @__PURE__ */ mkFieldActions1(/* @__PURE__ */ hmapWithIndexRecord()(/* @__PURE__ */ mapRecordWithIndexCons2(/* @__PURE__ */ mappingWithIndexMkFieldAc(passwordIsSymbol)(refl)())(/* @__PURE__ */ mapRecordWithIndexCons1(/* @__PURE__ */ mappingWithIndexMkFieldAc(usernameIsSymbol2)(refl)())(mapRecordWithIndexNil)()())()()));
   var hfoldlRecordWithIndex2 = /* @__PURE__ */ hfoldlRecordWithIndex();
   var foldlRecordCons2 = /* @__PURE__ */ foldlRecordCons(passwordIsSymbol)();
-  var foldlRecordCons1 = /* @__PURE__ */ foldlRecordCons(usernameIsSymbol)();
-  var mkFieldResults12 = /* @__PURE__ */ mkFieldResults1(/* @__PURE__ */ hfoldlRecordWithIndex2(/* @__PURE__ */ foldlRecordCons2(/* @__PURE__ */ foldingWithIndexMkFieldRe(passwordIsSymbol)(refl)()())(/* @__PURE__ */ foldlRecordCons1(/* @__PURE__ */ foldingWithIndexMkFieldRe(usernameIsSymbol)(refl)()())(foldlRecordNil))));
-  var mkFieldOutputs12 = /* @__PURE__ */ mkFieldOutputs1(/* @__PURE__ */ hfoldlRecordWithIndex2(/* @__PURE__ */ foldlRecordCons2(/* @__PURE__ */ foldingWithIndexMkFieldOu(passwordIsSymbol)(refl)()())(/* @__PURE__ */ foldlRecordCons1(/* @__PURE__ */ foldingWithIndexMkFieldOu(usernameIsSymbol)(refl)()())(foldlRecordNil))));
+  var foldlRecordCons1 = /* @__PURE__ */ foldlRecordCons(usernameIsSymbol2)();
+  var mkFieldResults12 = /* @__PURE__ */ mkFieldResults1(/* @__PURE__ */ hfoldlRecordWithIndex2(/* @__PURE__ */ foldlRecordCons2(/* @__PURE__ */ foldingWithIndexMkFieldRe(passwordIsSymbol)(refl)()())(/* @__PURE__ */ foldlRecordCons1(/* @__PURE__ */ foldingWithIndexMkFieldRe(usernameIsSymbol2)(refl)()())(foldlRecordNil))));
+  var mkFieldOutputs12 = /* @__PURE__ */ mkFieldOutputs1(/* @__PURE__ */ hfoldlRecordWithIndex2(/* @__PURE__ */ foldlRecordCons2(/* @__PURE__ */ foldingWithIndexMkFieldOu(passwordIsSymbol)(refl)()())(/* @__PURE__ */ foldlRecordCons1(/* @__PURE__ */ foldingWithIndexMkFieldOu(usernameIsSymbol2)(refl)()())(foldlRecordNil))));
   var mkConfig12 = /* @__PURE__ */ mkConfig1(/* @__PURE__ */ defaultsRecord()());
-  var mempty3 = /* @__PURE__ */ mempty(/* @__PURE__ */ monoidRecord()(/* @__PURE__ */ monoidRecordCons(passwordIsSymbol)(monoidString)()(/* @__PURE__ */ monoidRecordCons(usernameIsSymbol)(monoidString)()(monoidRecordNil))));
+  var mempty3 = /* @__PURE__ */ mempty(/* @__PURE__ */ monoidRecord()(/* @__PURE__ */ monoidRecordCons(passwordIsSymbol)(monoidString)()(/* @__PURE__ */ monoidRecordCons(usernameIsSymbol2)(monoidString)()(monoidRecordNil))));
   var Receive6 = /* @__PURE__ */ function() {
     function Receive8(value0) {
       this.value0 = value0;
@@ -33897,7 +33960,7 @@
                 $138.loginError = false;
                 return $138;
               }))(function() {
-                return bind18(gets4(function(v1) {
+                return bind19(gets4(function(v1) {
                   return v1.form.input;
                 }))(function(v1) {
                   return when4(v1.redirect)(navigate2(Home.value));
@@ -33905,13 +33968,13 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Janus.Page.Login (line 74, column 32 - line 80, column 40): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at Janus.Page.Login (line 75, column 32 - line 81, column 40): " + [v.constructor.name]);
           });
           return handleSubmitValidate(onSubmit2)(validate2)(validation2);
         }();
         var handleAction = function(v) {
           if (v instanceof Receive6) {
-            return bind18(gets4(function(v1) {
+            return bind19(gets4(function(v1) {
               return v1.form.input;
             }))(function(v1) {
               return discard11(liftEffect10(log2("Login.Receive " + show8(v1.redirect))))(function() {
@@ -33932,7 +33995,7 @@
           }
           ;
           if (v instanceof Eval2) {
-            return bind18(gets4(function(v1) {
+            return bind19(gets4(function(v1) {
               return v1.form.input;
             }))(function(v1) {
               return discard11(liftEffect10(log2("Login.Eval " + show8(v1.redirect))))(function() {
@@ -33941,7 +34004,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Janus.Page.Login (line 61, column 18 - line 69, column 22): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Janus.Page.Login (line 62, column 18 - line 70, column 22): " + [v.constructor.name]);
         };
         return formless2({
           liftAction: Eval2.create
@@ -33970,7 +34033,7 @@
   // output/Janus.Component.Router/index.js
   var type_22 = /* @__PURE__ */ type_17(isPropInputType);
   var type_1 = /* @__PURE__ */ type_17(isPropButtonType);
-  var bind19 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind20 = /* @__PURE__ */ bind(bindHalogenM);
   var get5 = /* @__PURE__ */ get(monadStateHalogenM);
   var discard12 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var show9 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
@@ -34092,8 +34155,9 @@
             var component8 = component52(dictNavigate);
             return function(dictManageUser) {
               var component9 = component6(dictManageUser);
+              var component10 = component7(dictManageUser);
               var handleQuery = function(v) {
-                return bind19(get5)(function(v1) {
+                return bind20(get5)(function(v1) {
                   return discard12(liftEffect10(log2("Router.Navigate " + show9(map49(toString2)(map49(function(v2) {
                     return v2.username;
                   })(v1.currentUser))))))(function() {
@@ -34101,16 +34165,16 @@
                       var v2 = isJust(v1.currentUser) && elem3(v.value0)([]);
                       if (!v2) {
                         return modify_8(function(v3) {
-                          var $89 = {};
-                          for (var $90 in v3) {
-                            if ({}.hasOwnProperty.call(v3, $90)) {
-                              $89[$90] = v3[$90];
+                          var $90 = {};
+                          for (var $91 in v3) {
+                            if ({}.hasOwnProperty.call(v3, $91)) {
+                              $90[$91] = v3[$91];
                             }
                             ;
                           }
                           ;
-                          $89.route = new Just(v.value0);
-                          return $89;
+                          $90.route = new Just(v.value0);
+                          return $90;
                         });
                       }
                       ;
@@ -34124,10 +34188,10 @@
               var handleAction = function(v) {
                 if (v instanceof Initialize4) {
                   return discard12(liftEffect10(log2("Router.Initialize")))(function() {
-                    return bind19(map117(function() {
-                      var $112 = parse6(routeCodec);
-                      return function($113) {
-                        return hush($112($113));
+                    return bind20(map117(function() {
+                      var $113 = parse6(routeCodec);
+                      return function($114) {
+                        return hush($113($114));
                       };
                     }())(liftEffect10(getHash)))(function(initialRoute) {
                       return navigate2(fromMaybe(Home.value)(initialRoute));
@@ -34140,16 +34204,16 @@
                     return v1.username;
                   })(v.value0.context))))))(function() {
                     return modify_8(function(v1) {
-                      var $97 = {};
-                      for (var $98 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $98)) {
-                          $97[$98] = v1[$98];
+                      var $98 = {};
+                      for (var $99 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $99)) {
+                          $98[$99] = v1[$99];
                         }
                         ;
                       }
                       ;
-                      $97.currentUser = v.value0.context;
-                      return $97;
+                      $98.currentUser = v.value0.context;
+                      return $98;
                     });
                   });
                 }
@@ -34178,7 +34242,7 @@
               var render = function(v) {
                 if (v.route instanceof Just) {
                   if (v.route.value0 instanceof Home) {
-                    return authorize(v.currentUser)(div3([])([menu2(v.currentUser)(Home.value), main2(slot_1($$Proxy.value)(unit)(component7)(unit))]));
+                    return authorize(v.currentUser)(div3([])([menu2(v.currentUser)(Home.value), main2(slot_1($$Proxy.value)(unit)(component10)(unit))]));
                   }
                   ;
                   if (v.route.value0 instanceof Dashboard) {
@@ -34213,8 +34277,8 @@
                 "eval": mkEval({
                   handleAction,
                   handleQuery,
-                  receive: function($114) {
-                    return Just.create(Receive7.create($114));
+                  receive: function($115) {
+                    return Just.create(Receive7.create($115));
                   },
                   initialize: new Just(Initialize4.value),
                   finalize: defaultEval.finalize
@@ -34228,7 +34292,7 @@
   };
 
   // output/Main/index.js
-  var bind20 = /* @__PURE__ */ bind(bindAff);
+  var bind21 = /* @__PURE__ */ bind(bindAff);
   var liftEffect9 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var pure24 = /* @__PURE__ */ pure(applicativeAff);
   var lmap6 = /* @__PURE__ */ lmap(bifunctorEither);
@@ -34243,18 +34307,18 @@
   var matchesWith2 = /* @__PURE__ */ matchesWith(foldableEither);
   var when6 = /* @__PURE__ */ when(applicativeEffect);
   var notEq3 = /* @__PURE__ */ notEq(/* @__PURE__ */ eqMaybe(eqRoute));
-  var main3 = /* @__PURE__ */ runHalogenAff(/* @__PURE__ */ bind20(awaitBody)(function(body2) {
-    return bind20(bind20(liftEffect9(readToken))(function(v) {
+  var main3 = /* @__PURE__ */ runHalogenAff(/* @__PURE__ */ bind21(awaitBody)(function(body2) {
+    return bind21(bind21(liftEffect9(readToken))(function(v) {
       if (v instanceof Nothing) {
         return pure24(Nothing.value);
       }
       ;
       if (v instanceof Just) {
         var requestOptions = {
-          endpoint: Refresh.value,
+          endpoint: User.value,
           method: Get.value
         };
-        return bind20(request2(defaultRequest2("http://localhost:8080")(new Just(v.value0))(requestOptions)))(function(res) {
+        return bind21(request2(defaultRequest2("http://localhost:8080")(new Just(v.value0))(requestOptions)))(function(res) {
           var user = function() {
             if (res instanceof Left) {
               return new Left(printError(res.value0));
@@ -34281,11 +34345,11 @@
         logLevel: Dev.value,
         currentUser: v
       };
-      return bind20(runAppM(initialStore)(component5))(function(rootComponent) {
-        return bind20(runUI2(rootComponent)(unit)(body2))(function(halogenIO) {
+      return bind21(runAppM(initialStore)(component5))(function(rootComponent) {
+        return bind21(runUI2(rootComponent)(unit)(body2))(function(halogenIO) {
           return $$void11(liftEffect9(matchesWith2(parse6(routeCodec))(function(old) {
             return function($$new2) {
-              return when6(notEq3(old)(new Just($$new2)))(launchAff_(bind20(halogenIO.query(mkTell(Navigate.create($$new2))))(function(_response) {
+              return when6(notEq3(old)(new Just($$new2)))(launchAff_(bind21(halogenIO.query(mkTell(Navigate.create($$new2))))(function(_response) {
                 return pure24(unit);
               })));
             };

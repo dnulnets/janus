@@ -20,6 +20,7 @@ import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
+import Janus.Capability.Resource.User
 
 type Input = { redirect :: Boolean }
 

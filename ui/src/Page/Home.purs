@@ -14,6 +14,7 @@ import Halogen.Store.Connect (Connected, connect)
 import Halogen.Store.Monad (class MonadStore)
 import Halogen.Store.Select (selectEq)
 import Janus.Capability.Navigate (class Navigate)
+import Janus.Capability.Resource.User (class ManageUser, getCurrentUser)
 import Janus.Data.Profile (Profile)
 import Janus.Store as Store
 import Janus.Component.HTML.Utils (css, prop, safeHref)
@@ -33,6 +34,7 @@ component
    . MonadAff m
   => MonadStore Store.Action Store.Store m
   => Navigate m
+  => ManageUser m
   => H.Component q Unit o m
 component = connect (selectEq _.currentUser) $ H.mkComponent
   { initialState
@@ -56,6 +58,8 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
 
       Test -> do
         H.liftEffect $ log "Test pressed!"
+        user <- getCurrentUser
+        H.liftEffect $ log $ show user
 
     render :: forall slots. State -> H.ComponentHTML Action slots m
     render _state@{ currentUser } = 

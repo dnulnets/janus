@@ -13,5 +13,8 @@ derive instance newtypeEmail :: Newtype Email _
 derive instance eqEmail :: Eq Email
 derive instance ordEmail :: Ord Email
 
+instance showEmail :: Show Email where
+  show (Email n) = n 
+
 codec :: JsonCodec Email
 codec = wrapIso Email CA.string
