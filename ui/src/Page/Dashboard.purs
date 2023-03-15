@@ -17,7 +17,6 @@ import Halogen.Store.Connect (Connected, connect)
 import Halogen.Store.Monad (class MonadStore)
 import Halogen.Store.Select (selectEq)
 import Janus.Capability.Navigate (class Navigate)
-import Janus.Component.HTML.Menu (menu)
 import Janus.Component.HTML.Utils (css, maybeElem, whenElem)
 import Janus.Data.Profile (Profile)
 import Janus.Data.Route (Route(..))
@@ -63,4 +62,4 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
       H.modify_ _ { currentUser = currentUser }
 
   render :: forall slots. State -> H.ComponentHTML Action slots m
-  render state@{ currentUser } = HH.div [][menu currentUser Home, main $ HH.text "Dashboard"]
+  render state@{ currentUser } = HH.text "Dashboard"

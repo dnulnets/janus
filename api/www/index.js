@@ -32186,33 +32186,6 @@
     return main([css("bg-light"), prop5("role")("main")])([html2]);
   };
 
-  // output/Janus.Component.HTML.Menu/index.js
-  var type_18 = /* @__PURE__ */ type_17(isPropInputType);
-  var type_1 = /* @__PURE__ */ type_17(isPropButtonType);
-  var menu2 = function(_currentUser) {
-    return function(_route) {
-      var span5 = function(s) {
-        return function(t) {
-          return span3([css("navbar-text pe-3")])([span3([css("fw-bold")])([text5(s)]), text5(t)]);
-        };
-      };
-      var search2 = form([css("d-flex"), prop5("role")("search"), action2("/search"), method2(GET2.value)])([input2([css("form-control me-2"), type_18(InputSearch.value), name16("what"), placeholder3("Search"), label5("Search")])]);
-      var navItemDropdown = function(id4) {
-        return function(s) {
-          return function(html2) {
-            return li([css("nav-item dropdown")])([a([css("nav-link dropdown-toggle"), href4("#"), id3(id4), prop5("role")("button"), prop5("data-bs-toggle")("dropdown")])([text5(s)]), ul([css("dropdown-menu dropdown-menu-light")])(html2)]);
-          };
-        };
-      };
-      var navItem = function(r) {
-        return function(html2) {
-          return li([])([a([css("dropdown-item"), safeHref(r)])(html2)]);
-        };
-      };
-      return nav([css("navbar navbar-expand-md navbar-light fixed-top bg-light"), prop5("role")("navigation"), id3("j-navbar-top")])([div3([css("container-fluid")])([a([css("navbar-brand"), href4("#")])([img([src9("/static/logo.svg"), height8(40)])]), button([css("navbar-toggler"), type_1(ButtonButton.value), prop5("data-bs-toggle")("collapse"), prop5("data-bs-target")("#j-navbar-collapse"), controls2("j-navbar-collapse"), expanded("false"), label5("Toggle navigation")])([span3([css("navbar-toggler-icon")])([])]), div3([css("collapse navbar-collapse"), id3("j-navbar-collapse")])([ul([css("navbar-nav me-auto mb-2 mb-md-0")])([navItemDropdown("j-drop1")("Dropdown1")([navItem(Home.value)([text5("Home")])]), navItemDropdown("j-drop2")("Dropdown2")([navItem(Dashboard.value)([text5("Dashboard")])])]), span5("Product:")("SMP"), span5("Team:")("Fragglarna")]), search2])]);
-    };
-  };
-
   // output/Janus.Page.Dashboard/index.js
   var discard8 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var show6 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
@@ -32249,7 +32222,7 @@
       var connect1 = connect2(dictMonadStore);
       return function(dictNavigate) {
         var render = function(v) {
-          return div3([])([menu2(v.currentUser)(Home.value), main2(text5("Dashboard"))]);
+          return text5("Dashboard");
         };
         var initialState = function(v) {
           return {
@@ -32384,7 +32357,7 @@
   var onValueInput = /* @__PURE__ */ addForeignPropHandler(input)("value")(readString2);
 
   // output/Janus.Page.Home/index.js
-  var type_20 = /* @__PURE__ */ type_17(isPropButtonType);
+  var type_19 = /* @__PURE__ */ type_17(isPropButtonType);
   var discard9 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var show7 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
   var map47 = /* @__PURE__ */ map(functorMaybe);
@@ -32427,7 +32400,7 @@
       var connect1 = connect2(dictMonadStore);
       return function(dictNavigate) {
         var render = function(v) {
-          return button([css("btn btn-lg btn-block btn-warning"), type_20(ButtonButton.value), onClick(function(v1) {
+          return button([css("btn btn-lg btn-block btn-warning"), type_19(ButtonButton.value), onClick(function(v1) {
             return Test.value;
           })])([text5("Test")]);
         };
@@ -33804,7 +33777,7 @@
   var value14 = /* @__PURE__ */ value13(isPropString);
   var bind17 = /* @__PURE__ */ bind(bindMaybe);
   var pure21 = /* @__PURE__ */ pure(applicativeMaybe);
-  var type_21 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_20 = /* @__PURE__ */ type_17(isPropInputType);
   var textInput = function(v) {
     return function(props) {
       return fieldset([])([div3([css("mb-3")])([label4([css("form-label"), $$for("j-" + v.label)])([text5(v.label)]), input2(append12([css("form-control"), id3("j-" + v.label), value14(v.state.value), onValueInput(v.action.handleChange), onBlur(v.action.handleBlur)])(props)), maybeElem(bind17(v.state.result)(either(pure21)($$const(Nothing.value))))(function(err) {
@@ -33813,11 +33786,11 @@
     };
   };
   var submitButton = function(label6) {
-    return input2([css("btn btn-primary"), type_21(InputSubmit.value), value14(label6)]);
+    return input2([css("btn btn-primary"), type_20(InputSubmit.value), value14(label6)]);
   };
 
   // output/Janus.Page.Login/index.js
-  var type_22 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_21 = /* @__PURE__ */ type_17(isPropInputType);
   var composeKleisli3 = /* @__PURE__ */ composeKleisli(bindEither);
   var required5 = /* @__PURE__ */ required4(eqString)(monoidString);
   var composeKleisli1 = /* @__PURE__ */ composeKleisli(bindHalogenM);
@@ -33884,11 +33857,11 @@
             label: "Username",
             state: v.form.fields.username,
             action: v.form.actions.username
-          })([type_22(InputText.value)]), textInput({
+          })([type_21(InputText.value)]), textInput({
             label: "Password",
             state: v.form.fields.password,
             action: v.form.actions.password
-          })([type_22(InputPassword.value)]), submitButton("Log in")])])])])])]));
+          })([type_21(InputPassword.value)]), submitButton("Log in")])])])])])]));
         };
         var handleQuery = function() {
           var validation2 = {
@@ -33995,8 +33968,8 @@
   };
 
   // output/Janus.Component.Router/index.js
-  var type_23 = /* @__PURE__ */ type_17(isPropInputType);
-  var type_110 = /* @__PURE__ */ type_17(isPropButtonType);
+  var type_22 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_1 = /* @__PURE__ */ type_17(isPropButtonType);
   var bind19 = /* @__PURE__ */ bind(bindHalogenM);
   var get5 = /* @__PURE__ */ get(monadStateHalogenM);
   var discard12 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
@@ -34076,14 +34049,14 @@
     Test3.value = new Test3();
     return Test3;
   }();
-  var menu3 = function(_currentUser) {
+  var menu2 = function(_currentUser) {
     return function(_route) {
       var span5 = function(s) {
         return function(t) {
           return span3([css("navbar-text pe-3")])([span3([css("fw-bold")])([text5(s)]), text5(t)]);
         };
       };
-      var search2 = form([css("d-flex"), prop5("role")("search"), action2("/search"), method2(GET2.value)])([input2([css("form-control me-2"), type_23(InputSearch.value), name16("what"), placeholder3("Search"), label5("Search")])]);
+      var search2 = form([css("d-flex"), prop5("role")("search"), action2("/search"), method2(GET2.value)])([input2([css("form-control me-2"), type_22(InputSearch.value), name16("what"), placeholder3("Search"), label5("Search")])]);
       var navItemDropdown = function(id4) {
         return function(s) {
           return function(html2) {
@@ -34096,7 +34069,7 @@
           return li([])([a([css("dropdown-item"), safeHref(r)])(html2)]);
         };
       };
-      return nav([css("navbar navbar-expand-md navbar-light fixed-top bg-light"), prop5("role")("navigation"), id3("j-navbar-top")])([div3([css("container-fluid")])([a([css("navbar-brand"), href4("#")])([img([src9("/static/logo.svg"), height8(40)])]), button([css("navbar-toggler"), type_110(ButtonButton.value), prop5("data-bs-toggle")("collapse"), prop5("data-bs-target")("#j-navbar-collapse"), controls2("j-navbar-collapse"), expanded("false"), label5("Toggle navigation")])([span3([css("navbar-toggler-icon")])([])]), div3([css("collapse navbar-collapse"), id3("j-navbar-collapse")])([ul([css("navbar-nav me-auto mb-2 mb-md-0")])([navItemDropdown("j-drop1")("Dropdown1")([navItem(Home.value)([text5("Home")])]), navItemDropdown("j-drop2")("Dropdown2")([navItem(Dashboard.value)([text5("Dashboard")])])]), span5("Product:")("SMP"), span5("Team:")("Fragglarna")]), search2])]);
+      return nav([css("navbar navbar-expand-md navbar-light fixed-top bg-light"), prop5("role")("navigation"), id3("j-navbar-top")])([div3([css("container-fluid")])([a([css("navbar-brand"), href4("#")])([img([src9("/static/logo.svg"), height8(40)])]), button([css("navbar-toggler"), type_1(ButtonButton.value), prop5("data-bs-toggle")("collapse"), prop5("data-bs-target")("#j-navbar-collapse"), controls2("j-navbar-collapse"), expanded("false"), label5("Toggle navigation")])([span3([css("navbar-toggler-icon")])([])]), div3([css("collapse navbar-collapse"), id3("j-navbar-collapse")])([ul([css("navbar-nav me-auto mb-2 mb-md-0")])([navItemDropdown("j-drop1")("Dropdown1")([navItem(Home.value)([text5("Home")])]), navItemDropdown("j-drop2")("Dropdown2")([navItem(Dashboard.value)([text5("Dashboard")])])]), span5("Product:")("SMP"), span5("Team:")("Fragglarna")]), search2])]);
     };
   };
   var component4 = function(dictMonadAff) {
@@ -34185,7 +34158,7 @@
                   return liftEffect10(log2("Test pressed"));
                 }
                 ;
-                throw new Error("Failed pattern match at Janus.Component.Router (line 85, column 18 - line 98, column 40): " + [v.constructor.name]);
+                throw new Error("Failed pattern match at Janus.Component.Router (line 86, column 18 - line 99, column 40): " + [v.constructor.name]);
               };
               var authorize = function(mbProfile) {
                 return function(html2) {
@@ -34199,17 +34172,17 @@
                     return html2;
                   }
                   ;
-                  throw new Error("Failed pattern match at Janus.Component.Router (line 117, column 30 - line 121, column 11): " + [mbProfile.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Component.Router (line 118, column 30 - line 122, column 11): " + [mbProfile.constructor.name]);
                 };
               };
               var render = function(v) {
                 if (v.route instanceof Just) {
                   if (v.route.value0 instanceof Home) {
-                    return authorize(v.currentUser)(div3([])([menu3(v.currentUser)(Home.value), main2(slot_1($$Proxy.value)(unit)(component7)(unit))]));
+                    return authorize(v.currentUser)(div3([])([menu2(v.currentUser)(Home.value), main2(slot_1($$Proxy.value)(unit)(component7)(unit))]));
                   }
                   ;
                   if (v.route.value0 instanceof Dashboard) {
-                    return authorize(v.currentUser)(slot_22($$Proxy.value)(unit)(component8)(unit));
+                    return authorize(v.currentUser)(div3([])([menu2(v.currentUser)(Dashboard.value), main2(slot_22($$Proxy.value)(unit)(component8)(unit))]));
                   }
                   ;
                   if (v.route.value0 instanceof Login2) {
@@ -34218,14 +34191,14 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at Janus.Component.Router (line 125, column 15 - line 131, column 78): " + [v.route.value0.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Component.Router (line 126, column 15 - line 132, column 78): " + [v.route.value0.constructor.name]);
                 }
                 ;
                 if (v.route instanceof Nothing) {
-                  return div_([text5("Oh no! That page wasn't found.")]);
+                  return full(div_([text5("Oh no! That page wasn't found.")]));
                 }
                 ;
-                throw new Error("Failed pattern match at Janus.Component.Router (line 124, column 35 - line 133, column 59): " + [v.route.constructor.name]);
+                throw new Error("Failed pattern match at Janus.Component.Router (line 125, column 35 - line 134, column 66): " + [v.route.constructor.name]);
               };
               return connect1(selectEq4(function(v) {
                 return v.currentUser;

@@ -14,7 +14,7 @@ import Halogen.HTML.Properties.ARIA as HPA
 import Janus.Capability.Navigate (class Navigate, navigate)
 import Janus.Capability.Resource.User (class ManageUser, loginUser)
 import Janus.Component.HTML.Fragments (full)
-import Janus.Component.HTML.Utils (css, safeHref, whenElem, prop)
+import Janus.Component.HTML.Utils (css, whenElem, prop)
 import Janus.Data.Route (Route(..))
 import Janus.Data.Username (Username)
 import Janus.Form.Field as Field

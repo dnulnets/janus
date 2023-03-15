@@ -24,6 +24,7 @@ import Janus.Capability.Now (class Now)
 import Janus.Capability.Resource.User (class ManageUser)
 import Janus.Component.Utils (OpaqueSlot)
 import Janus.Component.HTML.Utils (css, prop, safeHref)
+import Janus.Component.HTML.Fragments (main, full)
 import Janus.Data.Profile (Profile)
 import Janus.Data.Route (Route(..), routeCodec)
 import Janus.Data.Username (toString)
@@ -126,11 +127,11 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
       Home -> authorize currentUser do
         HH.div [][menu currentUser Home, main $ HH.slot_ (Proxy :: _ "home") unit Home.component unit]
       Dashboard -> authorize currentUser do
-        HH.slot_ (Proxy :: _ "dashboard") unit Dashboard.component unit
+        HH.div [][menu currentUser Dashboard, main $ HH.slot_ (Proxy :: _ "dashboard") unit Dashboard.component unit]
       Login ->
         HH.slot_ (Proxy :: _ "login") unit Login.component { redirect: true }
     Nothing ->
-      HH.div_ [ HH.text "Oh no! That page wasn't found." ]
+      full $ HH.div_ [ HH.text "Oh no! That page wasn't found." ]
 
 -- | Creates the html for the menu bar that is used at the top of the application user interface.
 menu :: forall i p. Maybe Profile -> Route -> HH.HTML i p
