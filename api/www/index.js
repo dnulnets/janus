@@ -31961,6 +31961,12 @@
   });
   var navigateAppM = /* @__PURE__ */ $lazy_navigateAppM(62);
 
+  // output/Halogen.HTML.Properties.ARIA/index.js
+  var labelledBy = /* @__PURE__ */ attr2("aria-labelledby");
+  var label5 = /* @__PURE__ */ attr2("aria-label");
+  var expanded = /* @__PURE__ */ attr2("aria-expanded");
+  var controls2 = /* @__PURE__ */ attr2("aria-controls");
+
   // output/Halogen.Store.Connect/index.js
   var bind11 = /* @__PURE__ */ bind(bindHalogenM);
   var $$void10 = /* @__PURE__ */ $$void(functorHalogenM);
@@ -32174,17 +32180,11 @@
 
   // output/Janus.Component.HTML.Fragments/index.js
   var main2 = function(html2) {
-    return main([css("container-fluid"), prop5("role")("main")])([div3([css("bg-light p-2 rounded")])([html2])]);
+    return main([css("container-fluid j-workarea"), prop5("role")("main")])([div3([css("bg-light p-2 rounded")])([html2])]);
   };
   var full = function(html2) {
     return main([css("bg-light"), prop5("role")("main")])([html2]);
   };
-
-  // output/Halogen.HTML.Properties.ARIA/index.js
-  var labelledBy = /* @__PURE__ */ attr2("aria-labelledby");
-  var label5 = /* @__PURE__ */ attr2("aria-label");
-  var expanded = /* @__PURE__ */ attr2("aria-expanded");
-  var controls2 = /* @__PURE__ */ attr2("aria-controls");
 
   // output/Janus.Component.HTML.Menu/index.js
   var type_18 = /* @__PURE__ */ type_17(isPropInputType);
@@ -32293,10 +32293,101 @@
     };
   };
 
+  // output/Foreign.Index/foreign.js
+  function unsafeReadPropImpl(f, s, key, value15) {
+    return value15 == null ? f : s(value15[key]);
+  }
+
+  // output/Foreign.Index/index.js
+  var unsafeReadProp = function(dictMonad) {
+    var fail4 = fail(dictMonad);
+    var pure25 = pure(applicativeExceptT(dictMonad));
+    return function(k) {
+      return function(value15) {
+        return unsafeReadPropImpl(fail4(new TypeMismatch("object", typeOf(value15))), pure25, k, value15);
+      };
+    };
+  };
+  var readProp = function(dictMonad) {
+    return unsafeReadProp(dictMonad);
+  };
+
+  // output/Web.Event.Event/foreign.js
+  function _currentTarget(e) {
+    return e.currentTarget;
+  }
+  function preventDefault(e) {
+    return function() {
+      return e.preventDefault();
+    };
+  }
+
+  // output/Web.Event.Event/index.js
+  var currentTarget = function($5) {
+    return toMaybe(_currentTarget($5));
+  };
+
+  // output/Web.UIEvent.MouseEvent.EventTypes/index.js
+  var click2 = "click";
+
+  // output/Halogen.HTML.Events/index.js
+  var map46 = /* @__PURE__ */ map(functorMaybe);
+  var composeKleisli2 = /* @__PURE__ */ composeKleisli(bindMaybe);
+  var composeKleisliFlipped5 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
+  var readProp2 = /* @__PURE__ */ readProp(monadIdentity);
+  var readString2 = /* @__PURE__ */ readString(monadIdentity);
+  var mouseHandler = unsafeCoerce2;
+  var handler$prime = function(et) {
+    return function(f) {
+      return handler(et)(function(ev) {
+        return map46(Action2.create)(f(ev));
+      });
+    };
+  };
+  var handler2 = function(et) {
+    return function(f) {
+      return handler(et)(function(ev) {
+        return new Just(new Action2(f(ev)));
+      });
+    };
+  };
+  var onClick = /* @__PURE__ */ function() {
+    var $15 = handler2(click2);
+    return function($16) {
+      return $15(mouseHandler($16));
+    };
+  }();
+  var onSubmit = /* @__PURE__ */ handler2("submit");
+  var focusHandler = unsafeCoerce2;
+  var onBlur = /* @__PURE__ */ function() {
+    var $55 = handler2(blur2);
+    return function($56) {
+      return $55(focusHandler($56));
+    };
+  }();
+  var addForeignPropHandler = function(key) {
+    return function(prop6) {
+      return function(reader) {
+        return function(f) {
+          var go2 = function(a2) {
+            return composeKleisliFlipped5(reader)(readProp2(prop6))(unsafeToForeign(a2));
+          };
+          return handler$prime(key)(composeKleisli2(currentTarget)(function(e) {
+            return either($$const(Nothing.value))(function($85) {
+              return Just.create(f($85));
+            })(runExcept(go2(e)));
+          }));
+        };
+      };
+    };
+  };
+  var onValueInput = /* @__PURE__ */ addForeignPropHandler(input)("value")(readString2);
+
   // output/Janus.Page.Home/index.js
+  var type_20 = /* @__PURE__ */ type_17(isPropButtonType);
   var discard9 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var show7 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
-  var map46 = /* @__PURE__ */ map(functorMaybe);
+  var map47 = /* @__PURE__ */ map(functorMaybe);
   var modify_5 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var selectEq3 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(eqRowNil)()({
     reflectSymbol: function() {
@@ -32321,6 +32412,13 @@
     };
     return Receive8;
   }();
+  var Test = /* @__PURE__ */ function() {
+    function Test3() {
+    }
+    ;
+    Test3.value = new Test3();
+    return Test3;
+  }();
   var component2 = function(dictMonadAff) {
     var MonadEffect0 = dictMonadAff.MonadEffect0();
     var liftEffect10 = liftEffect(monadEffectHalogenM(MonadEffect0));
@@ -32329,7 +32427,9 @@
       var connect1 = connect2(dictMonadStore);
       return function(dictNavigate) {
         var render = function(v) {
-          return div3([])([menu2(v.currentUser)(Home.value), main2(text5("Home"))]);
+          return button([css("btn btn-lg btn-block btn-warning"), type_20(ButtonButton.value), onClick(function(v1) {
+            return Test.value;
+          })])([text5("Test")]);
         };
         var initialState = function(v) {
           return {
@@ -32337,22 +32437,30 @@
           };
         };
         var handleAction = function(v) {
-          return discard9(liftEffect10(log2("Home.Receive " + show7(map46(toString2)(map46(function(v1) {
-            return v1.username;
-          })(v.value0.context))))))(function() {
-            return modify_5(function(v1) {
-              var $47 = {};
-              for (var $48 in v1) {
-                if ({}.hasOwnProperty.call(v1, $48)) {
-                  $47[$48] = v1[$48];
+          if (v instanceof Receive4) {
+            return discard9(liftEffect10(log2("Home.Receive " + show7(map47(toString2)(map47(function(v1) {
+              return v1.username;
+            })(v.value0.context))))))(function() {
+              return modify_5(function(v1) {
+                var $49 = {};
+                for (var $50 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $50)) {
+                    $49[$50] = v1[$50];
+                  }
+                  ;
                 }
                 ;
-              }
-              ;
-              $47.currentUser = v.value0.context;
-              return $47;
+                $49.currentUser = v.value0.context;
+                return $49;
+              });
             });
-          });
+          }
+          ;
+          if (v instanceof Test) {
+            return liftEffect10(log2("Test pressed!"));
+          }
+          ;
+          throw new Error("Failed pattern match at Janus.Page.Home (line 51, column 20 - line 58, column 43): " + [v.constructor.name]);
         };
         return connect1(selectEq3(function(v) {
           return v.currentUser;
@@ -32362,8 +32470,8 @@
           "eval": mkEval({
             handleAction,
             handleQuery: defaultEval.handleQuery,
-            receive: function($52) {
-              return Just.create(Receive4.create($52));
+            receive: function($54) {
+              return Just.create(Receive4.create($54));
             },
             initialize: defaultEval.initialize,
             finalize: defaultEval.finalize
@@ -32646,23 +32754,8 @@
     };
   };
 
-  // output/Web.Event.Event/foreign.js
-  function _currentTarget(e) {
-    return e.currentTarget;
-  }
-  function preventDefault(e) {
-    return function() {
-      return e.preventDefault();
-    };
-  }
-
-  // output/Web.Event.Event/index.js
-  var currentTarget = function($5) {
-    return toMaybe(_currentTarget($5));
-  };
-
   // output/Formless/index.js
-  var map47 = /* @__PURE__ */ map(functorMaybe);
+  var map48 = /* @__PURE__ */ map(functorMaybe);
   var pure20 = /* @__PURE__ */ pure(applicativeMaybe);
   var identity18 = /* @__PURE__ */ identity(categoryBuilder);
   var inj3 = /* @__PURE__ */ inj();
@@ -32930,7 +33023,7 @@
   var mkFieldResults1 = function(dictHFoldlWithIndex) {
     return {
       mkFieldResults: function() {
-        var $267 = map47(flip(build)({}));
+        var $267 = map48(flip(build)({}));
         var $268 = hfoldlWithIndex(dictHFoldlWithIndex)(MkFieldResult.value)(pure20(identity18));
         return function($269) {
           return $267($268($269));
@@ -32944,7 +33037,7 @@
   var mkFieldOutputs1 = function(dictHFoldlWithIndex) {
     return {
       mkFieldOutputs: function() {
-        var $270 = map47(flip(build)({}));
+        var $270 = map48(flip(build)({}));
         var $271 = hfoldlWithIndex(dictHFoldlWithIndex)(MkFieldOutput.value)(pure20(identity18));
         return function($272) {
           return $270($271($272));
@@ -33029,7 +33122,7 @@
                 return function(rin) {
                   return function(field) {
                     var v1 = from4(field);
-                    return apply5(map47(composeFlipped2)(rin))(map47(insert13(prop6))(v1.result));
+                    return apply5(map48(composeFlipped2)(rin))(map48(insert13(prop6))(v1.result));
                   };
                 };
               };
@@ -33051,7 +33144,7 @@
                 return function(rin) {
                   return function(field) {
                     var result = from4(field);
-                    return apply5(map47(composeFlipped2)(rin))(map47(insert13(prop6))(hush(result)));
+                    return apply5(map48(composeFlipped2)(rin))(map48(insert13(prop6))(hush(result)));
                   };
                 };
               };
@@ -33562,71 +33655,6 @@
     };
   };
 
-  // output/Foreign.Index/foreign.js
-  function unsafeReadPropImpl(f, s, key, value15) {
-    return value15 == null ? f : s(value15[key]);
-  }
-
-  // output/Foreign.Index/index.js
-  var unsafeReadProp = function(dictMonad) {
-    var fail4 = fail(dictMonad);
-    var pure25 = pure(applicativeExceptT(dictMonad));
-    return function(k) {
-      return function(value15) {
-        return unsafeReadPropImpl(fail4(new TypeMismatch("object", typeOf(value15))), pure25, k, value15);
-      };
-    };
-  };
-  var readProp = function(dictMonad) {
-    return unsafeReadProp(dictMonad);
-  };
-
-  // output/Halogen.HTML.Events/index.js
-  var map48 = /* @__PURE__ */ map(functorMaybe);
-  var composeKleisli2 = /* @__PURE__ */ composeKleisli(bindMaybe);
-  var composeKleisliFlipped5 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
-  var readProp2 = /* @__PURE__ */ readProp(monadIdentity);
-  var readString2 = /* @__PURE__ */ readString(monadIdentity);
-  var handler$prime = function(et) {
-    return function(f) {
-      return handler(et)(function(ev) {
-        return map48(Action2.create)(f(ev));
-      });
-    };
-  };
-  var handler2 = function(et) {
-    return function(f) {
-      return handler(et)(function(ev) {
-        return new Just(new Action2(f(ev)));
-      });
-    };
-  };
-  var onSubmit = /* @__PURE__ */ handler2("submit");
-  var focusHandler = unsafeCoerce2;
-  var onBlur = /* @__PURE__ */ function() {
-    var $55 = handler2(blur2);
-    return function($56) {
-      return $55(focusHandler($56));
-    };
-  }();
-  var addForeignPropHandler = function(key) {
-    return function(prop6) {
-      return function(reader) {
-        return function(f) {
-          var go2 = function(a2) {
-            return composeKleisliFlipped5(reader)(readProp2(prop6))(unsafeToForeign(a2));
-          };
-          return handler$prime(key)(composeKleisli2(currentTarget)(function(e) {
-            return either($$const(Nothing.value))(function($85) {
-              return Just.create(f($85));
-            })(runExcept(go2(e)));
-          }));
-        };
-      };
-    };
-  };
-  var onValueInput = /* @__PURE__ */ addForeignPropHandler(input)("value")(readString2);
-
   // output/Janus.Capability.Resource.User/index.js
   var lift7 = /* @__PURE__ */ lift(monadTransHalogenM);
   var updateUser = function(dict) {
@@ -33776,7 +33804,7 @@
   var value14 = /* @__PURE__ */ value13(isPropString);
   var bind17 = /* @__PURE__ */ bind(bindMaybe);
   var pure21 = /* @__PURE__ */ pure(applicativeMaybe);
-  var type_20 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_21 = /* @__PURE__ */ type_17(isPropInputType);
   var textInput = function(v) {
     return function(props) {
       return fieldset([])([div3([css("mb-3")])([label4([css("form-label"), $$for("j-" + v.label)])([text5(v.label)]), input2(append12([css("form-control"), id3("j-" + v.label), value14(v.state.value), onValueInput(v.action.handleChange), onBlur(v.action.handleBlur)])(props)), maybeElem(bind17(v.state.result)(either(pure21)($$const(Nothing.value))))(function(err) {
@@ -33785,11 +33813,11 @@
     };
   };
   var submitButton = function(label6) {
-    return input2([css("btn btn-primary"), type_20(InputSubmit.value), value14(label6)]);
+    return input2([css("btn btn-primary"), type_21(InputSubmit.value), value14(label6)]);
   };
 
   // output/Janus.Page.Login/index.js
-  var type_21 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_22 = /* @__PURE__ */ type_17(isPropInputType);
   var composeKleisli3 = /* @__PURE__ */ composeKleisli(bindEither);
   var required5 = /* @__PURE__ */ required4(eqString)(monoidString);
   var composeKleisli1 = /* @__PURE__ */ composeKleisli(bindHalogenM);
@@ -33856,11 +33884,11 @@
             label: "Username",
             state: v.form.fields.username,
             action: v.form.actions.username
-          })([type_21(InputText.value)]), textInput({
+          })([type_22(InputText.value)]), textInput({
             label: "Password",
             state: v.form.fields.password,
             action: v.form.actions.password
-          })([type_21(InputPassword.value)]), submitButton("Log in")])])])])])]));
+          })([type_22(InputPassword.value)]), submitButton("Log in")])])])])])]));
         };
         var handleQuery = function() {
           var validation2 = {
@@ -33967,6 +33995,8 @@
   };
 
   // output/Janus.Component.Router/index.js
+  var type_23 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_110 = /* @__PURE__ */ type_17(isPropButtonType);
   var bind19 = /* @__PURE__ */ bind(bindHalogenM);
   var get5 = /* @__PURE__ */ get(monadStateHalogenM);
   var discard12 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
@@ -34039,6 +34069,36 @@
     };
     return Receive8;
   }();
+  var Test2 = /* @__PURE__ */ function() {
+    function Test3() {
+    }
+    ;
+    Test3.value = new Test3();
+    return Test3;
+  }();
+  var menu3 = function(_currentUser) {
+    return function(_route) {
+      var span5 = function(s) {
+        return function(t) {
+          return span3([css("navbar-text pe-3")])([span3([css("fw-bold")])([text5(s)]), text5(t)]);
+        };
+      };
+      var search2 = form([css("d-flex"), prop5("role")("search"), action2("/search"), method2(GET2.value)])([input2([css("form-control me-2"), type_23(InputSearch.value), name16("what"), placeholder3("Search"), label5("Search")])]);
+      var navItemDropdown = function(id4) {
+        return function(s) {
+          return function(html2) {
+            return li([css("nav-item dropdown")])([a([css("nav-link dropdown-toggle"), href4("#"), id3(id4), prop5("role")("button"), prop5("data-bs-toggle")("dropdown")])([text5(s)]), ul([css("dropdown-menu dropdown-menu-light")])(html2)]);
+          };
+        };
+      };
+      var navItem = function(r) {
+        return function(html2) {
+          return li([])([a([css("dropdown-item"), safeHref(r)])(html2)]);
+        };
+      };
+      return nav([css("navbar navbar-expand-md navbar-light fixed-top bg-light"), prop5("role")("navigation"), id3("j-navbar-top")])([div3([css("container-fluid")])([a([css("navbar-brand"), href4("#")])([img([src9("/static/logo.svg"), height8(40)])]), button([css("navbar-toggler"), type_110(ButtonButton.value), prop5("data-bs-toggle")("collapse"), prop5("data-bs-target")("#j-navbar-collapse"), controls2("j-navbar-collapse"), expanded("false"), label5("Toggle navigation")])([span3([css("navbar-toggler-icon")])([])]), div3([css("collapse navbar-collapse"), id3("j-navbar-collapse")])([ul([css("navbar-nav me-auto mb-2 mb-md-0")])([navItemDropdown("j-drop1")("Dropdown1")([navItem(Home.value)([text5("Home")])]), navItemDropdown("j-drop2")("Dropdown2")([navItem(Dashboard.value)([text5("Dashboard")])])]), span5("Product:")("SMP"), span5("Team:")("Fragglarna")]), search2])]);
+    };
+  };
   var component4 = function(dictMonadAff) {
     var MonadEffect0 = dictMonadAff.MonadEffect0();
     var liftEffect10 = liftEffect(monadEffectHalogenM(MonadEffect0));
@@ -34068,16 +34128,16 @@
                       var v2 = isJust(v1.currentUser) && elem3(v.value0)([]);
                       if (!v2) {
                         return modify_8(function(v3) {
-                          var $87 = {};
-                          for (var $88 in v3) {
-                            if ({}.hasOwnProperty.call(v3, $88)) {
-                              $87[$88] = v3[$88];
+                          var $89 = {};
+                          for (var $90 in v3) {
+                            if ({}.hasOwnProperty.call(v3, $90)) {
+                              $89[$90] = v3[$90];
                             }
                             ;
                           }
                           ;
-                          $87.route = new Just(v.value0);
-                          return $87;
+                          $89.route = new Just(v.value0);
+                          return $89;
                         });
                       }
                       ;
@@ -34092,9 +34152,9 @@
                 if (v instanceof Initialize4) {
                   return discard12(liftEffect10(log2("Router.Initialize")))(function() {
                     return bind19(map117(function() {
-                      var $110 = parse6(routeCodec);
-                      return function($111) {
-                        return hush($110($111));
+                      var $112 = parse6(routeCodec);
+                      return function($113) {
+                        return hush($112($113));
                       };
                     }())(liftEffect10(getHash)))(function(initialRoute) {
                       return navigate2(fromMaybe(Home.value)(initialRoute));
@@ -34107,21 +34167,25 @@
                     return v1.username;
                   })(v.value0.context))))))(function() {
                     return modify_8(function(v1) {
-                      var $95 = {};
-                      for (var $96 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $96)) {
-                          $95[$96] = v1[$96];
+                      var $97 = {};
+                      for (var $98 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $98)) {
+                          $97[$98] = v1[$98];
                         }
                         ;
                       }
                       ;
-                      $95.currentUser = v.value0.context;
-                      return $95;
+                      $97.currentUser = v.value0.context;
+                      return $97;
                     });
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Janus.Component.Router (line 78, column 18 - line 88, column 48): " + [v.constructor.name]);
+                if (v instanceof Test2) {
+                  return liftEffect10(log2("Test pressed"));
+                }
+                ;
+                throw new Error("Failed pattern match at Janus.Component.Router (line 85, column 18 - line 98, column 40): " + [v.constructor.name]);
               };
               var authorize = function(mbProfile) {
                 return function(html2) {
@@ -34135,13 +34199,13 @@
                     return html2;
                   }
                   ;
-                  throw new Error("Failed pattern match at Janus.Component.Router (line 107, column 30 - line 111, column 11): " + [mbProfile.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Component.Router (line 117, column 30 - line 121, column 11): " + [mbProfile.constructor.name]);
                 };
               };
               var render = function(v) {
                 if (v.route instanceof Just) {
                   if (v.route.value0 instanceof Home) {
-                    return authorize(v.currentUser)(slot_1($$Proxy.value)(unit)(component7)(unit));
+                    return authorize(v.currentUser)(div3([])([menu3(v.currentUser)(Home.value), main2(slot_1($$Proxy.value)(unit)(component7)(unit))]));
                   }
                   ;
                   if (v.route.value0 instanceof Dashboard) {
@@ -34154,14 +34218,14 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at Janus.Component.Router (line 115, column 15 - line 121, column 78): " + [v.route.value0.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Component.Router (line 125, column 15 - line 131, column 78): " + [v.route.value0.constructor.name]);
                 }
                 ;
                 if (v.route instanceof Nothing) {
                   return div_([text5("Oh no! That page wasn't found.")]);
                 }
                 ;
-                throw new Error("Failed pattern match at Janus.Component.Router (line 114, column 35 - line 123, column 59): " + [v.route.constructor.name]);
+                throw new Error("Failed pattern match at Janus.Component.Router (line 124, column 35 - line 133, column 59): " + [v.route.constructor.name]);
               };
               return connect1(selectEq4(function(v) {
                 return v.currentUser;
@@ -34176,8 +34240,8 @@
                 "eval": mkEval({
                   handleAction,
                   handleQuery,
-                  receive: function($112) {
-                    return Just.create(Receive7.create($112));
+                  receive: function($114) {
+                    return Just.create(Receive7.create($114));
                   },
                   initialize: new Just(Initialize4.value),
                   finalize: defaultEval.finalize

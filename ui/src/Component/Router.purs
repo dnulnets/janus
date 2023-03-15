@@ -3,34 +3,38 @@
 module Janus.Component.Router where
 
 import Prelude
+
 import Data.Either (hush)
 import Data.Foldable (elem)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Console (log)
-
 import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties as HP
+import Halogen.HTML.Properties.ARIA as HPA
 import Halogen.Store.Connect (Connected, connect)
 import Halogen.Store.Monad (class MonadStore)
 import Halogen.Store.Select (selectEq)
-import Routing.Duplex as RD
-import Routing.Hash (getHash)
-import Type.Proxy (Proxy(..))
-
 import Janus.Capability.LogMessages (class LogMessages)
 import Janus.Capability.Navigate (class Navigate, navigate)
 import Janus.Capability.Now (class Now)
 import Janus.Capability.Resource.User (class ManageUser)
 import Janus.Component.Utils (OpaqueSlot)
+import Janus.Component.HTML.Utils (css, prop, safeHref)
 import Janus.Data.Profile (Profile)
 import Janus.Data.Route (Route(..), routeCodec)
 import Janus.Data.Username (toString)
+import Janus.Page.Dashboard as Dashboard
 import Janus.Page.Home as Home
 import Janus.Page.Login as Login
-import Janus.Page.Dashboard as Dashboard
 import Janus.Store as Store
+import Routing.Duplex as RD
+import Routing.Hash (getHash)
+import Type.Proxy (Proxy(..))
+import Janus.Component.HTML.Fragments (main)
 
 -- |The router page query messages used for navigation.
 data Query a = Navigate Route a
@@ -41,10 +45,13 @@ type State =
   , currentUser :: Maybe Profile
   }
 
--- |The activities for the router page.
+-- |The actions for the router page.
 data Action
   = Initialize
   | Receive (Connected (Maybe Profile) Unit)
+  
+  -- | This is a test action to help in development
+  | Test
 
 -- |The pages that can be displayed in the router.
 type ChildSlots =
@@ -87,6 +94,9 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
       H.liftEffect $ log $ "Router.Receive " <> show (toString <$> (_.username <$> currentUser))
       H.modify_ _ { currentUser = currentUser }
 
+    Test -> do
+      H.liftEffect $ log "Test pressed"
+
   handleQuery :: forall a. Query a -> H.HalogenM State Action ChildSlots Void m (Maybe a)
   handleQuery = case _ of
     Navigate dest a -> do
@@ -114,10 +124,62 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
   render { route, currentUser } = case route of
     Just r -> case r of
       Home -> authorize currentUser do
-        HH.slot_ (Proxy :: _ "home") unit Home.component unit
+        HH.div [][menu currentUser Home, main $ HH.slot_ (Proxy :: _ "home") unit Home.component unit]
       Dashboard -> authorize currentUser do
         HH.slot_ (Proxy :: _ "dashboard") unit Dashboard.component unit
       Login ->
         HH.slot_ (Proxy :: _ "login") unit Login.component { redirect: true }
     Nothing ->
       HH.div_ [ HH.text "Oh no! That page wasn't found." ]
+
+-- | Creates the html for the menu bar that is used at the top of the application user interface.
+menu :: forall i p. Maybe Profile -> Route -> HH.HTML i p
+menu _currentUser _route =
+
+  HH.nav [css "navbar navbar-expand-md navbar-light fixed-top bg-light", prop "role" "navigation", HP.id "j-navbar-top"]
+  [
+    HH.div [css "container-fluid"]
+    [
+      HH.a [css "navbar-brand", HP.href "#"] [HH.img [HP.src "/static/logo.svg", HP.height 40]],
+      HH.button [css "navbar-toggler", HP.type_ HP.ButtonButton, prop "data-bs-toggle" "collapse", 
+        prop "data-bs-target" "#j-navbar-collapse", HPA.controls "j-navbar-collapse", HPA.expanded "false",
+        HPA.label "Toggle navigation"] [HH.span [css "navbar-toggler-icon"][]],
+      HH.div [css "collapse navbar-collapse", HP.id "j-navbar-collapse"]
+      [
+        HH.ul [css "navbar-nav me-auto mb-2 mb-md-0"]
+        [
+          navItemDropdown "j-drop1" "Dropdown1" [navItem Home [HH.text "Home"]],
+          navItemDropdown "j-drop2" "Dropdown2" [navItem Dashboard [HH.text "Dashboard"]]
+        ],
+        span "Product:" "SMP",
+        span "Team:" "Fragglarna"
+      ],
+      search
+    ]
+  ]
+
+  where
+
+  navItemDropdown id s html =
+    HH.li [css "nav-item dropdown"]
+    [
+      HH.a [css "nav-link dropdown-toggle", HP.href "#", HP.id id, prop "role" "button", prop "data-bs-toggle" "dropdown"] [HH.text s],
+      HH.ul [css "dropdown-menu dropdown-menu-light"] html
+    ]
+
+  navItem r html =
+    HH.li
+      []
+      [ HH.a
+          [ css $ "dropdown-item" -- | <> guard (route == r) " active"
+          , safeHref r
+          ]
+          html
+      ]
+
+  search = HH.form 
+    [css "d-flex", prop "role" "search", HP.action "/search", HP.method HP.GET]
+    [HH.input [css "form-control me-2", HP.type_ HP.InputSearch, HP.name "what", HP.placeholder "Search", HPA.label "Search"]
+     ]
+
+  span s t = HH.span [css "navbar-text pe-3"] [HH.span [css "fw-bold"] [HH.text s], HH.text t]

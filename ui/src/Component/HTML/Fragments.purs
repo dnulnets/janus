@@ -6,7 +6,7 @@ import Janus.Component.HTML.Utils (css, prop)
 
 -- |The main element for the application, it is used for the pages that have a navigational bar at the top
 main :: forall p i. HH.HTML p i -> HH.HTML p i
-main html =     HH.main [css "container-fluid", prop "role" "main"]
+main html =     HH.main [css "container-fluid j-workarea", prop "role" "main"]
     [
         HH.div [css "bg-light p-2 rounded"]
         [
