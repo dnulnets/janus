@@ -78,7 +78,7 @@ component = H.mkComponent
                                     ],
                                     HH.ul [css "dropdown-menu", HPA.labelledBy "j-dropdownlink"]
                                     [
-                                        HH.li_ [HH.a [css "dropdown-item", HP.href "#"][HH.text "Sweden"]],
+                                        HH.li_ [HH.a [css "dropdown-item", HP.href "#"][HH.text "Swedena"]],
                                         HH.li_ [HH.a [css "dropdown-item", HP.href "#"][HH.text "USA"]],
                                         HH.li_ [HH.a [css "dropdown-item", HP.href "#"][HH.text "Great Britain"]]
                                     ]
