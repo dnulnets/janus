@@ -1,15 +1,18 @@
 module Janus.Api.Request
-  ( Token
-  , BaseURL(..)
+  ( BaseURL(..)
+  , LoginFields(..)
   , RequestMethod(..)
   , RequestTemplate(..)
+  , Token
   , defaultRequest
-  , LoginFields(..)
   , login
+  , readCountry
   , readToken
-  , writeToken
   , removeToken
-  ) where
+  , writeCountry
+  , writeToken
+  )
+  where
 
 import Prelude
 
@@ -142,3 +145,17 @@ writeToken (Token str) =
 removeToken :: Effect Unit
 removeToken =
   removeItem tokenKey =<< localStorage =<< window
+
+-- |The key used in the broswers local storage for storing the token
+countryKey = "country" :: String
+
+-- |Reads the token from local storage.
+readCountry :: Effect (Maybe String)
+readCountry = do
+  str <- getItem countryKey =<< localStorage =<< window
+  pure $ str
+
+-- |Writes the token to local storage.
+writeCountry :: String -> Effect Unit
+writeCountry str =
+  setItem countryKey str =<< localStorage =<< window

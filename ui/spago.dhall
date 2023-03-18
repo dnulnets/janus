@@ -1,6 +1,6 @@
 { name = "janus"
 , dependencies =
-    [ "aff"
+  [ "aff"
   , "affjax"
   , "affjax-web"
   , "argonaut-core"
@@ -31,10 +31,12 @@
   , "prelude"
   , "profunctor"
   , "profunctor-lenses"
+  , "record-extra"
   , "remotedata"
   , "routing"
   , "routing-duplex"
   , "safe-coerce"
+  , "simple-i18n"
   , "slug"
   , "strings"
   , "transformers"
@@ -43,7 +45,8 @@
   , "web-events"
   , "web-html"
   , "web-storage"
-  , "web-uievents" ]
+  , "web-uievents"
+  ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
 }

@@ -24,12 +24,14 @@ type Store =
   { logLevel ∷ LogLevel
   , baseUrl ∷ BaseURL
   , currentUser ∷ Maybe Profile
+  , country :: String
   }
 
 -- | The actions supported by the store.
 data Action
   = LoginUser Profile -- | Logs in a user
   | LogoutUser        -- | Logs out a user
+  | SetCountry String -- | Sets the current country for localization
 
 -- | Reduces the store based on an action.
 reduce ∷ Store → Action → Store
@@ -38,3 +40,5 @@ reduce store = case _ of
     store { currentUser = Just profile }
   LogoutUser →
     store { currentUser = Nothing }
+  SetCountry c ->
+    store { country = c}

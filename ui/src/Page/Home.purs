@@ -12,7 +12,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.HTML.Properties.ARIA as HPA
 import Halogen.Store.Connect (Connected, connect)
 import Halogen.Store.Monad (class MonadStore)
-import Halogen.Store.Select (selectEq)
+import Halogen.Store.Select (selectEq, selectAll)
 import Janus.Capability.Navigate (class Navigate)
 import Janus.Capability.Resource.User (class ManageUser, getCurrentUser)
 import Janus.Data.Profile (Profile)
@@ -21,8 +21,10 @@ import Janus.Component.HTML.Utils (css, prop, safeHref)
 
 import Janus.Data.Username (toString)
 
+data Input = Unit
+
 data Action
-  =  Receive (Connected (Maybe Profile) Unit)
+  =  Receive (Connected Store.Store Input)
   | Test
 
 type State =
@@ -35,9 +37,9 @@ component
   => MonadStore Store.Action Store.Store m
   => Navigate m
   => ManageUser m
-  => H.Component q Unit o m
-component = connect (selectEq _.currentUser) $ H.mkComponent
-  { initialState
+  => H.Component q Input o m
+component = connect selectAll $ H.mkComponent
+  { initialState: deriveState
   , render
   , eval: H.mkEval $ H.defaultEval
       { handleAction = handleAction
@@ -46,15 +48,18 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
   }
   where
 
-    initialState::forall r . {context::Maybe Profile | r} -> State
-    initialState { context: currentUser } = { currentUser }
+    deriveState :: Connected Store.Store Input -> State
+    deriveState { context, input } = { currentUser: context.currentUser }
+
+--    initialState::forall r . {context::Maybe Profile | r} -> State
+--    initialState { context: currentUser } = { currentUser }
 
     handleAction :: forall slots. Action -> H.HalogenM State Action slots o m Unit
     handleAction = case _ of
     
-      Receive { context: currentUser } -> do
-        H.liftEffect $ log $ "Home.Receive " <> show (toString <$> (_.username <$> currentUser))
-        H.modify_ _ { currentUser = currentUser }
+      Receive { context } -> do
+        H.liftEffect $ log $ "Home.Receive " <> show (toString <$> (_.username <$> context.currentUser))
+        H.modify_ _ { currentUser = context.currentUser }
 
       Test -> do
         H.liftEffect $ log "Test pressed!"

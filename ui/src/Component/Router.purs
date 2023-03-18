@@ -21,6 +21,7 @@ import Halogen.Store.Select (selectEq)
 import Janus.Capability.LogMessages (class LogMessages)
 import Janus.Capability.Navigate (class Navigate, navigate)
 import Janus.Capability.Now (class Now)
+import Janus.Capability.I18n (class I18n, country)
 import Janus.Capability.Resource.User (class ManageUser)
 import Janus.Component.Utils (OpaqueSlot)
 import Janus.Component.HTML.Utils (css, prop, safeHref)
@@ -70,6 +71,7 @@ component
   => LogMessages m
   => Navigate m
   => ManageUser m
+  => I18n m
   => H.Component Query Unit Void m
 component = connect (selectEq _.currentUser) $ H.mkComponent
   { initialState: \{ context: currentUser } -> { route: Nothing, currentUser }
@@ -125,7 +127,7 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
   render { route, currentUser } = case route of
     Just r -> case r of
       Home -> authorize currentUser do
-        HH.div [][menu currentUser Home, main $ HH.slot_ (Proxy :: _ "home") unit Home.component unit]
+        HH.div [][menu currentUser Home, main $ HH.slot_ (Proxy :: _ "home") unit Home.component Home.Unit]
       Dashboard -> authorize currentUser do
         HH.div [][menu currentUser Dashboard, main $ HH.slot_ (Proxy :: _ "dashboard") unit Dashboard.component unit]
       Login ->

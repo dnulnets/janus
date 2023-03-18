@@ -7,7 +7,7 @@ import Prelude
 
 import Affjax.Web (printError, request)
 import Janus.Api.Endpoint (Endpoint(..))
-import Janus.Api.Request (BaseURL(..), RequestMethod(..), defaultRequest, readToken)
+import Janus.Api.Request (BaseURL(..), RequestMethod(..), defaultRequest, readToken, readCountry)
 import Janus.AppM (runAppM)
 import Janus.Component.Router as Router
 import Janus.Data.Profile (Profile)
@@ -20,7 +20,7 @@ import Data.Codec.Argonaut (printJsonDecodeError)
 import Data.Codec.Argonaut as CA
 import Data.Codec.Argonaut.Record as CAR
 import Data.Either (Either(..), hush)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Halogen (liftEffect)
@@ -40,6 +40,7 @@ main = HA.runHalogenAff do
     baseUrl = BaseURL "http://localhost:8080" -- Has to get the origin, will fixa later!
     logLevel = Dev
 
+  country <- liftEffect readCountry
   currentUser :: Maybe Profile ← (liftEffect readToken) >>= case _ of
     Nothing →
       pure Nothing
@@ -61,7 +62,7 @@ main = HA.runHalogenAff do
 
   let
     initialStore ∷ Store
-    initialStore = { baseUrl, logLevel, currentUser }
+    initialStore = { baseUrl:baseUrl, logLevel:logLevel, currentUser:currentUser, country: fromMaybe "en" country }
 
   rootComponent ← runAppM initialStore Router.component
 
