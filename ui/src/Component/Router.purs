@@ -51,9 +51,6 @@ type State =
 data Action
   = Initialize
   | Receive (Connected (Maybe Profile) Unit)
-  
-  -- | This is a test action to help in development
-  | Test
 
 -- |The pages that can be displayed in the router.
 type ChildSlots =
@@ -96,9 +93,6 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
     Receive { context: currentUser } -> do
       H.liftEffect $ log $ "Router.Receive " <> show (toString <$> (_.username <$> currentUser))
       H.modify_ _ { currentUser = currentUser }
-
-    Test -> do
-      H.liftEffect $ log "Test pressed"
 
   handleQuery :: forall a. Query a -> H.HalogenM State Action ChildSlots Void m (Maybe a)
   handleQuery = case _ of

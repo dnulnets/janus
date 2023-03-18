@@ -768,19 +768,6 @@
   var showChar = {
     show: showCharImpl
   };
-  var showBoolean = {
-    show: function(v) {
-      if (v) {
-        return "true";
-      }
-      ;
-      if (!v) {
-        return "false";
-      }
-      ;
-      throw new Error("Failed pattern match at Data.Show (line 29, column 1 - line 31, column 23): " + [v.constructor.name]);
-    }
-  };
   var show = function(dict) {
     return dict.show;
   };
@@ -885,11 +872,11 @@
     return Just2;
   }();
   var showMaybe = function(dictShow) {
-    var show9 = show(dictShow);
+    var show8 = show(dictShow);
     return {
       show: function(v) {
         if (v instanceof Just) {
-          return "(Just " + (show9(v.value0) + ")");
+          return "(Just " + (show8(v.value0) + ")");
         }
         ;
         if (v instanceof Nothing) {
@@ -10521,9 +10508,9 @@
         var componentSlot22 = componentSlot1(dictOrd);
         return function(label6) {
           return function(p2) {
-            return function(component6) {
+            return function(component7) {
               return function(input3) {
-                return widget(new ComponentSlot(componentSlot22(label6)(p2)(component6)(input3)($$const(Nothing.value))));
+                return widget(new ComponentSlot(componentSlot22(label6)(p2)(component7)(input3)($$const(Nothing.value))));
               };
             };
           };
@@ -10538,10 +10525,10 @@
         var componentSlot22 = componentSlot1(dictOrd);
         return function(label6) {
           return function(p2) {
-            return function(component6) {
+            return function(component7) {
               return function(input3) {
                 return function(outputQuery) {
-                  return widget(new ComponentSlot(componentSlot22(label6)(p2)(component6)(input3)(function($11) {
+                  return widget(new ComponentSlot(componentSlot22(label6)(p2)(component7)(input3)(function($11) {
                     return Just.create(outputQuery($11));
                   })));
                 };
@@ -10578,7 +10565,7 @@
       return f(v);
     };
   };
-  var initDriverState = function(component6) {
+  var initDriverState = function(component7) {
     return function(input3) {
       return function(handler3) {
         return function(lchs) {
@@ -10594,8 +10581,8 @@
             var subscriptions = $$new(new Just(empty5))();
             var forks = $$new(empty5)();
             var ds = {
-              component: component6,
-              state: component6.initialState(input3),
+              component: component7,
+              state: component7.initialState(input3),
               refs: empty5,
               children: empty6,
               childrenIn,
@@ -10959,7 +10946,7 @@
     };
   };
   var runUI = function(renderSpec2) {
-    return function(component6) {
+    return function(component7) {
       return function(i2) {
         var squashChildInitializers = function(lchs) {
           return function(preInits) {
@@ -11204,7 +11191,7 @@
                 return function($78) {
                   return liftEffect5($77($78));
                 };
-              }())(i2)(component6))();
+              }())(i2)(component7))();
               return unDriverStateX(function(st) {
                 return pure9({
                   query: evalDriver(disposed)(st.selfRef),
@@ -11446,11 +11433,11 @@
       };
     };
   };
-  var runUI2 = function(component6) {
+  var runUI2 = function(component7) {
     return function(i2) {
       return function(element3) {
         return bind14(liftEffect6(map28(toDocument)(bindFlipped9(document)(windowImpl))))(function(document2) {
-          return runUI(renderSpec(document2)(element3))(component6)(i2);
+          return runUI(renderSpec(document2)(element3))(component7)(i2);
         });
       };
     };
@@ -14252,7 +14239,7 @@
     var hoist5 = hoist4(dictMonad.Bind1().Apply0().Functor0());
     return function(initialStore) {
       return function(reducer) {
-        return function(component6) {
+        return function(component7) {
           return bind16(liftEffect7(function __do4() {
             var value15 = $$new(initialStore)();
             var v = create3();
@@ -14267,7 +14254,7 @@
               emitter: hs.emitter,
               component: hoist5(function(v) {
                 return runReaderT(v)(hs);
-              })(component6)
+              })(component7)
             });
           });
         };
@@ -14278,10 +14265,10 @@
     var runAndEmitStoreT1 = runAndEmitStoreT(dictMonad);
     return function(initialStore) {
       return function(reducer) {
-        return function(component6) {
+        return function(component7) {
           return map39(function(v) {
             return v.component;
-          })(runAndEmitStoreT1(initialStore)(reducer)(component6));
+          })(runAndEmitStoreT1(initialStore)(reducer)(component7));
         };
       };
     };
@@ -32047,10 +32034,10 @@
       var subscribe1 = subscribe3(dictMonadStore);
       var getStore3 = getStore(monadStoreHalogenM(dictMonadStore));
       return function(v) {
-        return function(component6) {
+        return function(component7) {
           var renderInner = function(input3) {
             return function(context) {
-              return slot2($$Proxy.value)(unit)(component6)({
+              return slot2($$Proxy.value)(unit)(component7)({
                 input: input3,
                 context
               })(Raise2.create);
@@ -32438,11 +32425,11 @@
     return Receive8;
   }();
   var Test = /* @__PURE__ */ function() {
-    function Test3() {
+    function Test2() {
     }
     ;
-    Test3.value = new Test3();
-    return Test3;
+    Test2.value = new Test2();
+    return Test2;
   }();
   var component2 = function(dictMonadAff) {
     var MonadEffect0 = dictMonadAff.MonadEffect0();
@@ -32486,7 +32473,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Janus.Page.Home (line 58, column 20 - line 67, column 39): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at Janus.Page.Home (line 55, column 20 - line 64, column 39): " + [v.constructor.name]);
           };
           var deriveState = function(v) {
             return {
@@ -33254,7 +33241,7 @@
               var mkConfig2 = mkConfig(dictMkConfig);
               return function(providedConfig) {
                 return function(initialForm) {
-                  return function(component6) {
+                  return function(component7) {
                     var setFieldResult = function(v) {
                       return function(object8) {
                         var field = unsafeIndex3(object8)(v.type);
@@ -33638,7 +33625,7 @@
                           formState: state3.formState,
                           formActions: state3.formActions
                         };
-                        return slot3($$Proxy.value)(unit)(component6)(context)(HandleForm.create);
+                        return slot3($$Proxy.value)(unit)(component7)(context)(HandleForm.create);
                       },
                       "eval": mkEval({
                         initialize: new Just(Initialize3.value),
@@ -33813,7 +33800,7 @@
     return input2([css("btn btn-primary"), type_20(InputSubmit.value), value14(label6)]);
   };
 
-  // output/Janus.Page.Login/index.js
+  // output/Janus.Form.Login/index.js
   var type_21 = /* @__PURE__ */ type_17(isPropInputType);
   var composeKleisli3 = /* @__PURE__ */ composeKleisli(bindEither);
   var required5 = /* @__PURE__ */ required4(eqString)(monoidString);
@@ -33824,7 +33811,6 @@
   var gets4 = /* @__PURE__ */ gets(monadStateHalogenM);
   var when4 = /* @__PURE__ */ when(applicativeHalogenM);
   var validate2 = /* @__PURE__ */ validate()()()();
-  var show7 = /* @__PURE__ */ show(showBoolean);
   var passwordIsSymbol = {
     reflectSymbol: function() {
       return "password";
@@ -33868,14 +33854,12 @@
     return Eval3;
   }();
   var component3 = function(dictMonadAff) {
-    var MonadEffect0 = dictMonadAff.MonadEffect0();
-    var liftEffect10 = liftEffect(monadEffectHalogenM(MonadEffect0));
-    var formless2 = formless(MonadEffect0)(mkFieldStates12)(mkFieldActions12)(mkFieldResults12)(mkFieldOutputs12)(mkConfig12);
+    var formless2 = formless(dictMonadAff.MonadEffect0())(mkFieldStates12)(mkFieldActions12)(mkFieldResults12)(mkFieldOutputs12)(mkConfig12);
     return function(dictNavigate) {
       var navigate2 = navigate(navigateHalogenM(dictNavigate));
       return function(dictManageUser) {
         var render = function(v) {
-          return full(section([css("vh-100")])([div3([css("container-fluid h-custom workarea")])([div3([css("row d-flex justify-content-center align-items-center h-100")])([div3([css("col-md-9 col-lg-6 col-xl-5")])([img([css("img-fluid"), alt6("Janus logo"), src9("/static/logo.png")])]), div3([css("col-md-8 col-lg-6 col-xl-4 offset-xl-1"), id3("j-login")])([div3([css("row")])([div3([css("col")])([h1([])([b([])([text5("Janus")])])]), div3([css("col d-flex align-items-center justify-content-end")])([div3([css("dropdown")])([a([css("btn btn-primary dropdown-toggle"), id3("j-dropdownlink"), href4("#"), prop5("role")("button"), prop5("data-bs-toggle")("dropdown"), expanded("false")])([text5("Country")]), ul([css("dropdown-menu"), labelledBy("j-dropdownlink")])([li_([a([css("dropdown-item"), href4("#")])([text5("Sweden")])]), li_([a([css("dropdown-item"), href4("#")])([text5("USA")])]), li_([a([css("dropdown-item"), href4("#")])([text5("Great Britain")])])])])])]), form([onSubmit(v.form.formActions.handleSubmit)])([whenElem(v.loginError)(function(v1) {
+          return form([onSubmit(v.form.formActions.handleSubmit)])([whenElem(v.loginError)(function(v1) {
             return div3([css("j-invalid-feedback")])([text5("Username or password is invalid")]);
           }), fieldset_([textInput({
             label: "Username",
@@ -33885,7 +33869,7 @@
             label: "Password",
             state: v.form.fields.password,
             action: v.form.actions.password
-          })([type_21(InputPassword.value)]), submitButton("Log in")])])])])])]));
+          })([type_21(InputPassword.value)]), submitButton("Log in")])]);
         };
         var handleQuery = function() {
           var validation2 = {
@@ -33895,77 +33879,67 @@
           var onSubmit2 = composeKleisli1(loginUser(manageUserHalogenM(dictManageUser)))(function(v) {
             if (v instanceof Nothing) {
               return modify_7(function(v1) {
-                var $135 = {};
-                for (var $136 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $136)) {
-                    $135[$136] = v1[$136];
+                var $127 = {};
+                for (var $128 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $128)) {
+                    $127[$128] = v1[$128];
                   }
                   ;
                 }
                 ;
-                $135.loginError = true;
-                return $135;
+                $127.loginError = true;
+                return $127;
               });
             }
             ;
             if (v instanceof Just) {
               return discard11(modify_7(function(v1) {
-                var $138 = {};
-                for (var $139 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $139)) {
-                    $138[$139] = v1[$139];
+                var $130 = {};
+                for (var $131 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $131)) {
+                    $130[$131] = v1[$131];
                   }
                   ;
                 }
                 ;
-                $138.loginError = false;
-                return $138;
+                $130.loginError = false;
+                return $130;
               }))(function() {
-                return bind19(gets4(function(v1) {
-                  return v1.form.input;
-                }))(function(v1) {
-                  return when4(v1.redirect)(navigate2(Home.value));
+                return discard11(navigate2(Home.value))(function() {
+                  return bind19(gets4(function(v1) {
+                    return v1.form.input;
+                  }))(function(v1) {
+                    return when4(v1.redirect)(navigate2(Home.value));
+                  });
                 });
               });
             }
             ;
-            throw new Error("Failed pattern match at Janus.Page.Login (line 75, column 32 - line 81, column 40): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at Janus.Form.Login (line 73, column 32 - line 80, column 40): " + [v.constructor.name]);
           });
           return handleSubmitValidate(onSubmit2)(validate2)(validation2);
         }();
         var handleAction = function(v) {
           if (v instanceof Receive6) {
-            return bind19(gets4(function(v1) {
-              return v1.form.input;
-            }))(function(v1) {
-              return discard11(liftEffect10(log2("Login.Receive " + show7(v1.redirect))))(function() {
-                return modify_7(function(v2) {
-                  var $146 = {};
-                  for (var $147 in v2) {
-                    if ({}.hasOwnProperty.call(v2, $147)) {
-                      $146[$147] = v2[$147];
-                    }
-                    ;
-                  }
-                  ;
-                  $146.form = v.value0;
-                  return $146;
-                });
-              });
+            return modify_7(function(v1) {
+              var $137 = {};
+              for (var $138 in v1) {
+                if ({}.hasOwnProperty.call(v1, $138)) {
+                  $137[$138] = v1[$138];
+                }
+                ;
+              }
+              ;
+              $137.form = v.value0;
+              return $137;
             });
           }
           ;
           if (v instanceof Eval2) {
-            return bind19(gets4(function(v1) {
-              return v1.form.input;
-            }))(function(v1) {
-              return discard11(liftEffect10(log2("Login.Eval " + show7(v1.redirect))))(function() {
-                return $$eval(v.value0);
-              });
-            });
+            return $$eval(v.value0);
           }
           ;
-          throw new Error("Failed pattern match at Janus.Page.Login (line 62, column 18 - line 70, column 22): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Janus.Form.Login (line 64, column 18 - line 68, column 22): " + [v.constructor.name]);
         };
         return formless2({
           liftAction: Eval2.create
@@ -33980,13 +33954,40 @@
           "eval": mkEval({
             handleAction,
             handleQuery,
-            receive: function($154) {
-              return Just.create(Receive6.create($154));
+            receive: function($142) {
+              return Just.create(Receive6.create($142));
             },
             initialize: defaultEval.initialize,
             finalize: defaultEval.finalize
           })
         }));
+      };
+    };
+  };
+
+  // output/Janus.Page.Login/index.js
+  var slot_2 = /* @__PURE__ */ slot_()({
+    reflectSymbol: function() {
+      return "login";
+    }
+  })(ordUnit);
+  var component4 = function(dictMonadAff) {
+    var component1 = component3(dictMonadAff);
+    return function(dictNavigate) {
+      var component22 = component1(dictNavigate);
+      return function(dictManageUser) {
+        var component32 = component22(dictManageUser);
+        var render = function(state3) {
+          return full(section([css("vh-100")])([div3([css("container-fluid h-custom workarea")])([div3([css("row d-flex justify-content-center align-items-center h-100")])([div3([css("col-md-9 col-lg-6 col-xl-5")])([img([css("img-fluid"), alt6("Janus logo"), src9("/static/logo.png")])]), div3([css("col-md-8 col-lg-6 col-xl-4 offset-xl-1"), id3("j-login")])([div3([css("row")])([div3([css("col")])([h1([])([b([])([text5("Janus")])])]), div3([css("col d-flex align-items-center justify-content-end")])([div3([css("dropdown")])([a([css("btn btn-primary dropdown-toggle"), id3("j-dropdownlink"), href4("#"), prop5("role")("button"), prop5("data-bs-toggle")("dropdown"), expanded("false")])([text5("Country")]), ul([css("dropdown-menu"), labelledBy("j-dropdownlink")])([li_([a([css("dropdown-item"), href4("#")])([text5("Sweden")])]), li_([a([css("dropdown-item"), href4("#")])([text5("USA")])]), li_([a([css("dropdown-item"), href4("#")])([text5("Great Britain")])])])])])]), slot_2($$Proxy.value)(unit)(component32)(state3)])])])]));
+        };
+        var initialState = function(r) {
+          return r;
+        };
+        return mkComponent({
+          initialState,
+          render,
+          "eval": mkEval(defaultEval)
+        });
       };
     };
   };
@@ -33997,7 +33998,7 @@
   var bind20 = /* @__PURE__ */ bind(bindHalogenM);
   var get5 = /* @__PURE__ */ get(monadStateHalogenM);
   var discard12 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var show8 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
+  var show7 = /* @__PURE__ */ show(/* @__PURE__ */ showMaybe(showString));
   var map50 = /* @__PURE__ */ map(functorMaybe);
   var when5 = /* @__PURE__ */ when(applicativeHalogenM);
   var notEq2 = /* @__PURE__ */ notEq(/* @__PURE__ */ eqMaybe(eqRoute));
@@ -34011,18 +34012,18 @@
     }
   };
   var slot4 = /* @__PURE__ */ slot()(loginIsSymbol)(ordUnit);
-  var slot_2 = /* @__PURE__ */ slot_();
-  var slot_1 = /* @__PURE__ */ slot_2({
+  var slot_3 = /* @__PURE__ */ slot_();
+  var slot_1 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "home";
     }
   })(ordUnit);
-  var slot_22 = /* @__PURE__ */ slot_2({
+  var slot_22 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "dashboard";
     }
   })(ordUnit);
-  var slot_3 = /* @__PURE__ */ slot_2(loginIsSymbol)(ordUnit);
+  var slot_32 = /* @__PURE__ */ slot_3(loginIsSymbol)(ordUnit);
   var selectEq3 = /* @__PURE__ */ selectEq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec()(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(eqRowNil)()({
     reflectSymbol: function() {
       return "username";
@@ -34066,13 +34067,6 @@
     };
     return Receive8;
   }();
-  var Test2 = /* @__PURE__ */ function() {
-    function Test3() {
-    }
-    ;
-    Test3.value = new Test3();
-    return Test3;
-  }();
   var menu2 = function(_currentUser) {
     return function(_route) {
       var span5 = function(s) {
@@ -34096,10 +34090,10 @@
       return nav([css("navbar navbar-expand-md navbar-light fixed-top bg-light"), prop5("role")("navigation"), id3("j-navbar-top")])([div3([css("container-fluid")])([a([css("navbar-brand"), href4("#")])([img([src9("/static/logo.svg"), height8(40)])]), button([css("navbar-toggler"), type_1(ButtonButton.value), prop5("data-bs-toggle")("collapse"), prop5("data-bs-target")("#j-navbar-collapse"), controls2("j-navbar-collapse"), expanded("false"), label5("Toggle navigation")])([span3([css("navbar-toggler-icon")])([])]), div3([css("collapse navbar-collapse"), id3("j-navbar-collapse")])([ul([css("navbar-nav me-auto mb-2 mb-md-0")])([navItemDropdown("j-drop1")("Dropdown1")([navItem(Home.value)([text5("Home")])]), navItemDropdown("j-drop2")("Dropdown2")([navItem(Dashboard.value)([text5("Dashboard")])])]), span5("Product:")("SMP"), span5("Team:")("Fragglarna")]), search2])]);
     };
   };
-  var component4 = function(dictMonadAff) {
+  var component5 = function(dictMonadAff) {
     var MonadEffect0 = dictMonadAff.MonadEffect0();
     var liftEffect10 = liftEffect(monadEffectHalogenM(MonadEffect0));
-    var component1 = component3(dictMonadAff);
+    var component1 = component4(dictMonadAff);
     var component22 = component2(dictMonadAff);
     var component32 = component(dictMonadAff);
     var connect2 = connect(MonadEffect0);
@@ -34111,16 +34105,16 @@
         return function(dictLogMessages) {
           return function(dictNavigate) {
             var navigate2 = navigate(navigateHalogenM(dictNavigate));
-            var component6 = component1(dictNavigate);
+            var component62 = component1(dictNavigate);
             var component7 = component42(dictNavigate);
             var component8 = component52(dictNavigate);
             return function(dictManageUser) {
-              var component9 = component6(dictManageUser);
+              var component9 = component62(dictManageUser);
               var component10 = component7(dictManageUser);
               return function(dictI18n) {
                 var handleQuery = function(v) {
                   return bind20(get5)(function(v1) {
-                    return discard12(liftEffect10(log2("Router.Navigate " + show8(map50(toString3)(map50(function(v2) {
+                    return discard12(liftEffect10(log2("Router.Navigate " + show7(map50(toString3)(map50(function(v2) {
                       return v2.username;
                     })(v1.currentUser))))))(function() {
                       return discard12(when5(notEq2(v1.route)(new Just(v.value0)))(function() {
@@ -34162,7 +34156,7 @@
                   }
                   ;
                   if (v instanceof Receive7) {
-                    return discard12(liftEffect10(log2("Router.Receive " + show8(map50(toString3)(map50(function(v1) {
+                    return discard12(liftEffect10(log2("Router.Receive " + show7(map50(toString3)(map50(function(v1) {
                       return v1.username;
                     })(v.value0.context))))))(function() {
                       return modify_8(function(v1) {
@@ -34180,11 +34174,7 @@
                     });
                   }
                   ;
-                  if (v instanceof Test2) {
-                    return liftEffect10(log2("Test pressed"));
-                  }
-                  ;
-                  throw new Error("Failed pattern match at Janus.Component.Router (line 88, column 18 - line 101, column 40): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Component.Router (line 85, column 18 - line 95, column 48): " + [v.constructor.name]);
                 };
                 var authorize = function(mbProfile) {
                   return function(html2) {
@@ -34198,7 +34188,7 @@
                       return html2;
                     }
                     ;
-                    throw new Error("Failed pattern match at Janus.Component.Router (line 120, column 30 - line 124, column 11): " + [mbProfile.constructor.name]);
+                    throw new Error("Failed pattern match at Janus.Component.Router (line 114, column 30 - line 118, column 11): " + [mbProfile.constructor.name]);
                   };
                 };
                 var render = function(v) {
@@ -34212,19 +34202,19 @@
                     }
                     ;
                     if (v.route.value0 instanceof Login2) {
-                      return slot_3($$Proxy.value)(unit)(component9)({
+                      return slot_32($$Proxy.value)(unit)(component9)({
                         redirect: true
                       });
                     }
                     ;
-                    throw new Error("Failed pattern match at Janus.Component.Router (line 128, column 15 - line 134, column 78): " + [v.route.value0.constructor.name]);
+                    throw new Error("Failed pattern match at Janus.Component.Router (line 122, column 15 - line 128, column 78): " + [v.route.value0.constructor.name]);
                   }
                   ;
                   if (v.route instanceof Nothing) {
                     return full(div_([text5("Oh no! That page wasn't found.")]));
                   }
                   ;
-                  throw new Error("Failed pattern match at Janus.Component.Router (line 127, column 35 - line 136, column 66): " + [v.route.constructor.name]);
+                  throw new Error("Failed pattern match at Janus.Component.Router (line 121, column 35 - line 130, column 66): " + [v.route.constructor.name]);
                 };
                 return connect1(selectEq3(function(v) {
                   return v.currentUser;
@@ -34265,7 +34255,7 @@
       return "user";
     }
   }));
-  var component5 = /* @__PURE__ */ component4(monadAffAppM)(monadStoreAppM)(nowAppM)(logMessagesAppM)(navigateAppM)(manageUserAppM)(i18nAppM);
+  var component6 = /* @__PURE__ */ component5(monadAffAppM)(monadStoreAppM)(nowAppM)(logMessagesAppM)(navigateAppM)(manageUserAppM)(i18nAppM);
   var $$void12 = /* @__PURE__ */ $$void(functorAff);
   var matchesWith2 = /* @__PURE__ */ matchesWith(foldableEither);
   var when6 = /* @__PURE__ */ when(applicativeEffect);
@@ -34310,7 +34300,7 @@
           currentUser: v,
           country: fromMaybe("en")(country)
         };
-        return bind21(runAppM(initialStore)(component5))(function(rootComponent) {
+        return bind21(runAppM(initialStore)(component6))(function(rootComponent) {
           return bind21(runUI2(rootComponent)(unit)(body2))(function(halogenIO) {
             return $$void12(liftEffect9(matchesWith2(parse7(routeCodec))(function(old) {
               return function($$new2) {

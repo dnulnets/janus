@@ -51,9 +51,6 @@ component = connect selectAll $ H.mkComponent
     deriveState :: Connected Store.Store Input -> State
     deriveState { context, input } = { currentUser: context.currentUser }
 
---    initialState::forall r . {context::Maybe Profile | r} -> State
---    initialState { context: currentUser } = { currentUser }
-
     handleAction :: forall slots. Action -> H.HalogenM State Action slots o m Unit
     handleAction = case _ of
     
