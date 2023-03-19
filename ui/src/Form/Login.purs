@@ -21,10 +21,12 @@ import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
 import Janus.Capability.Resource.User
+import Simple.I18n.Translator (Translator, setLang, translate, label)
+import Janus.Lang.Form.Login (translator, Labels (..))
 
 type Slot = forall q . H.Slot q Void Unit
 
-type Input = { redirect:: Boolean}
+type Input = { redirect:: Boolean, country:: String}
 
 type Form :: (Type -> Type -> Type -> Type) -> Row Type
 type Form f =
@@ -42,6 +44,7 @@ data Action
 type State =
   { form :: FormContext
   , loginError :: Boolean
+  , i18n ::  Translator Labels
   }
 
 component
@@ -51,7 +54,7 @@ component
   => ManageUser m
   => H.Component query Input output m
 component = F.formless { liftAction: Eval } mempty $ H.mkComponent
-  { initialState: \context -> { form: context, loginError: false }
+  { initialState
   , render
   , eval: H.mkEval $ H.defaultEval
       { receive = Just <<< Receive
@@ -60,10 +63,14 @@ component = F.formless { liftAction: Eval } mempty $ H.mkComponent
       }
   }
   where
+
+  initialState context = { form: context, loginError: false, i18n: translator context.input.country }
+
   handleAction :: Action -> H.HalogenM _ _ _ _ _ Unit
   handleAction = case _ of
     Receive context -> do
-        H.modify_ _ { form = context }
+        H.liftEffect $ log $ "Form.Login Country = " <> context.input.country
+        H.modify_ (\state -> state { form = context, i18n = state.i18n # setLang context.input.country})
     Eval action -> do
         F.eval action
 
@@ -87,18 +94,18 @@ component = F.formless { liftAction: Eval } mempty $ H.mkComponent
     F.handleSubmitValidate onSubmit F.validate validation
 
   render :: State -> H.ComponentHTML Action () m
-  render { loginError, form: { formActions, fields, actions } } = 
+  render { i18n: i18n, loginError: loginError, form: { formActions, fields, actions } } = 
     HH.form [ HE.onSubmit formActions.handleSubmit ]
     [ whenElem loginError \_ ->
         HH.div
             [ css "j-invalid-feedback" ]
-            [ HH.text "Username or password is invalid" ]
+            [ HH.text (i18n # translate (label :: _ "invalid")) ]
     , HH.fieldset_
         [ Field.textInput
-            { label: "Username", state: fields.username, action: actions.username }
+            { label: (i18n # translate (label :: _ "uname")), state: fields.username, action: actions.username }
             [ HP.type_ HP.InputText ]
         , Field.textInput
-            { label: "Password", state: fields.password, action: actions.password }
+            { label: (i18n # translate (label :: _ "pwd")), state: fields.password, action: actions.password }
             [ HP.type_ HP.InputPassword ]
         , Field.submitButton "Log in"
         ]

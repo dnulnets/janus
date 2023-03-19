@@ -29,7 +29,7 @@ import Janus.Form.Validation as V
 import Janus.Lang.Login
 import Type.Proxy (Proxy(..))
 import Simple.I18n.Translation (Translation, fromRecord)
-import Simple.I18n.Translator (Translator, createTranslator, label, setLang, translate)
+import Simple.I18n.Translator (Translator, createTranslator, label, setLang, currentLang, translate)
 import Halogen.Store.Monad (class MonadStore, StoreT, getStore, runStoreT, updateStore)
 import Janus.Store as Store
 
@@ -108,7 +108,7 @@ component = H.mkComponent
                                 ]
                             ]
                         ],
-                        HH.slot_ (Proxy :: _ "login") unit L.component { redirect: state.redirect }
+                        HH.slot_ (Proxy :: _ "login") unit L.component { redirect: state.redirect, country: state.i18n # currentLang }
                     ]
 
                 ]
