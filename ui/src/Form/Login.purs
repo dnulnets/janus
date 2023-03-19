@@ -1,5 +1,6 @@
 module Janus.Form.Login where
 
+import Janus.Capability.Resource.User
 import Prelude
 
 import Data.Maybe (Maybe(..))
@@ -20,9 +21,8 @@ import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
-import Janus.Capability.Resource.User
-import Simple.I18n.Translator (Translator, setLang, translate, label)
-import Janus.Lang.Form.Login (translator, Labels (..))
+import Janus.Lang.Form.Login (translator, Labels(..))
+import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
 
 type Slot = forall q . H.Slot q Void Unit
 
@@ -102,10 +102,10 @@ component = F.formless { liftAction: Eval } mempty $ H.mkComponent
             [ HH.text (i18n # translate (label :: _ "invalid")) ]
     , HH.fieldset_
         [ Field.textInput
-            { label: (i18n # translate (label :: _ "uname")), state: fields.username, action: actions.username }
+            { label: (i18n # translate (label :: _ "uname")), state: fields.username, action: actions.username, country: i18n # currentLang }
             [ HP.type_ HP.InputText ]
         , Field.textInput
-            { label: (i18n # translate (label :: _ "pwd")), state: fields.password, action: actions.password }
+            { label: (i18n # translate (label :: _ "pwd")), state: fields.password, action: actions.password, country: i18n # currentLang }
             [ HP.type_ HP.InputPassword ]
         , Field.submitButton "Log in"
         ]

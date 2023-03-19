@@ -1,4 +1,8 @@
-module Janus.Lang.Login (translator, Labels (..)) where
+module Janus.Lang.Login
+  ( Labels(..)
+  , en
+  , translator
+  ) where
 
 import Prelude
 import Simple.I18n.Translation (Translation, fromRecord)

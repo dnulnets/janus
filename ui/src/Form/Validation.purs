@@ -8,6 +8,8 @@ import Janus.Data.Username as Username
 import Data.Either (Either(..), note)
 import Data.Maybe (Maybe(..))
 import Data.String as String
+import Janus.Lang.Validation as Validation
+import Simple.I18n.Translator ( translate, label)
 
 data FormError
   = Required
@@ -15,16 +17,14 @@ data FormError
   | TooLong
   | InvalidEmail
   | InvalidUsername
-  | InvalidAvatar
 
-errorToString :: FormError -> String
-errorToString = case _ of
-  Required -> "This field is required."
-  TooShort -> "Not enough characters entered"
-  TooLong -> "Too many characters entered"
-  InvalidEmail -> "Invalid email address"
-  InvalidUsername -> "Invalid username"
-  InvalidAvatar -> "Invalid image URL"
+errorToString :: FormError -> String -> String
+errorToString fe country = case fe of
+  Required -> (Validation.translator country) # translate (label :: _ "required")
+  TooShort -> (Validation.translator country) # translate (label :: _ "tooShort")
+  TooLong -> (Validation.translator country) # translate (label :: _ "tooLong")
+  InvalidEmail -> (Validation.translator country) # translate (label :: _ "invalidEmail")
+  InvalidUsername -> (Validation.translator country) # translate (label :: _ "invalidUsername")
 
 required :: forall a. Eq a => Monoid a => a -> Either FormError a
 required = check (_ /= mempty) Required
