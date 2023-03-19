@@ -20,7 +20,7 @@ import Janus.Store (Action(..), LogLevel(..), Store)
 import Janus.Store as Store
 import Data.Codec.Argonaut as Codec
 import Data.Codec.Argonaut.Record as CAR
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -31,6 +31,8 @@ import Halogen.Store.Monad (class MonadStore, StoreT, getStore, runStoreT, updat
 import Routing.Duplex (print)
 import Routing.Hash (setHash)
 import Safe.Coerce (coerce)
+import Simple.I18n.Translation (Translation, fromRecord)
+import Simple.I18n.Translator (Translator, createTranslator, label, setLang, translate)
 
 -- | The definition of the application.
 newtype AppM a = AppM (StoreT Store.Action Store.Store Aff a)
@@ -86,5 +88,5 @@ instance manageUserAppM :: ManageUser AppM where
     void $ mkAuthRequest { endpoint: User, method: method }
 
 instance i18nAppM :: I18n AppM where
-  country = pure "se"
-
+  country = liftEffect $ fromMaybe "en" <$> Request.readCountry
+  setLanguage s t = pure $ t # setLang s 

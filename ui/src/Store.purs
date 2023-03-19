@@ -31,7 +31,7 @@ type Store =
 data Action
   = LoginUser Profile -- | Logs in a user
   | LogoutUser        -- | Logs out a user
-  | SetCountry String -- | Sets the current country for localization
+  | Country String    -- | Country code
 
 -- | Reduces the store based on an action.
 reduce ∷ Store → Action → Store
@@ -40,5 +40,6 @@ reduce store = case _ of
     store { currentUser = Just profile }
   LogoutUser →
     store { currentUser = Nothing }
-  SetCountry c ->
+  Country c ->
     store { country = c}
+

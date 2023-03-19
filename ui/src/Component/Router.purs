@@ -17,7 +17,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.HTML.Properties.ARIA as HPA
 import Halogen.Store.Connect (Connected, connect)
 import Halogen.Store.Monad (class MonadStore)
-import Halogen.Store.Select (selectEq)
+import Halogen.Store.Select (selectEq, selectAll)
 import Janus.Capability.LogMessages (class LogMessages)
 import Janus.Capability.Navigate (class Navigate, navigate)
 import Janus.Capability.Now (class Now)
@@ -45,12 +45,13 @@ data Query a = Navigate Route a
 type State =
   { route :: Maybe Route
   , currentUser :: Maybe Profile
+  , country :: String
   }
 
 -- |The actions for the router page.
 data Action
   = Initialize
-  | Receive (Connected (Maybe Profile) Unit)
+  | Receive (Connected (Store.Store) Unit)
 
 -- |The pages that can be displayed in the router.
 type ChildSlots =
@@ -70,8 +71,8 @@ component
   => ManageUser m
   => I18n m
   => H.Component Query Unit Void m
-component = connect (selectEq _.currentUser) $ H.mkComponent
-  { initialState: \{ context: currentUser } -> { route: Nothing, currentUser }
+component = connect selectAll $ H.mkComponent
+  { initialState: \{ context: ctx } -> { route: Nothing, currentUser: ctx.currentUser, country: ctx.country }
   , render
   , eval: H.mkEval $ H.defaultEval
       { handleQuery = handleQuery
@@ -90,9 +91,10 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
       -- then we'll navigate to the new route (also setting the hash)
       navigate $ fromMaybe Home initialRoute
 
-    Receive { context: currentUser } -> do
-      H.liftEffect $ log $ "Router.Receive " <> show (toString <$> (_.username <$> currentUser))
-      H.modify_ _ { currentUser = currentUser }
+    Receive { context: ctx } -> do
+      H.liftEffect $ log $ "Router.Receive User = " <> show (toString <$> (_.username <$> (ctx.currentUser)))
+      H.liftEffect $ log $ "Router.Receive Country = " <> ctx.country
+      H.modify_ _ { currentUser = ctx.currentUser, country = ctx.country }
 
   handleQuery :: forall a. Query a -> H.HalogenM State Action ChildSlots Void m (Maybe a)
   handleQuery = case _ of
@@ -110,22 +112,22 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
 
   -- Display the login page instead of the expected page if there is no current user; a simple
   -- way to restrict access.
-  authorize :: Maybe Profile -> H.ComponentHTML Action ChildSlots m -> H.ComponentHTML Action ChildSlots m
-  authorize mbProfile html = case mbProfile of
-    Nothing ->
-      HH.slot (Proxy :: _ "login") unit Login.component { redirect: false } absurd
+  authorize :: State -> H.ComponentHTML Action ChildSlots m -> H.ComponentHTML Action ChildSlots m
+  authorize { currentUser: currentUser, country: country } html = case currentUser of
+    Nothing -> do
+      HH.slot (Proxy :: _ "login") unit Login.component { redirect: false, country: country} absurd
     Just _ ->
       html
 
   render :: State -> H.ComponentHTML Action ChildSlots m
-  render { route, currentUser } = case route of
+  render state@{ route: route, currentUser: currentUser, country: country } = case route of
     Just r -> case r of
-      Home -> authorize currentUser do
+      Home -> authorize state do
         HH.div [][menu currentUser Home, main $ HH.slot_ (Proxy :: _ "home") unit Home.component Home.Unit]
-      Dashboard -> authorize currentUser do
+      Dashboard -> authorize state do
         HH.div [][menu currentUser Dashboard, main $ HH.slot_ (Proxy :: _ "dashboard") unit Dashboard.component unit]
-      Login ->
-        HH.slot_ (Proxy :: _ "login") unit Login.component { redirect: true }
+      Login -> do
+        HH.slot_ (Proxy :: _ "login") unit Login.component { redirect: true, country: country }
     Nothing ->
       full $ HH.div_ [ HH.text "Oh no! That page wasn't found." ]
 

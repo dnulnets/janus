@@ -8,7 +8,8 @@ import Record.Extra (type (:::), SNil)
 
 -- Symbols should be in alphabetic order.
 type Labels =
-    ( "gb_country"
+    ( "country"
+  ::: "gb_country"
   ::: "se_country"
   ::: "us_country"
   ::: SNil
@@ -22,14 +23,16 @@ translator country =
 
 en :: Translation Labels
 en = fromRecord
-  { se_country: "Sweden"
+  { country: "Country"
+  , se_country: "Sweden"
   , us_country: "USA"
   , gb_country: "Great Britain"
   }
 
 se :: Translation Labels
 se = fromRecord
-  { se_country: "Sverige"
+  { country: "Land"
+  , se_country: "Sverige"
   , us_country: "USA"
   , gb_country: "Storbritannien"
   }
