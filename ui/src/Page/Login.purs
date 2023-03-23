@@ -49,7 +49,6 @@ component
   => Navigate m
   => ManageUser m
   => MonadStore Store.Action Store.Store m
-  => I18n m
   => H.Component q Input o m
 component = H.mkComponent
   { initialState

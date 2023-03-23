@@ -87,6 +87,3 @@ instance manageUserAppM :: ManageUser AppM where
 
     void $ mkAuthRequest { endpoint: User, method: method }
 
-instance i18nAppM :: I18n AppM where
-  country = liftEffect $ fromMaybe "en" <$> Request.readCountry
-  setLanguage s t = pure $ t # setLang s 

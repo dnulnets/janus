@@ -69,7 +69,6 @@ component
   => LogMessages m
   => Navigate m
   => ManageUser m
-  => I18n m
   => H.Component Query Unit Void m
 component = connect selectAll $ H.mkComponent
   { initialState: \{ context: ctx } -> { route: Nothing, currentUser: ctx.currentUser, country: ctx.country }
