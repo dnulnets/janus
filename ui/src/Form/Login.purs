@@ -1,6 +1,6 @@
+-- |This module contains the form for login.
 module Janus.Form.Login where
 
-import Janus.Capability.Resource.User
 import Prelude
 
 import Data.Maybe (Maybe(..))
@@ -11,17 +11,15 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Halogen.HTML.Properties.ARIA as HPA
 import Janus.Capability.Navigate (class Navigate, navigate)
 import Janus.Capability.Resource.User (class ManageUser, loginUser)
-import Janus.Component.HTML.Fragments (full)
-import Janus.Component.HTML.Utils (css, whenElem, prop)
+import Janus.Component.HTML.Utils (css, whenElem)
 import Janus.Data.Route (Route(..))
 import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
-import Janus.Lang.Form.Login (translator, Labels(..))
+import Janus.Lang.Form.Login (translator, Labels)
 import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
 
 type Slot = forall q . H.Slot q Void Unit

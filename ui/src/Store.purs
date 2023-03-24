@@ -1,12 +1,11 @@
--- | The module for the global storage. It defines the store, reduce function and the
+-- | The module for the global storage. It defines the store, its reduce function and the
 -- | actions the store supports.
 module Janus.Store
   ( Action(..)
   , LogLevel(..)
   , Store
   , reduce
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -16,6 +15,7 @@ import Data.Maybe (Maybe(..))
 
 -- | Different types of log level
 data LogLevel = Dev | Prod
+
 derive instance eqLogLevel ∷ Eq LogLevel
 derive instance ordLogLevel ∷ Ord LogLevel
 
@@ -30,8 +30,8 @@ type Store =
 -- | The actions supported by the store.
 data Action
   = LoginUser Profile -- | Logs in a user
-  | LogoutUser        -- | Logs out a user
-  | Country String    -- | Country code
+  | LogoutUser -- | Logs out a user
+  | Country String -- | Country code
 
 -- | Reduces the store based on an action.
 reduce ∷ Store → Action → Store
@@ -41,5 +41,5 @@ reduce store = case _ of
   LogoutUser →
     store { currentUser = Nothing }
   Country c ->
-    store { country = c}
+    store { country = c }
 

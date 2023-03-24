@@ -1,3 +1,4 @@
+-- |This module contains the available profiles and codecs for json.
 module Janus.Data.Profile
   ( Profile(..)
   , ProfileBase(..)

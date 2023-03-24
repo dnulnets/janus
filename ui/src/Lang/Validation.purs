@@ -1,3 +1,4 @@
+-- |The language support for the validation of the input components.
 module Janus.Lang.Validation (translator, Labels (..)) where
 
 import Prelude

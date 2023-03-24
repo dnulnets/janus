@@ -1,3 +1,4 @@
+-- |This module contains support for a UUID type and encoding, decoding of the type for json. 
 module Janus.Data.UUID
   ( UUID(..)
   , codec

@@ -62,7 +62,7 @@ main = HA.runHalogenAff do
 
   let
     initialStore ∷ Store
-    initialStore = { baseUrl:baseUrl, logLevel:logLevel, currentUser:currentUser, country: fromMaybe "en" country }
+    initialStore = { baseUrl: baseUrl, logLevel: logLevel, currentUser: currentUser, country: fromMaybe "en" country }
 
   rootComponent ← runAppM initialStore Router.component
 

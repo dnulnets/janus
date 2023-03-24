@@ -1,8 +1,9 @@
+-- |The language support for the login form.
 module Janus.Lang.Form.Login (translator, Labels (..)) where
 
 import Prelude
 import Simple.I18n.Translation (Translation, fromRecord)
-import Simple.I18n.Translator (Translator, createTranslator, label, setLang, translate)
+import Simple.I18n.Translator (Translator, createTranslator, setLang)
 import Type.Proxy (Proxy(..))
 import Record.Extra (type (:::), SNil)
 

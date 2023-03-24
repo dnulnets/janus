@@ -37,7 +37,6 @@
   , "routing-duplex"
   , "safe-coerce"
   , "simple-i18n"
-  , "slug"
   , "strings"
   , "transformers"
   , "tuples"

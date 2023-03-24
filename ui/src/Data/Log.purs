@@ -1,3 +1,4 @@
+-- |This module contains the capability for logging of the application.
 module Janus.Data.Log
   ( LogReason(..)
   , message

@@ -1,3 +1,4 @@
+-- |The language support for the router component.
 module Janus.Lang.Router (Labels(..), translator) where
 
 import Prelude
@@ -7,13 +8,7 @@ import Type.Proxy (Proxy(..))
 import Record.Extra (type (:::), SNil)
 
 -- Symbols should be in alphabetic order.
-type Labels =
-  ( "country"
-      ::: "gb_country"
-      ::: "se_country"
-      ::: "us_country"
-      ::: SNil
-  )
+type Labels = ( "tbd" ::: SNil )
 
 translator :: String -> Translator Labels
 translator country =
@@ -24,16 +19,8 @@ translator country =
 
 en :: Translation Labels
 en = fromRecord
-  { country: "Country"
-  , se_country: "Sweden"
-  , us_country: "USA"
-  , gb_country: "Great Britain"
-  }
+  { tbd: "To be decided" }
 
 se :: Translation Labels
 se = fromRecord
-  { country: "Land"
-  , se_country: "Sverige"
-  , us_country: "USA"
-  , gb_country: "Storbritannien"
-  }
+  { tbd: "Att bestämmas" }

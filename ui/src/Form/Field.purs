@@ -1,3 +1,4 @@
+-- |This module contains various fields that can be used by the pages or forms for the application.
 module Janus.Form.Field
   ( StringField
   , TextInput

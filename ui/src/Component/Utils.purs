@@ -1,3 +1,4 @@
+-- |This module contains various functions and utilities for halogen.
 module Janus.Component.Utils where
 
 import Prelude

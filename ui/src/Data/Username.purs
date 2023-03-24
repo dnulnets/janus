@@ -1,3 +1,5 @@
+-- |This module contains the username data type and some additional functions for json and
+-- |other helper functions.
 module Janus.Data.Username
   ( Username
   , parse
@@ -20,12 +22,15 @@ derive instance ordUsername :: Ord Username
 instance showUsername :: Show Username where
   show (Username n) = n 
 
+-- |The json codec for the datatype.
 codec :: JsonCodec Username
 codec = dimap (\(Username user) -> user) Username CA.string
 
+-- ª|Parses a string to a user name.
 parse :: String -> Maybe Username
 parse "" = Nothing
 parse str = Just (Username str)
 
+-- |Converts a user name to a string.
 toString :: Username -> String
 toString (Username str) = str

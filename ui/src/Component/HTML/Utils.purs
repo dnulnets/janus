@@ -1,3 +1,4 @@
+-- |This module contains various functions and utilities for building HTML.
 module Janus.Component.HTML.Utils
   ( maybeElem
   , prop

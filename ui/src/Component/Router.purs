@@ -12,12 +12,11 @@ import Effect.Console (log)
 import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
-import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.HTML.Properties.ARIA as HPA
 import Halogen.Store.Connect (Connected, connect)
 import Halogen.Store.Monad (class MonadStore)
-import Halogen.Store.Select (selectEq, selectAll)
+import Halogen.Store.Select (selectAll)
 import Janus.Capability.LogMessages (class LogMessages)
 import Janus.Capability.Navigate (class Navigate, navigate)
 import Janus.Capability.Now (class Now)
@@ -35,7 +34,6 @@ import Janus.Store as Store
 import Routing.Duplex as RD
 import Routing.Hash (getHash)
 import Type.Proxy (Proxy(..))
-import Janus.Component.HTML.Fragments (main)
 
 -- |The router page query messages used for navigation.
 data Query a = Navigate Route a
