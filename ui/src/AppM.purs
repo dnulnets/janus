@@ -12,7 +12,6 @@ import Janus.Capability.LogMessages (class LogMessages)
 import Janus.Capability.Navigate (class Navigate, navigate)
 import Janus.Capability.Now (class Now)
 import Janus.Capability.Resource.User (class ManageUser)
-import Janus.Capability.I18n (class I18n)
 import Janus.Data.Log as Log
 import Janus.Data.Profile as Profile
 import Janus.Data.Route as Route

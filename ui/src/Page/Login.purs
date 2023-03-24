@@ -17,7 +17,6 @@ import Halogen.HTML.Properties.ARIA as HPA
 import Janus.Api.Request (writeCountry)
 import Janus.Capability.Navigate (class Navigate, navigate)
 import Janus.Capability.Resource.User (class ManageUser, loginUser)
-import Janus.Capability.I18n
 import Janus.Component.HTML.Fragments (full)
 import Janus.Component.HTML.Utils (css, whenElem, prop)
 import Janus.Data.Route (Route(..))
@@ -70,7 +69,7 @@ component = H.mkComponent
         H.modify_ (\state -> state { i18n = state.i18n # setLang c})
 
     render :: State -> H.ComponentHTML Action ChildSlots m
-    render state = 
+    render {i18n: i18n, redirect: redirect } = 
         full $ HH.section [css "vh-100"]
         [
             HH.div [css "container-fluid h-custom workarea"]
@@ -96,20 +95,21 @@ component = H.mkComponent
                                     HH.a [css "btn btn-primary dropdown-toggle", HP.id "j-dropdownlink", HP.href "#", prop "role" "button",
                                         prop "data-bs-toggle" "dropdown", HPA.expanded "false"]
                                     [
-                                        HH.text (state.i18n # translate (label :: _ "country"))
+                                        HH.text (i18n # translate (label :: _ "country"))
                                     ],
                                     HH.ul [css "dropdown-menu", HPA.labelledBy "j-dropdownlink"]
                                     [
-                                        HH.li_ [HH.a [css "dropdown-item", HE.onClick (\_->Country "se")][HH.text (state.i18n # translate (label :: _ "se_country"))]],
-                                        HH.li_ [HH.a [css "dropdown-item", HE.onClick (\_->Country "us")][HH.text (state.i18n # translate (label :: _ "us_country"))]],
-                                        HH.li_ [HH.a [css "dropdown-item", HE.onClick (\_->Country "gb")][HH.text (state.i18n # translate (label :: _ "gb_country"))]]
+                                        HH.li_ [HH.a [css "dropdown-item", HE.onClick (\_->Country "se")][HH.text (i18n # translate (label :: _ "se_country"))]],
+                                        HH.li_ [HH.a [css "dropdown-item", HE.onClick (\_->Country "us")][HH.text (i18n # translate (label :: _ "us_country"))]],
+                                        HH.li_ [HH.a [css "dropdown-item", HE.onClick (\_->Country "gb")][HH.text (i18n # translate (label :: _ "gb_country"))]]
                                     ]
                                 ]
                             ]
                         ],
-                        HH.slot_ (Proxy :: _ "login") unit L.component { redirect: state.redirect, country: state.i18n # currentLang }
+                        HH.slot_ (Proxy :: _ "login") unit L.component { redirect: redirect, country: i18n # currentLang }
                     ]
 
                 ]
             ]
         ]
+
