@@ -28,6 +28,7 @@ import           Data.Text.Encoding              (decodeUtf8', encodeUtf8)
 import           Data.Text.Lazy                  (toStrict)
 import           Data.Time.Clock.System          (SystemTime (systemSeconds),
                                                   getSystemTime)
+import           Data.UUID                       (UUID)
 import qualified Database.Persist.Sql            as DB
 import           Janus.Core                      (JScottyM)
 import qualified Janus.Data.Config               as C
@@ -43,7 +44,7 @@ import           Web.Scotty.Trans                (get, header, json, jsonData,
 
 -- | User information for the login response
 data LoginResponse = LoginResponse
-  { guid      :: Text,
+  { guid     :: UUID,
     username :: Text,
     email    :: Text,
     token    :: Text
@@ -87,10 +88,17 @@ instance FromJSON LoginRequest where
       .: "password"
   parseJSON _ = empty
 
--- | The part of the application that serve user specific functions
+-- | The part of the application that serve user specific functions.
+-- |
+-- | The following url's are handled:
+-- |
+-- | POST /api/user/login : Check the user and password, return with a token and user if valid and active
+-- | GET  /api/user/login : Check that the authroization contains a valid token and that the user is valid and active, returns with the user
+-- |
 app :: (MonadIO m) => JScottyM m ()
 app = do
 
+  -- |Handles a login request and returns with the token if the user is valid and active
   post "/api/user/login" $ do
     req <- jsonData
     settings <- lift ask
@@ -103,7 +111,8 @@ app = do
         json userResponse
       _ -> status unauthorized401
 
-  get "/api/user" $ do
+  -- |Checks a token and returns with the user if the user is valid and active
+  get "/api/user/login" $ do
     settings <- lift ask
     auth <- header "Authorization"
     let bearer = extractBearerAuth . encodeUtf8 . toStrict <$> auth

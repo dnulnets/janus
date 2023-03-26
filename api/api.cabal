@@ -23,6 +23,8 @@ library
                      , Janus.Utils.JWT
                      , Janus.Data.User
                      , Janus.Data.Config
+                     , Janus.Data.Role
+                     , Janus.Data.UUID
                      , Janus.Core
                      , Janus.Utils.DB
                      , Janus.Data.Model
@@ -49,6 +51,9 @@ library
                      , cryptonite
                      , http-types
                      , bytestring
+                     , uuid
+                     , extra
+                     , path-pieces
   default-language:    Haskell2010
   ghc-options:         -Wall
                        -Wcompat

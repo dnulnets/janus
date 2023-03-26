@@ -86,3 +86,9 @@ instance manageUserAppM :: ManageUser AppM where
 
     void $ mkAuthRequest { endpoint: User, method: method }
 
+  getUser uuid = do
+    mbJson <- mkAuthRequest { endpoint: User, method: Get }
+    map (map _.user)
+      $ decode (CAR.object "User" { user: Profile.profileCodec }) mbJson
+
+  getUsers = pure []

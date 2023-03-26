@@ -4,6 +4,7 @@
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE QuasiQuotes                #-}
 {-# LANGUAGE StandaloneDeriving         #-}
 {-# LANGUAGE TemplateHaskell            #-}
@@ -24,20 +25,30 @@
 --
 module Janus.Data.Model where
 
-import           Data.Text           (Text)
-import Database.Persist.TH
-    ( mkMigrate, mkPersist, persistLowerCase, share, sqlSettings )
+import           Data.Text                      (Text)
+import           Database.Persist.TH            (mkMigrate,
+                                                 mkPersist, persistLowerCase,
+                                                 share, sqlSettings, setImplicitIdDef)
+import qualified Janus.Data.Role                as Role
+import           Janus.Data.UUID
+import           Prelude
 
-share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
+share [mkPersist (setImplicitIdDef uuidDef sqlSettings), mkMigrate "migrateAll"] [persistLowerCase|
 
 User
     username Text
-    guid Text
+    guid UUID
     password Text
     email Text
+    active Bool
     UniqueUserUsername username
     UniqueUserGUID guid
     deriving Show
+
+AssignedRole
+    type Role.Role
+    guid UUID Maybe
+    user UserId
 
 |]
 

@@ -1,0 +1,8 @@
+cradle:
+  stack:
+    - path: ./src
+      component: "api:lib"
+    - path: ./app
+      component: "api:exe:api-exe"
+    - path: ./test
+      component: "api:test:api-test"

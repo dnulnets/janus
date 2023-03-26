@@ -17,8 +17,9 @@ module Janus.Utils.JWT
   )
 where
 
-import           Data.Text       (Text)
+import           Data.Text       (Text, pack, unpack)
 import           Data.Time.Clock (NominalDiffTime)
+import           Data.UUID
 import           Web.JWT         as JWT (Algorithm (HS256),
                                          JOSEHeader (alg, typ),
                                          JWTClaimsSet (exp, iat, iss, sub),
@@ -38,7 +39,7 @@ createToken ::
   -- | Issuer
   Text ->
   -- | The subject
-  Text ->
+  UUID ->
   -- | The token
   Text
 createToken jwtSecret ndt len issuer subject =
@@ -48,7 +49,7 @@ createToken jwtSecret ndt len issuer subject =
     mempty
       { JWT.iat = numericDate ndt,
         JWT.exp = numericDate (ndt + fromIntegral len),
-        JWT.sub = stringOrURI subject,
+        JWT.sub = stringOrURI (pack $ toString subject),
         JWT.iss = stringOrURI issuer
       }
 
@@ -63,12 +64,12 @@ getSubject ::
   -- | Issuer
   Text ->
   -- | The subject
-  Maybe Text
+  Maybe UUID
 getSubject jwtSecret now token issuer = do
   jwt <- JWT.decodeAndVerifySignature (toVerify (JWT.hmacSecret jwtSecret)) token
   case hasDateExpired (JWT.exp (JWT.claims jwt)) (numericDate now) of
     Just False -> case isCorrectIssuer (stringOrURIToText <$> JWT.iss (JWT.claims jwt)) issuer of
-      Just True -> stringOrURIToText <$> JWT.sub (JWT.claims jwt)
+      Just True -> (fromString . unpack . stringOrURIToText) =<< JWT.sub (JWT.claims jwt)
       _         -> Nothing
     _ -> Nothing
   where

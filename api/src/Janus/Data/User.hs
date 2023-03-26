@@ -10,7 +10,7 @@
 -- Portability : POSIX
 --
 -- The user type used within the server application.
-module Janus.Data.User (User (..)) where
+module Janus.Data.User (User(..)) where
 
 import           Control.Applicative (Alternative (empty))
 import           Data.Aeson          (FromJSON (parseJSON), KeyValue ((.=)),

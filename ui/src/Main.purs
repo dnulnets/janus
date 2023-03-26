@@ -46,7 +46,7 @@ main = HA.runHalogenAff do
       pure Nothing
 
     Just token → do
-      let requestOptions = { endpoint: User, method: Get }
+      let requestOptions = { endpoint: Login, method: Get }
       res ← request $ defaultRequest baseUrl (Just token) requestOptions
 
       let
