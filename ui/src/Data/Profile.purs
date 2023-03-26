@@ -19,7 +19,7 @@ import Janus.Data.UUID as UUID
 import Janus.Data.Username (Username)
 import Janus.Data.Username as Username
 
-type ProfileBase r = ( guid::UUID, email :: Email, username::Username | r )
+type ProfileBase r = ( guid::UUID, email :: Email, username::Username, active::Boolean | r )
 type Profile = { | ProfileBase ()}
 type ProfileWithPassword = {| ProfileBase(password::Maybe String)}
 
@@ -28,7 +28,8 @@ profileCodec =
   CAR.object "Profile"
     { guid: UUID.codec,
       username: Username.codec,
-      email: Email.codec
+      email: Email.codec,
+      active: CA.boolean
     }
 
 profileWithPasswordCodec :: JsonCodec ProfileWithPassword
@@ -37,5 +38,6 @@ profileWithPasswordCodec =
     { guid: UUID.codec,
       username: Username.codec,
       email: Email.codec,
+      active: CA.boolean,
       password: CAC.maybe CA.string
     }

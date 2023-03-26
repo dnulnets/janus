@@ -47,6 +47,7 @@ data LoginResponse = LoginResponse
   { guid     :: UUID,
     username :: Text,
     email    :: Text,
+    active   :: Bool,
     token    :: Text
   }
   deriving (Show)
@@ -60,8 +61,8 @@ data LoginRequest = LoginRequest
 
 instance ToJSON LoginResponse where
   -- this generates a Value
-  toJSON (LoginResponse _guid _username _email _token) =
-    object ["user" .= object ["guid" .= _guid, "username" .= _username, "email" .= _email, "token" .= _token]]
+  toJSON (LoginResponse _guid _username _email _active _token) =
+    object ["user" .= object ["guid" .= _guid, "username" .= _username, "email" .= _email, "token" .= _token, "active" .= _active]]
 
 instance FromJSON LoginResponse where
   parseJSON (Object v) = do
@@ -75,6 +76,8 @@ instance FromJSON LoginResponse where
       .: "email"
       <*> w
       .: "token"
+      <*> w
+      .: "active"
   parseJSON _ = empty
 
 
@@ -104,10 +107,11 @@ app = do
     settings <- lift ask
     dbuser <- runDB $ DB.getBy $ UniqueUserUsername (qusername req)
     case dbuser of
-      Just (DB.Entity _ user) | authValidatePassword (userPassword user) (qpassword req) -> do
+      Just (DB.Entity _ user) | userActive user && authValidatePassword (userPassword user) (qpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         let jwt = createToken (C.key (C.token (config settings))) seconds (C.valid (C.token (config settings))) (C.issuer (C.token (config settings))) (userGuid user)
-        let userResponse = LoginResponse {guid = (userGuid user), username = (userUsername user), email = (userEmail user), token = jwt}
+        let userResponse = LoginResponse {guid = (userGuid user), username = (userUsername user), email = (userEmail user),
+          active = (userActive user), token = jwt}
         json userResponse
       _ -> status unauthorized401
 
@@ -123,9 +127,10 @@ app = do
           Just u -> do
             dbuser <- runDB $ DB.getBy $ UniqueUserGUID u
             case dbuser of
-              Just (DB.Entity _ user) -> do
-                let userResponse = LoginResponse {guid = (userGuid user), username = (userUsername user), email = (userEmail user), token = b}
+              Just (DB.Entity _ user) | userActive user -> do
+                let userResponse = LoginResponse {guid = (userGuid user), username = (userUsername user), 
+                  email = (userEmail user), active = (userActive user), token = b}
                 json userResponse
-              Nothing -> status unauthorized401
+              _ -> status unauthorized401
           Nothing -> status unauthorized401
       _ -> status unauthorized401
