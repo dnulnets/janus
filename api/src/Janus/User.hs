@@ -14,33 +14,31 @@
 -- This module contains the static part of the application that servers static pages.
 module Janus.User (app, LoginResponse(..), LoginRequest(..)) where
 
-import           Control.Applicative             (Alternative (empty))
-import           Control.Monad                   (join)
-import           Control.Monad.IO.Class          (MonadIO)
-import           Control.Monad.Reader            (ask)
-import           Control.Monad.Trans             (lift, liftIO)
-import           Data.Aeson                      (FromJSON (parseJSON),
-                                                  KeyValue ((.=)),
-                                                  ToJSON (toJSON),
-                                                  Value (Object), object, (.:))
-import           Data.Text                       (Text)
-import           Data.Text.Encoding              (decodeUtf8', encodeUtf8)
-import           Data.Text.Lazy                  (toStrict)
-import           Data.Time.Clock.System          (SystemTime (systemSeconds),
-                                                  getSystemTime)
-import           Data.UUID                       (UUID)
-import qualified Database.Persist.Sql            as DB
-import           Janus.Core                      (JScottyM)
-import qualified Janus.Data.Config               as C
-import           Janus.Data.Model
-import           Janus.Settings
-import           Janus.Utils.DB
-import           Janus.Utils.JWT                 (createToken, getSubject)
-import           Janus.Utils.Password
-import           Network.HTTP.Types.Status
-import           Network.Wai.Middleware.HttpAuth (extractBearerAuth)
-import           Web.Scotty.Trans                (get, header, json, jsonData,
-                                                  post, status)
+import           Control.Applicative       (Alternative (empty))
+import           Control.Monad.IO.Class    (MonadIO)
+import           Control.Monad.Reader      (ask)
+import           Control.Monad.Trans       (lift, liftIO)
+import           Data.Aeson                (FromJSON (parseJSON),
+                                            KeyValue ((.=)), ToJSON (toJSON),
+                                            Value (Object), object, (.:))
+import           Data.Maybe                (fromMaybe)
+import           Data.Text                 (Text)
+import           Data.Time.Clock.System    (SystemTime (systemSeconds),
+                                            getSystemTime)
+import           Data.UUID                 (UUID)
+import qualified Database.Persist.Sql      as DB
+import           Janus.Core                (JScottyM, authenticationRequired,
+                                            getAuthenticated, getToken)
+import qualified Janus.Data.Config         as C
+import           Janus.Data.Model          (Unique (UniqueUserUsername),
+                                            User (userActive, userEmail, userGuid, userPassword, userUsername))
+import           Janus.Settings            (Settings (config))
+import           Janus.Utils.DB            (runDB)
+import           Janus.Utils.JWT           (createToken)
+import           Janus.Utils.Password      (authValidatePassword)
+import           Network.HTTP.Types.Status (unauthorized401)
+import           Web.Scotty.Trans          (get, json, jsonData, post, status,
+                                            text)
 
 -- | User information for the login response
 data LoginResponse = LoginResponse
@@ -117,20 +115,16 @@ app = do
 
   -- |Checks a token and returns with the user if the user is valid and active
   get "/api/user/login" $ do
-    settings <- lift ask
-    auth <- header "Authorization"
-    let bearer = extractBearerAuth . encodeUtf8 . toStrict <$> auth
-    case decodeUtf8' <$> join bearer of
-      Just (Right b) -> do
-        seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
-        case getSubject (C.key (C.token (config settings))) seconds b (C.issuer (C.token (config settings))) of
-          Just u -> do
-            dbuser <- runDB $ DB.getBy $ UniqueUserGUID u
-            case dbuser of
-              Just (DB.Entity _ user) | userActive user -> do
-                let userResponse = LoginResponse {guid = (userGuid user), username = (userUsername user), 
-                  email = (userEmail user), active = (userActive user), token = b}
-                json userResponse
-              _ -> status unauthorized401
-          Nothing -> status unauthorized401
-      _ -> status unauthorized401
+
+    user <- getAuthenticated
+    token <- getToken
+    case user of
+      Just u -> do
+        let userResponse = LoginResponse {guid = (userGuid u), username = (userUsername u),
+          email = (userEmail u), active = (userActive u), token = fromMaybe "" token}
+        json userResponse
+      Nothing -> status unauthorized401
+
+  get "/api/tomas" $ do
+    authenticationRequired
+    text "Hejsan svejsan"
