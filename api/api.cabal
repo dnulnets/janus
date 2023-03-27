@@ -30,6 +30,7 @@ library
                      , Janus.Data.Model
                      , Janus.Settings
                      , Janus.Utils.Password
+                     , Janus.Utils.Auth
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , scotty
@@ -54,6 +55,7 @@ library
                      , uuid
                      , extra
                      , path-pieces
+                     , containers
   default-language:    Haskell2010
   ghc-options:         -Wall
                        -Wcompat

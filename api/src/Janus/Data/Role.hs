@@ -26,7 +26,7 @@ import           GHC.Generics        (Generic)
 
 -- | The roles supported by the application
 data Role = User | Administrator | CreateObject | UpdateObject | DestroyObject | ReadObject
-    deriving (Eq, Show, Read, Generic)
+    deriving (Eq, Show, Read, Generic, Ord)
 derivePersistField "Role"
 instance FromJSON Role
 instance ToJSON Role

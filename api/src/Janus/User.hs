@@ -27,9 +27,9 @@ import           Data.Time.Clock.System    (SystemTime (systemSeconds),
                                             getSystemTime)
 import           Data.UUID                 (UUID)
 import qualified Database.Persist.Sql      as DB
-import           Janus.Core                (JScottyM, authenticationRequired,
-                                            getAuthenticated, getToken)
+import           Janus.Core                (JScottyM)
 import qualified Janus.Data.Config         as C
+import Janus.Data.Role
 import           Janus.Data.Model          (Unique (UniqueUserUsername),
                                             User (userActive, userEmail, userGuid, userPassword, userUsername))
 import           Janus.Settings            (Settings (config))
@@ -39,6 +39,7 @@ import           Janus.Utils.Password      (authValidatePassword)
 import           Network.HTTP.Types.Status (unauthorized401)
 import           Web.Scotty.Trans          (get, json, jsonData, post, status,
                                             text)
+import Janus.Utils.Auth
 
 -- | User information for the login response
 data LoginResponse = LoginResponse
@@ -94,7 +95,7 @@ instance FromJSON LoginRequest where
 -- | The following url's are handled:
 -- |
 -- | POST /api/user/login : Check the user and password, return with a token and user if valid and active
--- | GET  /api/user/login : Check that the authroization contains a valid token and that the user is valid and active, returns with the user
+-- | GET  /api/user/login : Check that the authorization header contains a valid token and that the user is valid and active, returns with the user
 -- |
 app :: (MonadIO m) => JScottyM m ()
 app = do
@@ -126,5 +127,5 @@ app = do
       Nothing -> status unauthorized401
 
   get "/api/tomas" $ do
-    authenticationRequired
+    roleRequired [Administrator]
     text "Hejsan svejsan"
