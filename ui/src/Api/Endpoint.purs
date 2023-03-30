@@ -22,6 +22,6 @@ derive instance genericEndpoint :: Generic Endpoint _
 -- | The codec for the valid routes in the Janus application.
 endpointCodec :: RouteDuplex' Endpoint
 endpointCodec = root $ prefix "api" $ sum
-  { "Login": "user" / "login" / noArgs
+  { "Login": "login" / noArgs
   , "User": "user" / noArgs
   }

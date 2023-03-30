@@ -5,4 +5,5 @@ token:
 database:
   url: "host=192.168.1.19 dbname=janus user=janus password='janus' port=5432"
   size: 5
-
+password:
+  cost: 10

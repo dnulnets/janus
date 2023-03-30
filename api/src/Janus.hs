@@ -29,9 +29,10 @@ import           Network.Wai                          (Application)
 import           Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import           Web.Scotty.Trans                     as T (middleware,
                                                             scottyAppT, scottyT)
+import Control.Monad.Catch
 
 -- | The concatenated application
-app :: (MonadIO m) => JScottyM m () -- ^ The Janus Scotty Monad
+app :: (MonadIO m, MonadCatch m) => JScottyM m () -- ^ The Janus Scotty Monad
 app = middleware logStdoutDev <> JS.app <> JU.app
 
 -- | The application that can be used for the testbed

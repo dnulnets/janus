@@ -12,7 +12,7 @@
 -- This module contains the data type and handling and parsing of the application configuration
 -- located in a yaml-file.
 --
-module Janus.Data.Config (Database (..), Token (..), Config (..), readConfig) where
+module Janus.Data.Config (Database (..), Token (..), Password (..), Config (..), readConfig) where
 
 import           Control.Applicative (Alternative (empty))
 import           Data.Text           (Text)
@@ -39,12 +39,21 @@ data Token = Token
   }
   deriving (Show)
 
+-- | Password configuration
+data Password = Password
+  {
+    -- | Hashing cost
+    cost:: Integer
+  } deriving (Show)
+
 -- | Application configuration
 data Config = Config
   { -- | The token configuration
     token    :: Token,
     -- | The database configuration
-    database :: Database
+    database :: Database,
+    -- | The password configuration
+    password :: Password
   }
   deriving (Show)
 
@@ -53,6 +62,7 @@ instance FromJSON Config where
   parseJSON (Object v) = do
     w <- v .: "token"
     x <- v .: "database"
+    y <- v .: "password"
     Config
       <$> ( Token
               <$> w
@@ -68,6 +78,9 @@ instance FromJSON Config where
               <*> x
               .: "size"
           )
+      <*> ( Password
+              <$> y
+              .: "cost")
   parseJSON _ = empty
 
 -- | Reads the configuration file for the Janus application

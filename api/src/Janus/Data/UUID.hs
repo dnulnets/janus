@@ -9,7 +9,7 @@
 {-# LANGUAGE TypeFamilies               #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Janus.Data.UUID(UUID, uuidDef) where
+module Janus.Data.UUID(UUID, uuidDef, toPersistValue, fromPersistValue, toPathPiece, fromPathPiece) where
 
 
 import qualified Data.ByteString.Char8          as C8
