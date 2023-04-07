@@ -46,7 +46,7 @@ getAuthenticated = do
     case token of
       Just b -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
-        case getSubject (C.key (C.token (config settings))) seconds b (C.issuer (C.token (config settings))) of
+        case getSubject ((C.key . C.token . config) settings) seconds b ((C.issuer . C.token . config) settings) of
           Just u -> do
             dbuser <- runDB $ DB.getBy $ UniqueUserGUID u
             case dbuser of

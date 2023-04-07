@@ -15,7 +15,6 @@
 module Janus.User (app, UserResponse(..), LoginRequest(..)) where
 
 import           Control.Applicative       (Alternative (empty))
-import           Control.Exception         (SomeException)
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class    (MonadIO)
 import           Control.Monad.Reader      (ask)
@@ -23,9 +22,7 @@ import           Control.Monad.Trans       (lift, liftIO)
 import           Data.Aeson                (FromJSON (parseJSON),
                                             KeyValue ((.=)), ToJSON (toJSON),
                                             Value (Object), object, (.:), (.:?))
-import           Data.Maybe                (fromMaybe)
 import           Data.Text                 (Text)
-import qualified Data.Text.Lazy            as L
 import           Data.Time.Clock.System    (SystemTime (systemSeconds),
                                             getSystemTime)
 import           Data.UUID                 (fromString)
@@ -46,7 +43,7 @@ import           Janus.Utils.Password      (authHashPassword,
 import           Network.HTTP.Types.Status (created201, internalServerError500,
                                             notFound404, ok200, unauthorized401, badRequest400)
 import           Web.Scotty.Trans          (delete, get, json, jsonData, param,
-                                            post, put, status, text)
+                                            post, put, status, rescue)
 
 -- | User information for the login response
 data UserResponse = UserResponse
@@ -174,7 +171,12 @@ app = do
     case dbuser of
       Just (DB.Entity _ user) | userActive user && authValidatePassword (userPassword user) (lrpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
-        let jwt = createToken (C.key (C.token (config settings))) seconds (C.valid (C.token (config settings))) (C.issuer (C.token (config settings))) (userGuid user)
+        let jwt = createToken
+              ((C.key . C.token . config) settings) 
+              seconds
+              ((C.valid . C.token . config) settings)
+              ((C.issuer . C.token . config) settings)
+              (userGuid user)
         let userResponse = UserResponse {guid = (userGuid user), username = (userUsername user), email = (userEmail user),
           active = (userActive user), token = Just jwt, password = Nothing}
         json userResponse
@@ -184,11 +186,11 @@ app = do
   get "/api/login" $ do
 
     user <- getAuthenticated
-    token <- getToken
+    t <- getToken
     case user of
       Just u -> do
         let userResponse = UserResponse {guid = (userGuid u), username = (userUsername u),
-          email = (userEmail u), active = (userActive u), token = token, password = Nothing}
+          email = (userEmail u), active = (userActive u), token = t, password = Nothing}
         json userResponse
       Nothing -> status unauthorized401
 
@@ -212,7 +214,7 @@ app = do
     roleRequired [R.Administrator]
     req <- jsonData
     settings <- lift ask
-    pwd <- liftIO $ authHashPassword (C.cost (C.password (config settings))) (curpassword req)
+    pwd <- liftIO $ authHashPassword ((C.cost . C.password . config) settings) (curpassword req)
     _ <- runDB $ DB.insert $ User { userUsername = (curusername req), userGuid = (curguid req), userPassword = pwd,
       userEmail = (curemail req), userActive = (curactive req)}
     status created201) `catch`
@@ -228,7 +230,7 @@ app = do
     uuid <- fromString <$> param "uuid"
     case uuid of
       Just k -> do
-        pwd <- liftIO $ mapM (authHashPassword (C.cost (C.password (config settings)))) (uurpassword req)
+        pwd <- liftIO $ mapM (authHashPassword ((C.cost . C.password . config) settings)) (uurpassword req)
         runDB $ DB.update (UserKey k) $ [ UserUsername DB.=. uurusername req, UserGuid DB.=. uurguid req,
           UserEmail DB.=. uuremail req, UserActive DB.=. uuractive req] <> (maybe [] (\i->[UserPassword DB.=. i]) pwd)
         status ok200
@@ -250,6 +252,15 @@ app = do
         status internalServerError500
         liftIO $ print e)
 
-  get "/api/tomas" $ do
+  -- |Returns with a list of users
+  get "/api/users" $ do
     roleRequired [R.Administrator]
-    text "Hejsan svejsan"
+    settings <- lift ask
+    start <- param "start" `rescue` (\_ -> pure 0)
+    nof <- param "n" `rescue` (\_ -> pure $ fromIntegral $ (C.length . C.ui . config) settings)
+    dbl <- runDB $ DB.selectList [] [DB.LimitTo nof, DB.OffsetBy start, DB.Asc UserUsername]
+    json $ map prepare dbl
+    where
+      prepare::DB.Entity User -> UserResponse
+      prepare (DB.Entity _ u) = UserResponse {guid = (userGuid u), username = (userUsername u),
+              email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}

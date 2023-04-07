@@ -7,3 +7,5 @@ database:
   size: 5
 password:
   cost: 10
+ui:
+  length: 10
