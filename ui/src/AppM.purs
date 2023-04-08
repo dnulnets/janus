@@ -4,6 +4,16 @@ module Janus.AppM where
 
 import Prelude
 
+import Data.Codec.Argonaut as Codec
+import Data.Codec.Argonaut.Record as CAR
+import Data.Maybe (Maybe(..), fromMaybe)
+import Effect.Aff (Aff)
+import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Console as Console
+import Effect.Now as Now
+import Halogen as H
+import Halogen.Store.Monad (class MonadStore, StoreT, getStore, runStoreT, updateStore)
 import Janus.Api.Endpoint (Endpoint(..))
 import Janus.Api.Request (RequestMethod(..))
 import Janus.Api.Request as Request
@@ -17,16 +27,6 @@ import Janus.Data.Profile as Profile
 import Janus.Data.Route as Route
 import Janus.Store (Action(..), LogLevel(..), Store)
 import Janus.Store as Store
-import Data.Codec.Argonaut as Codec
-import Data.Codec.Argonaut.Record as CAR
-import Data.Maybe (Maybe(..))
-import Effect.Aff (Aff)
-import Effect.Aff.Class (class MonadAff)
-import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Console as Console
-import Effect.Now as Now
-import Halogen as H
-import Halogen.Store.Monad (class MonadStore, StoreT, getStore, runStoreT, updateStore)
 import Routing.Duplex (print)
 import Routing.Hash (setHash)
 import Safe.Coerce (coerce)
@@ -75,7 +75,7 @@ instance manageUserAppM :: ManageUser AppM where
     authenticate Request.login
 
   getCurrentUser = do
-    mbJson <- mkAuthRequest { endpoint: User, method: Get }
+    mbJson <- mkAuthRequest { endpoint: Login, method: Get }
     map (map _.user)
       $ decode (CAR.object "User" { user: Profile.profileCodec }) mbJson
 
@@ -84,11 +84,27 @@ instance manageUserAppM :: ManageUser AppM where
       codec = CAR.object "User" { user: Profile.profileWithPasswordCodec }
       method = Put $ Just $ Codec.encode codec { user }
 
-    void $ mkAuthRequest { endpoint: User, method: method }
+    void $ mkAuthRequest { endpoint: User user.guid, method: method }
 
   getUser uuid = do
-    mbJson <- mkAuthRequest { endpoint: User, method: Get }
+    mbJson <- mkAuthRequest { endpoint: User uuid, method: Get }
     map (map _.user)
       $ decode (CAR.object "User" { user: Profile.profileCodec }) mbJson
 
-  getUsers = pure []
+  deleteUser uuid = do
+    void $ mkAuthRequest { endpoint: User uuid, method: Delete }
+  
+  createUser user = do
+    let
+      codec = CAR.object "User" { user: Profile.profileWithPasswordCodec }
+      method = Put $ Just $ Codec.encode codec { user }
+
+    void $ mkAuthRequest { endpoint: CreateUser, method: method }
+
+  getUsers = do
+    let
+      codec =  Codec.array (CAR.object "User" { user: Profile.profileCodec })
+
+    mbJson <- mkAuthRequest { endpoint: Users, method: Get }
+    l <- decode codec mbJson
+    pure $ fromMaybe [] $ map (map _.user) l

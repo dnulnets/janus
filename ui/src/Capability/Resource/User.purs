@@ -5,6 +5,8 @@ module Janus.Capability.Resource.User
   , updateUser
   , getUser
   , getUsers
+  , createUser
+  , deleteUser
   , class ManageUser
   )
   where
@@ -24,14 +26,18 @@ type UpdateProfileFields = { password::Maybe String | ProfileBase () }
 class Monad m <= ManageUser m where
   loginUser :: LoginFields -> m (Maybe Profile)
   getCurrentUser :: m (Maybe Profile)
+  createUser :: UpdateProfileFields -> m Unit
   updateUser :: UpdateProfileFields -> m Unit
   getUser :: UUID -> m (Maybe Profile)
+  deleteUser :: UUID -> m Unit
   getUsers :: m (Array Profile)
 
 -- |Helper to avoid lifting
 instance manageUserHalogenM :: ManageUser m => ManageUser (HalogenM st act slots msg m) where
   loginUser = lift <<< loginUser
   getCurrentUser = lift getCurrentUser
+  createUser = lift <<< createUser
   updateUser = lift <<< updateUser
   getUser = lift <<< getUser
+  deleteUser = lift <<< deleteUser
   getUsers = lift getUsers
