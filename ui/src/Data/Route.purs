@@ -12,7 +12,8 @@ import Routing.Duplex.Generic.Syntax ((/))
 data Route
   = Home |
     Login |
-    Dashboard
+    Dashboard |
+    Users
 
 derive instance genericRoute :: Generic Route _
 derive instance eqRoute :: Eq Route
@@ -24,5 +25,6 @@ routeCodec = root $ sum
   { "Home": noArgs
   , "Login": "login" / noArgs
   , "Dashboard": "dashboard" / noArgs
+  , "Users": "users" / noArgs
   }
 

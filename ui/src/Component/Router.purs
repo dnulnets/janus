@@ -30,6 +30,7 @@ import Janus.Data.Username (toString)
 import Janus.Page.Dashboard as Dashboard
 import Janus.Page.Home as Home
 import Janus.Page.Login as Login
+import Janus.Page.Users as Users
 import Janus.Store as Store
 import Routing.Duplex as RD
 import Routing.Hash (getHash)
@@ -55,6 +56,7 @@ type ChildSlots =
   ( home :: OpaqueSlot Unit
   , login :: OpaqueSlot Unit
   , dashboard :: OpaqueSlot Unit
+  , users :: OpaqueSlot Unit
   )
 
 -- |The router component.
@@ -122,6 +124,8 @@ component = connect selectAll $ H.mkComponent
         HH.div [][menu currentUser Home, main $ HH.slot_ (Proxy :: _ "home") unit Home.component Home.Unit]
       Dashboard -> authorize state do
         HH.div [][menu currentUser Dashboard, main $ HH.slot_ (Proxy :: _ "dashboard") unit Dashboard.component unit]
+      Users -> authorize state do
+        HH.div [][menu currentUser Users, main $ HH.slot_ (Proxy :: _ "users") unit Users.component unit]
       Login -> do
         HH.slot_ (Proxy :: _ "login") unit Login.component { redirect: true, country: country }
     Nothing ->
@@ -144,7 +148,8 @@ menu _currentUser _route =
         HH.ul [css "navbar-nav me-auto mb-2 mb-md-0"]
         [
           navItemDropdown "j-drop1" "Dropdown1" [navItem Home [HH.text "Home"]],
-          navItemDropdown "j-drop2" "Dropdown2" [navItem Dashboard [HH.text "Dashboard"]]
+          navItemDropdown "j-drop2" "Dropdown2" [navItem Dashboard [HH.text "Dashboard"]],
+          navItemDropdown "j-drop2" "Dropdown3" [navItem Users [HH.text "Users"]]
         ],
         span "Product:" "SMP",
         span "Team:" "Fragglarna"
