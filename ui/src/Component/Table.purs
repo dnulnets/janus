@@ -1,6 +1,7 @@
 -- |This module contains the component for a table
 module Janus.Component.Table where
 
+import Janus.Data.UUID
 import Prelude
 
 import Data.Array (range)
@@ -9,18 +10,21 @@ import Effect.Aff.Class (class MonadAff)
 import Effect.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
 import Janus.Capability.Navigate (class Navigate)
 import Janus.Component.HTML.Utils (css, prop)
-import Halogen.HTML.Events as HE
 
 type Slot id = forall q. H.Slot q Output id
 
-type TableRow = Array String
+type TableRow = {row :: Array String
+    , key :: UUID }
+
 type TableHeader = Array String
 
 type Input = { nofItems :: Int
             , currentItem :: Int
             , nofItemsPerPage :: Int
+            , action :: Boolean
             , headers :: TableHeader
             , rows :: Array TableRow }
 
@@ -34,6 +38,7 @@ data Action = Receive Input
 type State = { nofItems :: Int
             , currentItem :: Int
             , nofItemsPerPage :: Int
+            , action :: Boolean
             , headers :: TableHeader
             , rows :: Array TableRow }
 
@@ -67,7 +72,7 @@ component = H.mkComponent
 
 
   render :: State -> H.ComponentHTML Action () m
-  render {nofItems:nofItems, currentItem:currentItem, nofItemsPerPage:nofItemsPerPage, headers:headers, rows:rows} =
+  render {action:action, nofItems:nofItems, currentItem:currentItem, nofItemsPerPage:nofItemsPerPage, headers:headers, rows:rows} =
     HH.div [] [ top, table, bottom ]
     where
 
@@ -97,7 +102,9 @@ component = H.mkComponent
 
     value s = HH.td [][HH.text s]
 
-    row r = HH.tr [] $ map value r
+    row true r = HH.tr [] $ (map value r.row) <> [HH.td [prop "style" "text-align:right"] [HH.a [css "btn btn-primary"][HH.text "Edit"], HH.span [][HH.text " "],
+                                                            HH.a [css "btn btn-primary"][HH.text "Delete"]]]
+    row false r = HH.tr [] $ map value r.row
 
     page c nip = 1 + c / nip
 
@@ -106,8 +113,8 @@ component = H.mkComponent
     table = HH.div [ css "row" ] [
         HH.div [ css "col" ] [
             HH.table [css "table table-striped style=\"width:100%\""][
-                HH.thead [][HH.tr [] $ map header headers],
-                HH.tbody [] $ map row rows
+                HH.thead [][HH.tr [] $ (map header headers) <> (if action then [HH.th [prop "style" "text-align:right"][HH.text "Action"]] else [])],
+                HH.tbody [] $ map (row action) rows
             ]
         ]
     ]

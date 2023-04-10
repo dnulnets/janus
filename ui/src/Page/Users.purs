@@ -11,6 +11,7 @@ import Halogen.Store.Monad (class MonadStore)
 import Janus.Capability.Navigate (class Navigate)
 import Janus.Component.Table as Table
 import Janus.Store as Store
+import Janus.Data.UUID
 import Type.Proxy (Proxy(..))
 
 type Input = Unit
@@ -52,7 +53,9 @@ component = H.mkComponent
         nofItems : 21,
         nofItemsPerPage : 5,
         currentItem : 0,
+        action : true,
         headers : ["#", "User", "Team"],
-        rows : [["1", "tomas", "fragglarna"], ["2", "peter", "gurkorna"]]
+        rows : [{key:UUID "5435432-54325432-8765876", row:["1", "tomas", "fragglarna"]}, 
+                {key:UUID "6216721-43674367843-31267832", row:["2", "peter", "gurkorna"]}]
       } HandleTable
     ] 
