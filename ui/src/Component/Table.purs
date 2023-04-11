@@ -28,12 +28,16 @@ type Input = { nofItems :: Int
             , headers :: TableHeader
             , rows :: Array TableRow }
 
-data Output = Page Int
+data Output = GotoPage Int
   | Create
+  | Edit UUID
+  | Delete UUID
 
 data Action = Receive Input
-  | GotoPage Int
+  | DoGotoPage Int
   | DoCreate
+  | DoEdit UUID
+  | DoDelete UUID
 
 type State = { nofItems :: Int
             , currentItem :: Int
@@ -63,12 +67,18 @@ component = H.mkComponent
   handleAction = case _ of
     Receive i -> do
       H.liftEffect $ log $ "Table.Receive " <> show i
-    GotoPage n -> do
+    DoGotoPage n -> do
       H.liftEffect $ log $ "Table.Gotopage " <> show n
-      H.raise $ Page n     
+      H.raise $ GotoPage n     
     DoCreate -> do
       H.liftEffect $ log $ "Table.Create"
       H.raise $ Create
+    DoDelete id -> do
+      H.liftEffect $ log $ "Table.Delete " <> show id
+      H.raise $ Delete id
+    DoEdit id -> do
+      H.liftEffect $ log $ "Table.Edit " <> show id
+      H.raise $ Edit id
 
 
   render :: State -> H.ComponentHTML Action () m
@@ -79,7 +89,7 @@ component = H.mkComponent
     top = HH.div [ css "row" ]
       [ HH.div [ css "col d-flex align-items-center justify-content-start" ] [ HH.text $ "Visar " <> show nofItemsPerPage <> " objekt per sida" ],
         HH.div [ css "col d-flex align-items-center justify-content-end" ]
-            [ HH.a [ css "btn btn-primary", prop "role" "button", HE.onClick \_ -> DoCreate] [ HH.text "Create" ]]
+            [ HH.a [ css "btn btn-primary btn-sm", prop "role" "button", HE.onClick \_ -> DoCreate] [ HH.text "Create" ]]
       ]
 
     bottom = HH.div [css "row"][
@@ -89,12 +99,12 @@ component = H.mkComponent
           HH.text $ "Visar sida " <> show (page currentItem nofItemsPerPage) <> " of " <> show (page nofItems nofItemsPerPage)
         ],
         HH.div [css "col d-flex align-items-start justify-content-end"][
-          HH.ul [css "pagination"]
+          HH.ul [css "pagination pagination-sm"]
             ([ HH.li [css $ "page-item" <> if (page currentItem nofItemsPerPage) == 1 then " disabled" else ""]
-                [HH.a [css "page-link", HE.onClick \_ -> GotoPage ((page currentItem nofItemsPerPage)-1)][HH.text "Previous"]]]
+                [HH.a [css "page-link", HE.onClick \_ -> DoGotoPage ((page currentItem nofItemsPerPage)-1)][HH.text "Previous"]]]
             <> (map pageLink (range 1 (page nofItems nofItemsPerPage))) <>
             [ HH.li [css $ "page-item" <> if (page currentItem nofItemsPerPage) == (page nofItems nofItemsPerPage) then " disabled" else ""]
-              [HH.a [css "page-link", HE.onClick \_ -> GotoPage ((page currentItem nofItemsPerPage)+1)][HH.text "Next"]]])
+              [HH.a [css "page-link", HE.onClick \_ -> DoGotoPage ((page currentItem nofItemsPerPage)+1)][HH.text "Next"]]])
         ]
     ]
 
@@ -102,13 +112,17 @@ component = H.mkComponent
 
     value s = HH.td [][HH.text s]
 
-    row true r = HH.tr [] $ (map value r.row) <> [HH.td [prop "style" "text-align:right"] [HH.a [css "btn btn-primary"][HH.text "Edit"], HH.span [][HH.text " "],
-                                                            HH.a [css "btn btn-primary"][HH.text "Delete"]]]
+    row true r = HH.tr [] $ (map value r.row) <> [HH.td [prop "style" "text-align:right"] [HH.a [css "btn btn-primary btn-sm", 
+                                                                                                  HE.onClick \_ -> DoEdit r.key]
+                                                                                                  [HH.text "Edit"], HH.span [][HH.text " "],
+                                                            HH.a [css "btn btn-primary btn-sm",
+                                                              HE.onClick \_ -> DoDelete r.key]
+                                                              [HH.text "Delete"]]]
     row false r = HH.tr [] $ map value r.row
 
     page c nip = 1 + c / nip
 
-    pageLink n = HH.li [css $ "page-item"][HH.a [css "page-link", HE.onClick \_->GotoPage n][HH.text $ show n]]
+    pageLink n = HH.li [css $ "page-item"][HH.a [css "page-link", HE.onClick \_->DoGotoPage n][HH.text $ show n]]
 
     table = HH.div [ css "row" ] [
         HH.div [ css "col" ] [
