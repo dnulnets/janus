@@ -105,14 +105,14 @@ component = H.mkComponent
       [ HH.div [ css "col d-flex align-items-start justify-content-start" ]
           [ HH.text $ "Visar objekt " <> show currentItem <> " to " <> show (currentItem - 1 + min nofItemsPerPage nofItems) <> " of " <> show nofItems
           , HH.br []
-          , HH.text $ "Visar sida " <> show (page currentItem nofItemsPerPage) <> " of " <> show (page nofItems nofItemsPerPage)
+          , HH.text $ "Visar sida " <> show (page currentItem nofItemsPerPage) <> " of " <> show (page (nofItems-1) nofItemsPerPage)
           ]
       , HH.div [ css "col d-flex align-items-start justify-content-end" ]
           [ HH.ul [ css "pagination pagination-sm" ]
               ( [ HH.li [ css $ "page-item" <> if (page currentItem nofItemsPerPage) == 1 then " disabled" else "" ]
                     [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem - nofItemsPerPage) ] [ HH.text "Previous" ] ]
                 ]
-                  <> (map pageLink (range 1 (page nofItems nofItemsPerPage)))
+                  <> (map pageLink (range 1 (page (nofItems-1) nofItemsPerPage)))
                   <>
                     [ HH.li [ css $ "page-item" <> if (page currentItem nofItemsPerPage) == (page nofItems nofItemsPerPage) then " disabled" else "" ]
                         [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem + nofItemsPerPage) ] [ HH.text "Next" ] ]
@@ -138,7 +138,7 @@ component = H.mkComponent
 
     page c nip = 1 + c / nip
 
-    pageLink n = HH.li [ css $ "page-item" ] [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem n ] [ HH.text $ show $ (n - 1) * nofItemsPerPage + 1 ] ]
+    pageLink n = HH.li [ css $ "page-item" ] [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem ((n-1)*nofItemsPerPage+1) ] [ HH.text $ show n] ]
 
     table = HH.div [ css "row" ]
       [ HH.div [ css "col" ]

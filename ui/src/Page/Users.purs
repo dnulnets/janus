@@ -11,6 +11,7 @@ import Halogen.HTML as HH
 import Halogen.Store.Monad (class MonadStore)
 import Janus.Capability.Navigate (class Navigate)
 import Janus.Capability.Resource.User (class ManageUser, getUsers)
+import Janus.Component.Table (Output(..))
 import Janus.Component.Table as Table
 import Janus.Store as Store
 import Type.Proxy (Proxy(..))
@@ -43,7 +44,7 @@ component = H.mkComponent
   where
     initialState _ = {table:{nofItems:0, nofItemsPerPage:5, currentItem:1, action:true, header:[], rows:[]}}
     
-    news = {nofItems:2, 
+    news = {nofItems:15, 
       nofItemsPerPage:5,
       currentItem:1,
       action:true,
@@ -56,7 +57,19 @@ component = H.mkComponent
       Receive i -> do
         H.liftEffect $ log $ "Users.Receive " <> show i
       HandleTable i -> do
+        handleTable i
         H.liftEffect $ log $ "Users.HandleTable"
-        
+    
+    handleTable:: Table.Output -> H.HalogenM State Action ChildSlots o m Unit
+    handleTable = case _ of
+      GotoItem n -> do
+        H.liftEffect $ log $ "User.GotoItem" <> show n
+      Create -> do
+        H.liftEffect $ log $ "User.Create"
+      Delete u -> do
+        H.liftEffect $ log $ "User.Delete" <> show u
+      Edit u -> do
+        H.liftEffect $ log $ "User.Edit" <> show u
+
     render :: State -> H.ComponentHTML Action ChildSlots m
     render s = HH.div [][HH.slot (Proxy :: _ "table") unit Table.component news HandleTable ] 
