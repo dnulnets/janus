@@ -37,7 +37,8 @@ main = HA.runHalogenAff do
   body ← HA.awaitBody
 
   let
-    baseUrl = BaseURL "http://localhost:8080" -- Has to get the origin, will fixa later!
+    -- baseUrl = BaseURL "http://localhost:8080" -- Has to get the origin, will fixa later!
+    baseUrl = BaseURL ""
     logLevel = Dev
 
   country <- liftEffect readCountry

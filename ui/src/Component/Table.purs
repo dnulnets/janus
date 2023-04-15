@@ -1,7 +1,15 @@
--- |This module contains the component for a table
-module Janus.Component.Table where
+-- |This module contains the component for a table. The table item and page index starts at one.
+module Janus.Component.Table
+  ( Header
+  , Input
+  , Line
+  , Model
+  , Output(..)
+  , Slot
+  , component
+  ) where
 
-import Janus.Data.UUID
+import Janus.Data.UUID (UUID)
 import Prelude
 
 import Data.Array (range)
@@ -16,35 +24,35 @@ import Janus.Component.HTML.Utils (css, prop)
 
 type Slot id = forall q. H.Slot q Output id
 
-type TableRow = {row :: Array String
-    , key :: UUID }
+type Line = { row :: Array String, key :: UUID }
 
-type TableHeader = Array String
+type Header = Array String
 
-type Input = { nofItems :: Int
-            , currentItem :: Int
-            , nofItemsPerPage :: Int
-            , action :: Boolean
-            , headers :: TableHeader
-            , rows :: Array TableRow }
+type Model =
+  { nofItems :: Int
+  , nofItemsPerPage :: Int
+  , currentItem :: Int
+  , action :: Boolean
+  , header :: Header
+  , rows :: Array Line
+  }
 
-data Output = GotoPage Int
+type Input = Model
+
+type State = Model
+
+data Output
+  = GotoItem Int
   | Create
   | Edit UUID
   | Delete UUID
 
-data Action = Receive Input
-  | DoGotoPage Int
+data Action
+  = Receive Input
+  | DoGotoItem Int
   | DoCreate
   | DoEdit UUID
   | DoDelete UUID
-
-type State = { nofItems :: Int
-            , currentItem :: Int
-            , nofItemsPerPage :: Int
-            , action :: Boolean
-            , headers :: TableHeader
-            , rows :: Array TableRow }
 
 component
   :: forall query m
@@ -63,13 +71,15 @@ component = H.mkComponent
 
   initialState i = i
 
-  handleAction :: Action -> H.HalogenM _ _ _ _ _ Unit
+  handleAction :: forall slots. Action -> H.HalogenM State Action slots Output m Unit
   handleAction = case _ of
+
     Receive i -> do
-      H.liftEffect $ log $ "Table.Receive " <> show i
-    DoGotoPage n -> do
+      H.liftEffect $ log $ "Table.Receive "
+      H.put i
+    DoGotoItem n -> do
       H.liftEffect $ log $ "Table.Gotopage " <> show n
-      H.raise $ GotoPage n     
+      H.raise $ GotoItem n
     DoCreate -> do
       H.liftEffect $ log $ "Table.Create"
       H.raise $ Create
@@ -80,55 +90,61 @@ component = H.mkComponent
       H.liftEffect $ log $ "Table.Edit " <> show id
       H.raise $ Edit id
 
-
-  render :: State -> H.ComponentHTML Action () m
-  render {action:action, nofItems:nofItems, currentItem:currentItem, nofItemsPerPage:nofItemsPerPage, headers:headers, rows:rows} =
+  render :: forall slots. State -> H.ComponentHTML Action slots m
+  render { action: action, nofItems: nofItems, currentItem: currentItem, nofItemsPerPage: nofItemsPerPage, header: header, rows: rows } =
     HH.div [] [ top, table, bottom ]
     where
 
     top = HH.div [ css "row" ]
-      [ HH.div [ css "col d-flex align-items-center justify-content-start" ] [ HH.text $ "Visar " <> show nofItemsPerPage <> " objekt per sida" ],
-        HH.div [ css "col d-flex align-items-center justify-content-end" ]
-            [ HH.a [ css "btn btn-primary btn-sm", prop "role" "button", HE.onClick \_ -> DoCreate] [ HH.text "Create" ]]
+      [ HH.div [ css "col d-flex align-items-center justify-content-start" ] [ HH.text $ "Visar " <> show nofItemsPerPage <> " objekt per sida" ]
+      , HH.div [ css "col d-flex align-items-center justify-content-end" ]
+          [ HH.a [ css "btn btn-primary btn-sm", prop "role" "button", HE.onClick \_ -> DoCreate ] [ HH.text "Create" ] ]
       ]
 
-    bottom = HH.div [css "row"][
-        HH.div [css "col d-flex align-items-start justify-content-start"][
-          HH.text $ "Visar objekt " <> show (currentItem + 1) <> " to " <> show (currentItem + min nofItemsPerPage nofItems) <> " of " <> show nofItems,
-          HH.br [],
-          HH.text $ "Visar sida " <> show (page currentItem nofItemsPerPage) <> " of " <> show (page nofItems nofItemsPerPage)
-        ],
-        HH.div [css "col d-flex align-items-start justify-content-end"][
-          HH.ul [css "pagination pagination-sm"]
-            ([ HH.li [css $ "page-item" <> if (page currentItem nofItemsPerPage) == 1 then " disabled" else ""]
-                [HH.a [css "page-link", HE.onClick \_ -> DoGotoPage ((page currentItem nofItemsPerPage)-1)][HH.text "Previous"]]]
-            <> (map pageLink (range 1 (page nofItems nofItemsPerPage))) <>
-            [ HH.li [css $ "page-item" <> if (page currentItem nofItemsPerPage) == (page nofItems nofItemsPerPage) then " disabled" else ""]
-              [HH.a [css "page-link", HE.onClick \_ -> DoGotoPage ((page currentItem nofItemsPerPage)+1)][HH.text "Next"]]])
-        ]
-    ]
+    bottom = HH.div [ css "row" ]
+      [ HH.div [ css "col d-flex align-items-start justify-content-start" ]
+          [ HH.text $ "Visar objekt " <> show currentItem <> " to " <> show (currentItem - 1 + min nofItemsPerPage nofItems) <> " of " <> show nofItems
+          , HH.br []
+          , HH.text $ "Visar sida " <> show (page currentItem nofItemsPerPage) <> " of " <> show (page nofItems nofItemsPerPage)
+          ]
+      , HH.div [ css "col d-flex align-items-start justify-content-end" ]
+          [ HH.ul [ css "pagination pagination-sm" ]
+              ( [ HH.li [ css $ "page-item" <> if (page currentItem nofItemsPerPage) == 1 then " disabled" else "" ]
+                    [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem - nofItemsPerPage) ] [ HH.text "Previous" ] ]
+                ]
+                  <> (map pageLink (range 1 (page nofItems nofItemsPerPage)))
+                  <>
+                    [ HH.li [ css $ "page-item" <> if (page currentItem nofItemsPerPage) == (page nofItems nofItemsPerPage) then " disabled" else "" ]
+                        [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem + nofItemsPerPage) ] [ HH.text "Next" ] ]
+                    ]
+              )
+          ]
+      ]
 
-    header s = HH.th [][HH.text s]
+    head s = HH.th [] [ HH.text s ]
 
-    value s = HH.td [][HH.text s]
+    value s = HH.td [] [ HH.text s ]
 
-    row true r = HH.tr [] $ (map value r.row) <> [HH.td [prop "style" "text-align:right"] [HH.a [css "btn btn-primary btn-sm", 
-                                                                                                  HE.onClick \_ -> DoEdit r.key]
-                                                                                                  [HH.text "Edit"], HH.span [][HH.text " "],
-                                                            HH.a [css "btn btn-primary btn-sm",
-                                                              HE.onClick \_ -> DoDelete r.key]
-                                                              [HH.text "Delete"]]]
+    row true r = HH.tr [] $ (map value r.row) <>
+      [ HH.td [ prop "style" "text-align:right" ]
+          [ HH.a [ css "btn btn-primary btn-sm", HE.onClick \_ -> DoEdit r.key ]
+              [ HH.text "Edit" ]
+          , HH.span [] [ HH.text " " ]
+          , HH.a [ css "btn btn-primary btn-sm", HE.onClick \_ -> DoDelete r.key ]
+              [ HH.text "Delete" ]
+          ]
+      ]
     row false r = HH.tr [] $ map value r.row
 
     page c nip = 1 + c / nip
 
-    pageLink n = HH.li [css $ "page-item"][HH.a [css "page-link", HE.onClick \_->DoGotoPage n][HH.text $ show n]]
+    pageLink n = HH.li [ css $ "page-item" ] [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem n ] [ HH.text $ show $ (n - 1) * nofItemsPerPage + 1 ] ]
 
-    table = HH.div [ css "row" ] [
-        HH.div [ css "col" ] [
-            HH.table [css "table table-striped style=\"width:100%\""][
-                HH.thead [][HH.tr [] $ (map header headers) <> (if action then [HH.th [prop "style" "text-align:right"][HH.text "Action"]] else [])],
-                HH.tbody [] $ map (row action) rows
-            ]
-        ]
-    ]
+    table = HH.div [ css "row" ]
+      [ HH.div [ css "col" ]
+          [ HH.table [ css "table table-striped style=\"width:100%\"" ]
+              [ HH.thead [] [ HH.tr [] $ (map head header) <> (if action then [ HH.th [ prop "style" "text-align:right" ] [ HH.text "Action" ] ] else []) ]
+              , HH.tbody [] $ map (row action) rows
+              ]
+          ]
+      ]
