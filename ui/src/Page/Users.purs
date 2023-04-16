@@ -50,7 +50,9 @@ component = H.mkComponent
       }
   }
   where
-    initialState i = {i18n:translator i.country, table:{nofItems:0, nofItemsPerPage:5, currentItem:1, action:true, header:[], rows:[]}}
+
+    initialState i = {i18n:translator i.country, table:{nofItems:0, nofItemsPerPage:5, currentItem:1, action:true,
+        header:[], rows:[]}}
 
     convert::Profile->Table.Line
     convert {guid:guid, email:email, username:username, active:active} = {key:guid, row:[show username, show email, show active, show guid]}
@@ -61,7 +63,10 @@ component = H.mkComponent
         st <- H.get
         ul <- map convert <$> getUsers (st.table.currentItem-1) st.table.nofItemsPerPage 
         n <- nofUsers
-        H.modify_ (\s->s {table { nofItems = n, rows = ul, header = ["Username", "email", "Active", "GUID"]}})
+        H.modify_ (\s->s {table { nofItems = n, rows = ul, header = [(st.i18n # translate (label :: _ "username")), 
+            (st.i18n # translate (label :: _ "email")), 
+            (st.i18n # translate (label :: _ "active")),
+            (st.i18n # translate (label :: _ "guid"))]}})
         H.liftEffect $ log $ "Users.Initialize " <> show n
 
       Receive i -> do
@@ -76,7 +81,7 @@ component = H.mkComponent
         st <- H.get
         ul <- map convert <$> getUsers (n-1) st.table.nofItemsPerPage 
         nof <- nofUsers
-        H.modify_ (\s->s {table { currentItem = n, nofItems = nof, rows = ul, header = ["Username", "email", "Active", "GUID"]}})
+        H.modify_ (\s->s {table { currentItem = n, nofItems = nof, rows = ul}})
         H.liftEffect $ log $ "User.GotoItem" <> show n
       Create -> do
         H.liftEffect $ log $ "User.Create"

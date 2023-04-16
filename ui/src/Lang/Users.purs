@@ -13,7 +13,11 @@ import Record.Extra (type (:::), SNil)
 
 -- Symbols should be in alphabetic order.
 type Labels =
-    ( "title"
+    ( "active"
+  ::: "email"
+  ::: "guid"
+  ::: "title"
+  ::: "username"
   ::: SNil
     )
 
@@ -25,10 +29,18 @@ translator country =
 
 en :: Translation Labels
 en = fromRecord
-  { title: "User administration"
+  { active: "Active"
+  , email: "Email"
+  , guid: "GUID"
+  , username: "Username"
+  , title: "User administration"
   }
 
 se :: Translation Labels
 se = fromRecord
-  { title: "Användaradministration"
+  { active: "Aktiv"
+  , email: "Email"
+  , guid: "GUID"
+  , username: "Användarnamn"
+  , title: "Användaradministration"
   }
