@@ -124,7 +124,7 @@ component = connect selectAll $ H.mkComponent
       Dashboard -> authorize state do
         HH.div [][menu currentUser Dashboard, main $ HH.slot_ (Proxy :: _ "dashboard") unit Dashboard.component unit]
       Users -> authorize state do
-        HH.div [][menu currentUser Users, main $ HH.slot_ (Proxy :: _ "users") unit Users.component unit]
+        HH.div [][menu currentUser Users, main $ HH.slot_ (Proxy :: _ "users") unit Users.component {country:country}]
       Login -> do
         HH.slot_ (Proxy :: _ "login") unit Login.component { redirect: true, country: country }
     Nothing ->

@@ -21,6 +21,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Janus.Capability.Navigate (class Navigate)
 import Janus.Component.HTML.Utils (css, prop)
+import Janus.Lang.Component.Table
+import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
 
 type Slot id = forall q. H.Slot q Output id
 
@@ -37,9 +39,13 @@ type Model =
   , rows :: Array Line
   }
 
-type Input = Model
+type Input = {
+  model::Model
+  , country::String }
 
-type State = Model
+type State = {
+  model::Model
+  , i18n :: Translator Labels }
 
 data Output
   = GotoItem Int
@@ -69,14 +75,14 @@ component = H.mkComponent
   }
   where
 
-  initialState i = i
+  initialState i = { i18n:translator i.country, model:i.model }
 
   handleAction :: forall slots. Action -> H.HalogenM State Action slots Output m Unit
   handleAction = case _ of
 
     Receive i -> do
       H.liftEffect $ log $ "Table.Receive "
-      H.put i
+      H.put { i18n:translator i.country, model:i.model }
     DoGotoItem n -> do
       H.liftEffect $ log $ "Table.Gotopage " <> show n
       H.raise $ GotoItem n
@@ -91,7 +97,8 @@ component = H.mkComponent
       H.raise $ Edit id
 
   render :: forall slots. State -> H.ComponentHTML Action slots m
-  render { action: action, nofItems: nofItems, currentItem: currentItem, nofItemsPerPage: nofItemsPerPage, header: header, rows: rows } =
+  render { i18n:i18n, model: {action: action, nofItems: nofItems, currentItem: currentItem, nofItemsPerPage: nofItemsPerPage, 
+    header: header, rows: rows }} =
     HH.div [] [ top, table, bottom ]
     where
 

@@ -58,7 +58,7 @@ component = connect selectAll $ H.mkComponent
 
       Test -> do
         H.liftEffect $ log "Test pressed!"
-        user <- getUsers
+        user <- getUsers 0 5
         H.liftEffect $ log $ show user
 
     render :: forall slots. State -> H.ComponentHTML Action slots m

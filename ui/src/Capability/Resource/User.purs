@@ -31,7 +31,7 @@ class Monad m <= ManageUser m where
   updateUser :: UpdateProfileFields -> m Unit
   getUser :: UUID -> m (Maybe Profile)
   deleteUser :: UUID -> m Unit
-  getUsers :: m (Array Profile)
+  getUsers :: Int->Int->m (Array Profile)
   nofUsers :: m (Int)
 
 -- |Helper to avoid lifting
@@ -42,5 +42,5 @@ instance manageUserHalogenM :: ManageUser m => ManageUser (HalogenM st act slots
   updateUser = lift <<< updateUser
   getUser = lift <<< getUser
   deleteUser = lift <<< deleteUser
-  getUsers = lift getUsers
+  getUsers o n = lift $ getUsers o n
   nofUsers = lift nofUsers

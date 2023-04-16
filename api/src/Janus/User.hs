@@ -164,6 +164,8 @@ instance FromJSON LoginRequest where
 -- | POST /api/user       : Updates a user
 -- | PUT  /api/user       : Creates a user
 -- | DELETE /api/user     : Deletes a specified user
+-- | GET /api/users/count : Retrieves the number of registered users
+-- | GET /api/users?offset=<int>&n=<int>       : Retrieves the list of <n> users beginning at <offset>
 -- |
 app :: (MonadIO m, MonadCatch m) => JScottyM m ()
 app = do
@@ -267,7 +269,7 @@ app = do
   get "/api/users" $ do
     roleRequired [R.Administrator]
     settings <- lift ask
-    start <- param "start" `rescue` (\_ -> pure 0)
+    start <- param "offset" `rescue` (\_ -> pure 0)
     nof <- param "n" `rescue` (\_ -> pure $ fromIntegral $ (C.length . C.ui . config) settings)
     dbl <- runDB $ DB.selectList [] [DB.LimitTo nof, DB.OffsetBy start, DB.Asc UserUsername]
     json $ map prepare dbl

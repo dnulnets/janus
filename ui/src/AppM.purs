@@ -101,11 +101,11 @@ instance manageUserAppM :: ManageUser AppM where
 
     void $ mkAuthRequest { endpoint: CreateUser, method: method }
 
-  getUsers = do
+  getUsers o n = do
     let
       codec =  Codec.array (CAR.object "User" { user: Profile.profileCodec })
 
-    mbJson <- mkAuthRequest { endpoint: Users, method: Get }
+    mbJson <- mkAuthRequest { endpoint: Users {offset:o, n:n}, method: Get }
     l <- decode codec mbJson
     pure $ fromMaybe [] $ map (map _.user) l
 

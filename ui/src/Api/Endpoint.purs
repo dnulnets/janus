@@ -8,7 +8,7 @@ import Prelude hiding ((/))
 
 import Data.Generic.Rep (class Generic)
 import Janus.Data.UUID (UUID, uuid)
-import Routing.Duplex (RouteDuplex', prefix, root, segment)
+import Routing.Duplex (RouteDuplex', int, params, prefix, root, segment)
 import Routing.Duplex.Generic (noArgs, sum)
 import Routing.Duplex.Generic.Syntax ((/))
 
@@ -17,7 +17,7 @@ import Routing.Duplex.Generic.Syntax ((/))
 data Endpoint
   = Login 
   | CreateUser
-  | Users
+  | Users { offset::Int, n::Int}
   | User UUID
   | NofUsers
 
@@ -28,7 +28,7 @@ endpointCodec :: RouteDuplex' Endpoint
 endpointCodec = root $ prefix "api" $ sum
   { "Login": "login" / noArgs
   , "CreateUser": "user" / noArgs
-  , "Users": "users" / noArgs
+  , "Users": "users" / params { offset: int, n:int }
   , "User": "user" / uuid segment
   , "NofUsers": "users" / "count" / noArgs
   }
