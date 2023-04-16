@@ -103,26 +103,29 @@ component = H.mkComponent
     where
 
     top = HH.div [ css "row" ]
-      [ HH.div [ css "col d-flex align-items-center justify-content-start" ] [ HH.text $ "Visar " <> show nofItemsPerPage <> " objekt per sida" ]
+      [ HH.div [ css "col d-flex align-items-center justify-content-start" ] [ HH.text $ (i18n # translate (label :: _ "shows")) <> 
+        show nofItemsPerPage <> (i18n # translate (label :: _ "objects")) ]
       , HH.div [ css "col d-flex align-items-center justify-content-end" ]
-          [ HH.a [ css "btn btn-primary btn-sm", prop "role" "button", HE.onClick \_ -> DoCreate ] [ HH.text "Create" ] ]
+          [ HH.a [ css "btn btn-primary btn-sm", prop "role" "button", HE.onClick \_ -> DoCreate ] [ HH.text (i18n # translate (label :: _ "create")) ] ]
       ]
 
     bottom = HH.div [ css "row" ]
       [ HH.div [ css "col d-flex align-items-start justify-content-start" ]
-          [ HH.text $ "Visar objekt " <> show currentItem <> " to " <> show (currentItem - 1 + min nofItemsPerPage nofItems) <> " of " <> show nofItems
+          [ HH.text $ (i18n # translate (label :: _ "showobject")) <> show currentItem <> (i18n # translate (label :: _ "to")) <> 
+              show (currentItem - 1 + min nofItemsPerPage nofItems) <> (i18n # translate (label :: _ "of")) <> show nofItems
           , HH.br []
-          , HH.text $ "Visar sida " <> show (page currentItem nofItemsPerPage) <> " of " <> show (page (nofItems-1) nofItemsPerPage)
+          , HH.text $ (i18n # translate (label :: _ "showpage")) <> show (page currentItem nofItemsPerPage) <> 
+              (i18n # translate (label :: _ "of")) <> show (page (nofItems-1) nofItemsPerPage)
           ]
       , HH.div [ css "col d-flex align-items-start justify-content-end" ]
           [ HH.ul [ css "pagination pagination-sm" ]
               ( [ HH.li [ css $ "page-item" <> if (page currentItem nofItemsPerPage) == 1 then " disabled" else "" ]
-                    [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem - nofItemsPerPage) ] [ HH.text "Previous" ] ]
+                    [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem - nofItemsPerPage) ] [ HH.text (i18n # translate (label :: _ "previous")) ] ]
                 ]
                   <> (map pageLink (range 1 (page (nofItems-1) nofItemsPerPage)))
                   <>
                     [ HH.li [ css $ "page-item" <> if (page currentItem nofItemsPerPage) == (page nofItems nofItemsPerPage) then " disabled" else "" ]
-                        [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem + nofItemsPerPage) ] [ HH.text "Next" ] ]
+                        [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem + nofItemsPerPage) ] [ HH.text (i18n # translate (label :: _ "next")) ] ]
                     ]
               )
           ]
@@ -135,10 +138,10 @@ component = H.mkComponent
     row true r = HH.tr [] $ (map value r.row) <>
       [ HH.td [ prop "style" "text-align:right" ]
           [ HH.a [ css "btn btn-primary btn-sm", HE.onClick \_ -> DoEdit r.key ]
-              [ HH.text "Edit" ]
+              [ HH.text (i18n # translate (label :: _ "edit")) ]
           , HH.span [] [ HH.text " " ]
           , HH.a [ css "btn btn-primary btn-sm", HE.onClick \_ -> DoDelete r.key ]
-              [ HH.text "Delete" ]
+              [ HH.text (i18n # translate (label :: _ "delete")) ]
           ]
       ]
     row false r = HH.tr [] $ map value r.row

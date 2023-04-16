@@ -9,9 +9,17 @@ import Record.Extra (type (:::), SNil)
 
 -- Symbols should be in alphabetic order.
 type Labels =
-    ( "invalid"
-  ::: "pwd"
-  ::: "uname"
+    ( "create"
+  ::: "delete"
+  ::: "edit"
+  ::: "next"
+  ::: "objects"
+  ::: "of"
+  ::: "previous"
+  ::: "showobject"
+  ::: "showpage"
+  ::: "shows"
+  ::: "to"
   ::: SNil
     )
 
@@ -23,14 +31,30 @@ translator country =
 
 en :: Translation Labels
 en = fromRecord
-  { pwd: "Password"
-  , uname: "Username"
-  , invalid: "Username or password is invalid"
+  { shows: "Showing "
+  , objects: " objects per page"
+  , create: "Create"
+  , of: " of "
+  , to: "-"
+  , showobject: "Showing object "
+  , showpage: "Showing page "
+  , previous: "Previous"
+  , next: "Next"
+  , edit: "Edit"
+  , delete: "Delete"
   }
 
 se :: Translation Labels
 se = fromRecord
-  { pwd: "Lösenord"
-  , uname: "Användarnamn"
-  , invalid: "Användarnamn eller lösenord är felaktigt"
+  { shows: "Visar "
+  , objects: " objekt per sida"
+  , create: "Ny"
+  , of: " av "
+  , to: "-"
+  , showobject: "Visar objekt "
+  , showpage: "Visar sida "
+  , previous: "Previous"
+  , next: "Next"
+  , edit: "Ändra"
+  , delete: "Ta bort"
   }
