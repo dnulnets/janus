@@ -14,36 +14,41 @@
 -- This module contains the static part of the application that servers static pages.
 module Janus.User (app, UserResponse(..), LoginRequest(..)) where
 
-import           Control.Applicative       (Alternative (empty))
+import           Control.Applicative        (Alternative (empty))
 import           Control.Monad.Catch
-import           Control.Monad.IO.Class    (MonadIO)
-import           Control.Monad.Reader      (ask)
-import           Control.Monad.Trans       (lift, liftIO)
-import           Data.Aeson                (FromJSON (parseJSON),
-                                            KeyValue ((.=)), ToJSON (toJSON),
-                                            Value (Object), object, (.:), (.:?))
-import           Data.Text                 (Text)
-import           Data.Time.Clock.System    (SystemTime (systemSeconds),
-                                            getSystemTime)
-import           Data.UUID                 (fromString)
-import qualified Database.Persist.Sql      as DB
-import           Janus.Core                (JScottyM)
-import qualified Janus.Data.Config         as C
-import           Janus.Data.Model          (EntityField (..), Key (UserKey),
-                                            Unique (UniqueUserUsername),
-                                            User (User, userActive, userEmail, userGuid, userPassword, userUsername))
-import qualified Janus.Data.Role           as R
+import           Control.Monad.IO.Class     (MonadIO)
+import           Control.Monad.Reader       (ask)
+import           Control.Monad.Trans        (lift, liftIO)
+import           Data.Aeson                 (FromJSON (parseJSON),
+                                             KeyValue ((.=)), ToJSON (toJSON),
+                                             Value (Object), object, (.:),
+                                             (.:?))
+import           Data.Text                  (Text)
+import           Data.Time.Clock.System     (SystemTime (systemSeconds),
+                                             getSystemTime)
+import           Data.UUID                  (fromString)
+import qualified Database.Persist.Sql       as DB
+import           Janus.Core                 (JScottyM)
+import qualified Janus.Data.Config          as C
+import           Janus.Data.Model           (EntityField (..), Key (UserKey),
+                                             Unique (UniqueUserUsername),
+                                             User (User, userActive, userEmail, userGuid, userPassword, userUsername))
+import qualified Janus.Data.Role            as R
+import           Janus.Data.User            (nofUsers)
 import           Janus.Data.UUID
-import           Janus.Settings            (Settings (config))
+import           Janus.Settings             (Settings (config))
 import           Janus.Utils.Auth
-import           Janus.Utils.DB            (runDB)
-import           Janus.Utils.JWT           (createToken)
-import           Janus.Utils.Password      (authHashPassword,
-                                            authValidatePassword)
-import           Network.HTTP.Types.Status (created201, internalServerError500,
-                                            notFound404, ok200, unauthorized401, badRequest400)
-import           Web.Scotty.Trans          (delete, get, json, jsonData, param,
-                                            post, put, status, rescue)
+import           Janus.Utils.DB             (runDB)
+import           Janus.Utils.JWT            (createToken)
+import           Janus.Utils.Password       (authHashPassword,
+                                             authValidatePassword)
+import           Network.HTTP.Types.Status  (badRequest400, created201,
+                                             internalServerError500,
+                                             notFound404, ok200,
+                                             unauthorized401)
+import           Web.Scotty.Trans           (delete, get, json, jsonData, param,
+                                             post, put, rescue, status, text)
+import Data.Maybe
 
 -- | User information for the login response
 data UserResponse = UserResponse
@@ -172,7 +177,7 @@ app = do
       Just (DB.Entity _ user) | userActive user && authValidatePassword (userPassword user) (lrpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         let jwt = createToken
-              ((C.key . C.token . config) settings) 
+              ((C.key . C.token . config) settings)
               seconds
               ((C.valid . C.token . config) settings)
               ((C.issuer . C.token . config) settings)
@@ -193,6 +198,12 @@ app = do
           email = (userEmail u), active = (userActive u), token = t, password = Nothing}
         json userResponse
       Nothing -> status unauthorized401
+
+  -- |Returns with the number of users
+  get "/api/users/count" $ do
+    roleRequired [R.Administrator]
+    nof <- map DB.unSingle <$> runDB nofUsers
+    json $ fromMaybe 0 $ listToMaybe nof
 
   -- |Returns with the use based on the key
   get "/api/user/:uuid" $ do
@@ -260,7 +271,8 @@ app = do
     nof <- param "n" `rescue` (\_ -> pure $ fromIntegral $ (C.length . C.ui . config) settings)
     dbl <- runDB $ DB.selectList [] [DB.LimitTo nof, DB.OffsetBy start, DB.Asc UserUsername]
     json $ map prepare dbl
-    where
-      prepare::DB.Entity User -> UserResponse
-      prepare (DB.Entity _ u) = UserResponse {guid = (userGuid u), username = (userUsername u),
-              email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}
+
+  where
+    prepare::DB.Entity User -> UserResponse
+    prepare (DB.Entity _ u) = UserResponse {guid = (userGuid u), username = (userUsername u),
+      email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}

@@ -26,7 +26,6 @@ import Janus.Component.HTML.Utils (css, prop, safeHref)
 import Janus.Component.HTML.Fragments (main, full)
 import Janus.Data.Profile (Profile)
 import Janus.Data.Route (Route(..), routeCodec)
-import Janus.Data.Username (toString)
 import Janus.Page.Dashboard as Dashboard
 import Janus.Page.Home as Home
 import Janus.Page.Login as Login
@@ -90,7 +89,7 @@ component = connect selectAll $ H.mkComponent
       navigate $ fromMaybe Home initialRoute
 
     Receive { context: ctx } -> do
-      H.liftEffect $ log $ "Router.Receive User = " <> show (toString <$> (_.username <$> (ctx.currentUser)))
+      H.liftEffect $ log $ "Router.Receive User = " <> show (show <$> (_.username <$> (ctx.currentUser)))
       H.liftEffect $ log $ "Router.Receive Country = " <> ctx.country
       H.modify_ _ { currentUser = ctx.currentUser, country = ctx.country }
 
@@ -98,7 +97,7 @@ component = connect selectAll $ H.mkComponent
   handleQuery = case _ of
     Navigate dest a -> do
       { route, currentUser } <- H.get
-      H.liftEffect $ log $ "Router.Navigate " <> show (toString <$> (_.username <$> currentUser))
+      H.liftEffect $ log $ "Router.Navigate " <> show (show <$> (_.username <$> currentUser))
       -- don't re-render unnecessarily if the route is unchanged
       when (route /= Just dest) do
         -- don't change routes if there is a logged-in user trying to access

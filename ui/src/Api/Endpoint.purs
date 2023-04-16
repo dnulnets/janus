@@ -19,6 +19,7 @@ data Endpoint
   | CreateUser
   | Users
   | User UUID
+  | NofUsers
 
 derive instance genericEndpoint :: Generic Endpoint _
 
@@ -29,4 +30,5 @@ endpointCodec = root $ prefix "api" $ sum
   , "CreateUser": "user" / noArgs
   , "Users": "users" / noArgs
   , "User": "user" / uuid segment
+  , "NofUsers": "users" / "count" / noArgs
   }

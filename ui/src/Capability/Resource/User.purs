@@ -7,6 +7,7 @@ module Janus.Capability.Resource.User
   , getUsers
   , createUser
   , deleteUser
+  , nofUsers
   , class ManageUser
   )
   where
@@ -31,6 +32,7 @@ class Monad m <= ManageUser m where
   getUser :: UUID -> m (Maybe Profile)
   deleteUser :: UUID -> m Unit
   getUsers :: m (Array Profile)
+  nofUsers :: m (Int)
 
 -- |Helper to avoid lifting
 instance manageUserHalogenM :: ManageUser m => ManageUser (HalogenM st act slots msg m) where
@@ -41,3 +43,4 @@ instance manageUserHalogenM :: ManageUser m => ManageUser (HalogenM st act slots
   getUser = lift <<< getUser
   deleteUser = lift <<< deleteUser
   getUsers = lift getUsers
+  nofUsers = lift nofUsers

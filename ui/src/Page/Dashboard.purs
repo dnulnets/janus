@@ -26,7 +26,6 @@ import Network.RemoteData (RemoteData(..), _Success, fromMaybe, toMaybe)
 import Type.Proxy (Proxy(..))
 import Web.Event.Event (preventDefault)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
-import Janus.Data.Username (toString)
 
 data Action
   =  Receive (Connected (Maybe Profile) Unit)
@@ -58,7 +57,7 @@ component = connect (selectEq _.currentUser) $ H.mkComponent
   handleAction = case _ of
   
     Receive { context: currentUser } -> do
-      H.liftEffect $ log $ "Dashboard.Receive " <> show (toString <$> (_.username <$> currentUser))
+      H.liftEffect $ log $ "Dashboard.Receive " <> show (show <$> (_.username <$> currentUser))
       H.modify_ _ { currentUser = currentUser }
 
   render :: forall slots. State -> H.ComponentHTML Action slots m

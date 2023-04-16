@@ -3,7 +3,6 @@
 module Janus.Data.Username
   ( Username
   , parse
-  , toString
   , codec
   ) where
 
@@ -31,6 +30,3 @@ parse :: String -> Maybe Username
 parse "" = Nothing
 parse str = Just (Username str)
 
--- |Converts a user name to a string.
-toString :: Username -> String
-toString (Username str) = str

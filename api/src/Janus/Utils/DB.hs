@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 -- |
 -- Module      : Janus.Utils.DB
 -- Description : Generic database functionality
@@ -36,4 +38,5 @@ runDB::(MonadReader Settings m, MonadIO m) => ReaderT SqlBackend IO b -> m b
 runDB query = do
     settings <- ask
     liftIO $ runSqlPool query (dbpool settings)
+
 

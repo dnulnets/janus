@@ -10,15 +10,19 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.Store.Monad (class MonadStore)
 import Janus.Capability.Navigate (class Navigate)
-import Janus.Capability.Resource.User (class ManageUser, getUsers)
+import Janus.Capability.Resource.User (class ManageUser, getUsers, nofUsers)
 import Janus.Component.Table (Output(..))
 import Janus.Component.Table as Table
+import Janus.Data.Profile
+import Janus.Data.Username
+import Janus.Data.Email
 import Janus.Store as Store
 import Type.Proxy (Proxy(..))
 
 type Input = Unit
 
-data Action =  Receive Input
+data Action =  Initialize
+  | Receive Input
   | HandleTable Table.Output
 
 type State = {table :: Table.Model}
@@ -39,21 +43,24 @@ component = H.mkComponent
   , eval: H.mkEval $ H.defaultEval
       { handleAction = handleAction
       , receive = Just <<< Receive
+      , initialize = Just Initialize
       }
   }
   where
     initialState _ = {table:{nofItems:0, nofItemsPerPage:5, currentItem:1, action:true, header:[], rows:[]}}
-    
-    news = {nofItems:15, 
-      nofItemsPerPage:5,
-      currentItem:1,
-      action:true,
-      header:["#", "User", "Team"],
-      rows:[{key:UUID "5435432-54325432-8765876", row:["1", "tomas", "fragglarna"]}, 
-            {key:UUID "6216721-43674367843-31267832", row:["2", "peter", "gurkorna"]}]}
+
+    convert::Profile->Table.Line
+    convert {guid:guid, email:email, username:username, active:active} = {key:guid, row:[show username, show email, show active, show guid]}
+
 
     handleAction :: Action -> H.HalogenM State Action ChildSlots o m Unit
     handleAction = case _ of  
+      Initialize -> do
+        ul <- map convert <$> getUsers
+        n <- nofUsers
+        H.modify_ (\s->s {table { nofItems = n, rows = ul, header = ["Username", "email", "Active", "GUID"]}})
+        H.liftEffect $ log $ "Users.Initialize " <> show n
+
       Receive i -> do
         H.liftEffect $ log $ "Users.Receive " <> show i
       HandleTable i -> do
@@ -72,4 +79,4 @@ component = H.mkComponent
         H.liftEffect $ log $ "User.Edit" <> show u
 
     render :: State -> H.ComponentHTML Action ChildSlots m
-    render s = HH.div [][HH.slot (Proxy :: _ "table") unit Table.component news HandleTable ] 
+    render s = HH.div [][HH.slot (Proxy :: _ "table") unit Table.component s.table HandleTable ] 

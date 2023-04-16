@@ -19,8 +19,6 @@ import Janus.Data.Profile (Profile)
 import Janus.Store as Store
 import Janus.Component.HTML.Utils (css, prop, safeHref)
 
-import Janus.Data.Username (toString)
-
 data Input = Unit
 
 data Action
@@ -55,7 +53,7 @@ component = connect selectAll $ H.mkComponent
     handleAction = case _ of
     
       Receive { context } -> do
-        H.liftEffect $ log $ "Home.Receive " <> show (toString <$> (_.username <$> context.currentUser))
+        H.liftEffect $ log $ "Home.Receive " <> show (show <$> (_.username <$> context.currentUser))
         H.modify_ _ { currentUser = context.currentUser }
 
       Test -> do

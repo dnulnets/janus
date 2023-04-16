@@ -108,3 +108,11 @@ instance manageUserAppM :: ManageUser AppM where
     mbJson <- mkAuthRequest { endpoint: Users, method: Get }
     l <- decode codec mbJson
     pure $ fromMaybe [] $ map (map _.user) l
+
+  nofUsers = do
+    let codec = Codec.int
+
+    mbJson <- mkAuthRequest { endpoint: NofUsers, method: Get }
+    l <- decode codec mbJson
+    pure $ fromMaybe 0 l
+    
