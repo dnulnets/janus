@@ -20,6 +20,7 @@ import Janus.Store as Store
 import Type.Proxy (Proxy(..))
 import Janus.Lang.Users
 import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
+import Janus.Component.HTML.Utils (css, prop)
 
 type Input = {country::String}
 
@@ -85,4 +86,5 @@ component = H.mkComponent
         H.liftEffect $ log $ "User.Edit" <> show u
 
     render :: State -> H.ComponentHTML Action ChildSlots m
-    render s = HH.div [][HH.slot (Proxy :: _ "table") unit Table.component {country: s.i18n # currentLang, model: s.table} HandleTable ] 
+    render s = HH.div [css "container mt-3"][HH.h1 [][HH.text (s.i18n # translate (label :: _ "title"))], 
+        HH.slot (Proxy :: _ "table") unit Table.component {country: s.i18n # currentLang, model: s.table} HandleTable ] 
