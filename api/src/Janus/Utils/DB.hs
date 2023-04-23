@@ -12,7 +12,7 @@
 -- Portability : POSIX
 --
 -- Functionality for various database functions that are generic for the entire application.
-module Janus.Utils.DB (runDB, textToKey, keyToText) where
+module Janus.Utils.DB (runDB) where
 
 import           Control.Monad.Reader        (MonadReader (ask))
 import           Control.Monad.Trans         (MonadIO, liftIO)
@@ -21,17 +21,9 @@ import           Data.ByteString.Char8       (unpack)
 import           Data.Text                   (Text, pack)
 import           Data.Text.Encoding          (encodeUtf8)
 import           Database.Persist.Postgresql (runSqlPool)
-import           Database.Persist.Sql        (Key, SqlBackend, ToBackendKey,
-                                              fromSqlKey, toSqlKey)
+import           Database.Persist.Sql        (Key, SqlBackend, ToBackendKey, keyFromValues)
 import           Janus.Settings              (Settings (..))
-
--- | Convert from Text to database key
-textToKey :: ToBackendKey SqlBackend record => Text -> Key record
-textToKey key = toSqlKey $ read $ unpack $ encodeUtf8 key
-
--- | Convert from Text to database key
-keyToText :: ToBackendKey SqlBackend record => Key record -> Text
-keyToText key = pack $ show $ fromSqlKey key
+import           Janus.Data.UUID
 
 -- | Runs an sql query and returns with the result
 runDB::(MonadReader Settings m, MonadIO m) => ReaderT SqlBackend IO b -> m b

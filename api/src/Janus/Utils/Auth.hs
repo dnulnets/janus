@@ -28,8 +28,8 @@ import           Janus.Core                      (JActionM)
 import qualified Janus.Data.Config               as C
 import           Janus.Data.Model                (AssignedRole (assignedRoleType),
                                                   EntityField (AssignedRoleUser),
-                                                  Unique (UniqueUserGUID),
-                                                  User (userActive))
+                                                  Key(UserKey),
+                                                  User (userActive), UserId)
 import           Janus.Data.Role
 import           Janus.Settings                  (Settings (..))
 import           Janus.Utils.DB                  (runDB)
@@ -39,7 +39,7 @@ import           Network.Wai.Middleware.HttpAuth (extractBearerAuth)
 import           Web.Scotty.Trans                (finish, header, status)
 
 -- |Returns with the user that is authenticated with this request.
-getAuthenticated::(MonadIO m) => JActionM m (Maybe User)
+getAuthenticated::(MonadIO m) => JActionM m (Maybe (Key User, User))
 getAuthenticated = do
     settings <- lift ask
     token <- getToken
@@ -48,10 +48,10 @@ getAuthenticated = do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         case getSubject ((C.key . C.token . config) settings) seconds b ((C.issuer . C.token . config) settings) of
           Just u -> do
-            dbuser <- runDB $ DB.getBy $ UniqueUserGUID u
+            dbuser <- runDB $ DB.get $ UserKey u
             case dbuser of
-              Just (DB.Entity _ user) | userActive user -> pure $ Just user
-              _                                         -> pure Nothing
+              Just user | userActive user -> pure $ Just (UserKey u, user)
+              _                           -> pure Nothing
           Nothing -> pure Nothing
       _ -> pure Nothing
 
@@ -74,10 +74,10 @@ authenticationRequired = do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         case getSubject (C.key (C.token (config settings))) seconds b (C.issuer (C.token (config settings))) of
           Just u -> do
-            dbuser <- runDB $ DB.getBy $ UniqueUserGUID u
+            dbuser <- runDB $ DB.get $ UserKey u
             case dbuser of
-              Just (DB.Entity _ user) | userActive user -> pure ()
-              _                                         -> do
+              Just user | userActive user -> pure ()
+              _                           -> do
                 status unauthorized401
                 finish
           Nothing -> do
@@ -97,17 +97,17 @@ roleRequired lor = do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         case getSubject (C.key (C.token (config settings))) seconds b (C.issuer (C.token (config settings))) of
           Just u -> do
-            dbuser <- runDB $ DB.getBy $ UniqueUserGUID u
+            dbuser <- runDB $ DB.get $ UserKey u
             case dbuser of
-              Just (DB.Entity key user) | userActive user -> do
-                roles <- runDB $ DB.selectList [AssignedRoleUser ==. key] []
+              Just user | userActive user -> do
+                roles <- runDB $ DB.selectList [AssignedRoleUser ==. UserKey u] []
                 let h = intersectIsNotEmpty lor $ map extractRoles roles
                 if h
-                  then pure()
+                  then pure ()
                 else do
                   status unauthorized401
                   finish
-              _                                         -> do
+              _ -> do
                 status unauthorized401
                 finish
           Nothing -> do

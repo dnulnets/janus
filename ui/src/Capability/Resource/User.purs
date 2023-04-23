@@ -44,3 +44,5 @@ instance manageUserHalogenM :: ManageUser m => ManageUser (HalogenM st act slots
   deleteUser = lift <<< deleteUser
   getUsers o n = lift $ getUsers o n
   nofUsers = lift nofUsers
+
+

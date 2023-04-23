@@ -37,18 +37,15 @@ share [mkPersist (setImplicitIdDef uuidDef sqlSettings), mkMigrate "migrateAll"]
 
 User
     username Text
-    guid UUID
     password Text
     email Text
     active Bool
     UniqueUserUsername username
-    UniqueUserGUID guid
     deriving Show
 
 AssignedRole
     type Role.Role
-    guid UUID Maybe
     user UserId
-
+    object UUID Maybe
 |]
 

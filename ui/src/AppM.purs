@@ -84,7 +84,7 @@ instance manageUserAppM :: ManageUser AppM where
       codec = CAR.object "User" { user: Profile.profileWithPasswordCodec }
       method = Put $ Just $ Codec.encode codec { user }
 
-    void $ mkAuthRequest { endpoint: User user.guid, method: method }
+    void $ mkAuthRequest { endpoint: User user.key, method: method }
 
   getUser uuid = do
     mbJson <- mkAuthRequest { endpoint: User uuid, method: Get }

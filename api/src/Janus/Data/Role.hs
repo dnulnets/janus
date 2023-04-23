@@ -31,7 +31,7 @@ derivePersistField "Role"
 instance FromJSON Role
 instance ToJSON Role
 
-
+{--
 -- | The user type, used by the application.
 data AssignedRole = AssignedRole
   { -- | What kind of role it is
@@ -57,3 +57,4 @@ instance ToJSON AssignedRole where
   -- this encodes directly to a bytestring Builder
   toEncoding ar =
     pairs ("role" .= role ar <> "guid" .= guid ar)
+--}

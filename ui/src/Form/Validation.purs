@@ -6,6 +6,7 @@ import Prelude
 import Janus.Data.Email (Email(..))
 import Janus.Data.Username (Username)
 import Janus.Data.Username as Username
+import Janus.Data.UUID (UUID(..))
 import Data.Either (Either(..), note)
 import Data.Maybe (Maybe(..))
 import Data.String as String
@@ -46,6 +47,9 @@ emailFormat = map Email <<< check (String.contains (String.Pattern "@")) Invalid
 -- |The input must be a username.
 usernameFormat :: String -> Either FormError Username
 usernameFormat = note InvalidUsername <<< Username.parse
+
+uuidFormat :: String -> Either FormError UUID
+uuidFormat s = Right $ UUID s
 
 -- |Handles a "generic" check for an input.
 check :: forall a. (a -> Boolean) -> FormError -> a -> Either FormError a

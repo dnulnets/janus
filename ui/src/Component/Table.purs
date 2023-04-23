@@ -153,7 +153,7 @@ component = H.mkComponent
     table = HH.div [ css "row" ]
       [ HH.div [ css "col" ]
           [ HH.table [ css "table table-striped style=\"width:100%\"" ]
-              [ HH.thead [] [ HH.tr [] $ (map head header) <> (if action then [ HH.th [ prop "style" "text-align:right" ] [ HH.text "Action" ] ] else []) ]
+              [ HH.thead [] [ HH.tr [] $ (map head header) <> (if action then [ HH.th [ prop "style" "text-align:right" ] [ HH.text (i18n # translate (label :: _ "action")) ] ] else []) ]
               , HH.tbody [] $ map (row action) rows
               ]
           ]

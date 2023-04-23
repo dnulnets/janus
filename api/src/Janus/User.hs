@@ -14,45 +14,43 @@
 -- This module contains the static part of the application that servers static pages.
 module Janus.User (app, UserResponse(..), LoginRequest(..)) where
 
-import           Control.Applicative        (Alternative (empty))
+import           Control.Applicative       (Alternative (empty))
 import           Control.Monad.Catch
-import           Control.Monad.IO.Class     (MonadIO)
-import           Control.Monad.Reader       (ask)
-import           Control.Monad.Trans        (lift, liftIO)
-import           Data.Aeson                 (FromJSON (parseJSON),
-                                             KeyValue ((.=)), ToJSON (toJSON),
-                                             Value (Object), object, (.:),
-                                             (.:?))
-import           Data.Text                  (Text)
-import           Data.Time.Clock.System     (SystemTime (systemSeconds),
-                                             getSystemTime)
-import           Data.UUID                  (fromString)
-import qualified Database.Persist.Sql       as DB
-import           Janus.Core                 (JScottyM)
-import qualified Janus.Data.Config          as C
-import           Janus.Data.Model           (EntityField (..), Key (UserKey),
-                                             Unique (UniqueUserUsername),
-                                             User (User, userActive, userEmail, userGuid, userPassword, userUsername))
-import qualified Janus.Data.Role            as R
-import           Janus.Data.User            (nofUsers)
+import           Control.Monad.IO.Class    (MonadIO)
+import           Control.Monad.Reader      (ask)
+import           Control.Monad.Trans       (lift, liftIO)
+import           Data.Aeson                (FromJSON (parseJSON),
+                                            KeyValue ((.=)), ToJSON (toJSON),
+                                            Value (Object), object, (.:), (.:?))
+import           Data.Maybe
+import           Data.Text                 (Text)
+import           Data.Time.Clock.System    (SystemTime (systemSeconds),
+                                            getSystemTime)
+import           Data.UUID                 (fromString)
+import qualified Database.Persist.Sql      as DB
+import           Janus.Core                (JScottyM)
+import qualified Janus.Data.Config         as C
+import           Janus.Data.Model          (EntityField (..), Key (UserKey),
+                                            Unique (UniqueUserUsername),
+                                            User (User, userActive, userEmail, userPassword, userUsername))
+import qualified Janus.Data.Role           as R
+import           Janus.Data.User           (nofUsers)
 import           Janus.Data.UUID
-import           Janus.Settings             (Settings (config))
+import           Janus.Settings            (Settings (config))
 import           Janus.Utils.Auth
-import           Janus.Utils.DB             (runDB)
-import           Janus.Utils.JWT            (createToken)
-import           Janus.Utils.Password       (authHashPassword,
-                                             authValidatePassword)
-import           Network.HTTP.Types.Status  (badRequest400, created201,
-                                             internalServerError500,
-                                             notFound404, ok200,
-                                             unauthorized401)
-import           Web.Scotty.Trans           (delete, get, json, jsonData, param,
-                                             post, put, rescue, status, text)
-import Data.Maybe
+import           Janus.Utils.DB            (runDB)
+import           Janus.Utils.JWT           (createToken)
+import           Janus.Utils.Password      (authHashPassword,
+                                            authValidatePassword)
+import           Network.HTTP.Types.Status (badRequest400, created201,
+                                            internalServerError500, notFound404,
+                                            ok200, unauthorized401)
+import           Web.Scotty.Trans          (delete, get, json, jsonData, param,
+                                            post, put, rescue, status, text)
 
 -- | User information for the login response
 data UserResponse = UserResponse
-  { guid     :: UUID,
+  { key      :: UUID,
     username :: Text,
     email    :: Text,
     active   :: Bool,
@@ -70,8 +68,7 @@ data LoginRequest = LoginRequest
 
 -- | The request for creating the user
 data CreateUserRequest = CreateUserRequest
-  { curguid     :: UUID,
-    curusername :: Text,
+  { curusername :: Text,
     curemail    :: Text,
     curactive   :: Bool,
     curpassword :: Text
@@ -80,8 +77,7 @@ data CreateUserRequest = CreateUserRequest
 
 -- | The request for creating the user
 data UpdateUserRequest = UpdateUserRequest
-  { uurguid     :: UUID,
-    uurusername :: Text,
+  { uurusername :: Text,
     uuremail    :: Text,
     uuractive   :: Bool,
     uurpassword :: Maybe Text
@@ -90,8 +86,8 @@ data UpdateUserRequest = UpdateUserRequest
 
 instance ToJSON UserResponse where
   -- this generates a Value
-  toJSON (UserResponse _guid _username _email _active _token _password) =
-    object ["user" .= object ["guid" .= _guid, "username" .= _username, "email" .= _email,
+  toJSON (UserResponse _key _username _email _active _token _password) =
+    object ["user" .= object ["key" .= _key, "username" .= _username, "email" .= _email,
       "token" .= _token, "active" .= _active, "password" .= _password]]
 
 instance FromJSON UserResponse where
@@ -99,7 +95,7 @@ instance FromJSON UserResponse where
     w <- v .: "user"
     UserResponse
       <$> w
-      .: "guid"
+      .: "key"
       <*> w
       .: "username"
       <*> w
@@ -117,8 +113,6 @@ instance FromJSON CreateUserRequest where
     w <- v .: "user"
     CreateUserRequest
       <$> w
-      .: "guid"
-      <*> w
       .: "username"
       <*> w
       .: "email"
@@ -133,8 +127,6 @@ instance FromJSON UpdateUserRequest where
     w <- v .: "user"
     UpdateUserRequest
       <$> w
-      .: "guid"
-      <*> w
       .: "username"
       <*> w
       .: "email"
@@ -176,15 +168,15 @@ app = do
     settings <- lift ask
     dbuser <- runDB $ DB.getBy $ UniqueUserUsername (lrusername req)
     case dbuser of
-      Just (DB.Entity _ user) | userActive user && authValidatePassword (userPassword user) (lrpassword req) -> do
+      Just (DB.Entity (UserKey key) user) | userActive user && authValidatePassword (userPassword user) (lrpassword req) -> do
         seconds <- liftIO $ fromIntegral . systemSeconds <$> getSystemTime
         let jwt = createToken
               ((C.key . C.token . config) settings)
               seconds
               ((C.valid . C.token . config) settings)
               ((C.issuer . C.token . config) settings)
-              (userGuid user)
-        let userResponse = UserResponse {guid = (userGuid user), username = (userUsername user), email = (userEmail user),
+              key
+        let userResponse = UserResponse {key = key, username = (userUsername user), email = (userEmail user),
           active = (userActive user), token = Just jwt, password = Nothing}
         json userResponse
       _ -> status unauthorized401
@@ -192,11 +184,11 @@ app = do
   -- |Checks a token and returns with the user if the user is valid and active
   get "/api/login" $ do
 
-    user <- getAuthenticated
+    kau <- getAuthenticated
     t <- getToken
-    case user of
-      Just u -> do
-        let userResponse = UserResponse {guid = (userGuid u), username = (userUsername u),
+    case kau of
+      Just (UserKey k, u) -> do
+        let userResponse = UserResponse { key = k, username = (userUsername u),
           email = (userEmail u), active = (userActive u), token = t, password = Nothing}
         json userResponse
       Nothing -> status unauthorized401
@@ -216,7 +208,7 @@ app = do
         dbuser <- runDB $ DB.get $ UserKey k
         case dbuser of
           Just u -> do
-            let userResponse = UserResponse {guid = (userGuid u), username = (userUsername u),
+            let userResponse = UserResponse { key = k, username = (userUsername u),
               email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}
             json userResponse
           Nothing -> status notFound404
@@ -228,7 +220,7 @@ app = do
     req <- jsonData
     settings <- lift ask
     pwd <- liftIO $ authHashPassword ((C.cost . C.password . config) settings) (curpassword req)
-    _ <- runDB $ DB.insert $ User { userUsername = (curusername req), userGuid = (curguid req), userPassword = pwd,
+    _ <- runDB $ DB.insert $ User { userUsername = (curusername req), userPassword = pwd,
       userEmail = (curemail req), userActive = (curactive req)}
     status created201) `catch`
       (\(SomeException e) -> do
@@ -244,7 +236,7 @@ app = do
     case uuid of
       Just k -> do
         pwd <- liftIO $ mapM (authHashPassword ((C.cost . C.password . config) settings)) (uurpassword req)
-        runDB $ DB.update (UserKey k) $ [ UserUsername DB.=. uurusername req, UserGuid DB.=. uurguid req,
+        runDB $ DB.update (UserKey k) $ [ UserUsername DB.=. uurusername req,
           UserEmail DB.=. uuremail req, UserActive DB.=. uuractive req] <> (maybe [] (\i->[UserPassword DB.=. i]) pwd)
         status ok200
       Nothing -> status badRequest400) `catch`
@@ -276,5 +268,5 @@ app = do
 
   where
     prepare::DB.Entity User -> UserResponse
-    prepare (DB.Entity _ u) = UserResponse {guid = (userGuid u), username = (userUsername u),
+    prepare (DB.Entity (UserKey key) u) = UserResponse {key=key, username = (userUsername u),
       email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}

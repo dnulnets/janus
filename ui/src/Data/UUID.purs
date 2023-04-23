@@ -1,10 +1,5 @@
 -- |This module contains support for a UUID type and encoding, decoding of the type for json. 
-module Janus.Data.UUID
-  ( UUID(..)
-  , codec
-  , uuid
-  )
-  where
+module Janus.Data.UUID where
 
 import Prelude
 
@@ -20,6 +15,7 @@ import Routing.Duplex (RouteDuplex', as)
 newtype UUID = UUID String
 derive instance ntUUID :: Newtype UUID _
 derive instance eqUUID :: Eq UUID
+derive instance ordUUID :: Ord UUID
 derive instance genericUUID :: Generic UUID _
 
 instance showUUID :: Show UUID where

@@ -9,7 +9,8 @@ import Record.Extra (type (:::), SNil)
 
 -- Symbols should be in alphabetic order.
 type Labels =
-    ( "create"
+    ( "action"
+  ::: "create"
   ::: "delete"
   ::: "edit"
   ::: "next"
@@ -42,6 +43,7 @@ en = fromRecord
   , next: "Next"
   , edit: "Edit"
   , delete: "Delete"
+  , action: "Action"
   }
 
 se :: Translation Labels
@@ -57,4 +59,5 @@ se = fromRecord
   , next: "Next"
   , edit: "Ändra"
   , delete: "Ta bort"
+  , action: "Åtgärd"
   }

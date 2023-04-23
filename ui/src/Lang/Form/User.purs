@@ -1,9 +1,5 @@
--- |Language support for the login page.
-module Janus.Lang.Users
-  ( Labels(..)
-  , en
-  , translator
-  ) where
+-- |The language support for the login form.
+module Janus.Lang.Form.User (translator, Labels (..)) where
 
 import Prelude
 import Simple.I18n.Translation (Translation, fromRecord)
@@ -15,8 +11,9 @@ import Record.Extra (type (:::), SNil)
 type Labels =
     ( "active"
   ::: "email"
+  ::: "invalid"
   ::: "key"
-  ::: "title"
+  ::: "password"
   ::: "username"
   ::: SNil
     )
@@ -29,18 +26,20 @@ translator country =
 
 en :: Translation Labels
 en = fromRecord
-  { active: "Active"
-  , email: "Email"
-  , key: "UUID"
+  { password: "Password"
   , username: "Username"
-  , title: "User administration"
+  , invalid: "Username or password is invalid"
+  , email: "Email"
+  , active: "Active"
+  , key: "UUID"
   }
 
 se :: Translation Labels
 se = fromRecord
-  { active: "Aktiv"
-  , email: "Email"
-  , key: "UUID"
+  { password: "Lösenord"
   , username: "Användarnamn"
-  , title: "Användaradministration"
+  , invalid: "Användarnamn eller lösenord är felaktigt"
+  , email: "Email"
+  , active: "Active"
+  , key: "UUID"
   }
