@@ -96,7 +96,7 @@ instance manageUserAppM :: ManageUser AppM where
   
   createUser user = do
     let
-      codec = CAR.object "User" { user: Profile.profileWithPasswordCodec }
+      codec = CAR.object "User" { user: Profile.newProfileCodec }
       method = Put $ Just $ Codec.encode codec { user }
 
     void $ mkAuthRequest { endpoint: CreateUser, method: method }

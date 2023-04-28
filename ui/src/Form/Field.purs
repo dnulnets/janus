@@ -85,10 +85,10 @@ checkboxInput
    . CheckboxInput action output
   -> Array (HP.IProp HTMLinput action)
   -> H.ComponentHTML action slots m
-checkboxInput { label, state, action, country} props = HH.fieldset []
+checkboxInput { label, state, action } props = HH.fieldset []
   [
-    HH.div [css "form-check mb-3"] [
-      HH.input ( append [css "form-check-input", HP.type_ HP.InputCheckbox, HP.id $ "j-" <> label, HP.checked state.value] props),
+    HH.div [css "form-check mb-4"] [
+      HH.input ( append [css "form-check-input", HE.onChecked action.handleChange, HP.type_ HP.InputCheckbox, HP.id $ "j-" <> label, HP.checked state.value] props),
       HH.label [css "form-check-label", HP.for $ "j-" <> label] [HH.text label]
     ]
   ]

@@ -10,10 +10,13 @@ import Record.Extra (type (:::), SNil)
 -- Symbols should be in alphabetic order.
 type Labels =
     ( "active"
+  ::: "cancel"
+  ::: "create"
   ::: "email"
   ::: "invalid"
   ::: "key"
   ::: "password"
+  ::: "save"
   ::: "username"
   ::: SNil
     )
@@ -32,6 +35,9 @@ en = fromRecord
   , email: "Email"
   , active: "Active"
   , key: "UUID"
+  , create: "Create"
+  , save: "Save"
+  , cancel: "Cancel"
   }
 
 se :: Translation Labels
@@ -42,4 +48,7 @@ se = fromRecord
   , email: "Email"
   , active: "Active"
   , key: "UUID"
+  , create: "Skapa"
+  , save: "Spara"
+  , cancel: "Avbryt"
   }

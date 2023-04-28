@@ -1,7 +1,10 @@
 -- |This module contains the available profiles and codecs for json.
 module Janus.Data.Profile
-  ( Profile(..)
+  ( NewProfile
+  , Profile(..)
   , ProfileBase(..)
+  , ProfileWithPassword
+  , newProfileCodec
   , profileCodec
   , profileWithPasswordCodec
   )
@@ -19,9 +22,10 @@ import Janus.Data.UUID as UUID
 import Janus.Data.Username (Username)
 import Janus.Data.Username as Username
 
-type ProfileBase r = ( key::UUID, email :: Email, username::Username, active::Boolean | r )
-type Profile = { | ProfileBase ()}
-type ProfileWithPassword = {| ProfileBase(password::Maybe String)}
+type ProfileBase r = ( email :: Email, username::Username, active::Boolean | r )
+type Profile = { | ProfileBase (key::UUID)}
+type ProfileWithPassword = {password::Maybe String | ProfileBase(key::UUID)}
+type NewProfile = { password::String | ProfileBase () }
 
 profileCodec :: JsonCodec Profile
 profileCodec =
@@ -40,4 +44,14 @@ profileWithPasswordCodec =
       email: Email.codec,
       active: CA.boolean,
       password: CAC.maybe CA.string
+    }
+
+
+newProfileCodec :: JsonCodec NewProfile
+newProfileCodec =
+  CAR.object "NewProfile"
+    { username: Username.codec,
+      email: Email.codec,
+      active: CA.boolean,
+      password: CA.string
     }

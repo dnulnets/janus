@@ -1,5 +1,6 @@
 module Janus.Capability.Resource.User
   ( UpdateProfileFields
+  , CreateProfileFields
   , getCurrentUser
   , loginUser
   , updateUser
@@ -21,13 +22,14 @@ import Janus.Data.Profile (Profile, ProfileBase)
 import Janus.Data.UUID (UUID)
 
 -- |The fields used by the api for updating the user profile, it contains the password if the user wants to change it.
-type UpdateProfileFields = { password::Maybe String | ProfileBase () }
+type UpdateProfileFields = { | ProfileBase (key::UUID, password::Maybe String) }
+type CreateProfileFields = { | ProfileBase (password::String) }
 
 -- |The collection of user manipulation functions as well as the login functionality
 class Monad m <= ManageUser m where
   loginUser :: LoginFields -> m (Maybe Profile)
   getCurrentUser :: m (Maybe Profile)
-  createUser :: UpdateProfileFields -> m Unit
+  createUser :: CreateProfileFields -> m Unit
   updateUser :: UpdateProfileFields -> m Unit
   getUser :: UUID -> m (Maybe Profile)
   deleteUser :: UUID -> m Unit
@@ -44,5 +46,3 @@ instance manageUserHalogenM :: ManageUser m => ManageUser (HalogenM st act slots
   deleteUser = lift <<< deleteUser
   getUsers o n = lift $ getUsers o n
   nofUsers = lift nofUsers
-
-
