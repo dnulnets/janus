@@ -1,5 +1,5 @@
 -- |This module contains the form for creating a new user.
-module Janus.Form.UserCreate where
+module Janus.Form.User.Create where
 
 import Prelude
 import Data.Either (Either(..))
@@ -10,7 +10,6 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Janus.Capability.Navigate (class Navigate)
 import Janus.Capability.Resource.User (class ManageUser, createUser)
 import Janus.Component.HTML.Utils (css, whenElem)
 import Janus.Data.Email (Email)
@@ -64,7 +63,6 @@ type State =
 component
   :: forall q m
    . MonadAff m
-  => Navigate m
   => ManageUser m
   => H.Component q Input Output m
 component = F.formless { liftAction: Eval } initialValue $ H.mkComponent

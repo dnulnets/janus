@@ -4,7 +4,9 @@ module Janus.Form.Field
   , TextInput
   , submitButton
   , textInput
+  , textInputReadOnly
   , checkboxInput
+  , checkboxInputReadOnly
   )
   where
 
@@ -15,11 +17,9 @@ import Data.Either (either)
 import Data.Maybe (Maybe(..))
 import Formless as F
 import Halogen as H
-import Halogen.HTML (output)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Halogen.HTML.Properties.ARIA (checked)
 import Janus.Component.HTML.Utils (css, maybeElem)
 import Janus.Form.Validation (FormError, errorToString)
 
@@ -80,6 +80,31 @@ textInput { label, state, action, country } props =
       ]
     ]
 
+textInputReadOnly::forall action slots m . String
+  -> String
+  -> Array (HP.IProp HTMLinput action)
+  -> H.ComponentHTML action slots m
+textInputReadOnly label value props =
+  HH.div
+    []
+    [ HH.div [css "mb-3"]
+      [
+        HH.label [css "form-label", HP.for $ "j-" <> label]
+        [
+          HH.text label
+        ],
+        HH.input
+            ( append
+                [ css "form-control"
+                , HP.id $ "j-" <> label
+                , HP.value value
+                , HP.readOnly true
+                ]
+                props
+            )
+      ]
+    ]
+
 checkboxInput
   :: forall output action slots m
    . CheckboxInput action output
@@ -89,6 +114,25 @@ checkboxInput { label, state, action } props = HH.fieldset []
   [
     HH.div [css "form-check mb-4"] [
       HH.input ( append [css "form-check-input", HE.onChecked action.handleChange, HP.type_ HP.InputCheckbox, HP.id $ "j-" <> label, HP.checked state.value] props),
+      HH.label [css "form-check-label", HP.for $ "j-" <> label] [HH.text label]
+    ]
+  ]
+
+checkboxInputReadOnly
+  :: forall action slots m
+   . String
+  -> Boolean
+  -> Array (HP.IProp HTMLinput action)
+  -> H.ComponentHTML action slots m
+checkboxInputReadOnly
+ label value props = HH.div []
+  [
+    HH.div [css "form-check mb-4"] [
+      HH.input ( append [css "form-check-input", 
+        HP.type_ HP.InputCheckbox, 
+        HP.id $ "j-" <> label, 
+        HP.checked value,
+        HP.readOnly true] props),
       HH.label [css "form-check-label", HP.for $ "j-" <> label] [HH.text label]
     ]
   ]

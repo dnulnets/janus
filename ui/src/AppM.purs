@@ -82,7 +82,7 @@ instance manageUserAppM :: ManageUser AppM where
   updateUser user = do
     let
       codec = CAR.object "User" { user: Profile.profileWithPasswordCodec }
-      method = Put $ Just $ Codec.encode codec { user }
+      method = Post $ Just $ Codec.encode codec { user }
 
     void $ mkAuthRequest { endpoint: User user.key, method: method }
 

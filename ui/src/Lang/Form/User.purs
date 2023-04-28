@@ -12,6 +12,7 @@ type Labels =
     ( "active"
   ::: "cancel"
   ::: "create"
+  ::: "delete"
   ::: "email"
   ::: "invalid"
   ::: "key"
@@ -38,6 +39,7 @@ en = fromRecord
   , create: "Create"
   , save: "Save"
   , cancel: "Cancel"
+  , delete: "Delete"
   }
 
 se :: Translation Labels
@@ -51,4 +53,5 @@ se = fromRecord
   , create: "Skapa"
   , save: "Spara"
   , cancel: "Avbryt"
+  , delete: "Delete"
   }
