@@ -8,7 +8,10 @@ import Type.Proxy (Proxy(..))
 import Record.Extra (type (:::), SNil)
 
 -- Symbols should be in alphabetic order.
-type Labels = ( "tbd" ::: SNil )
+type Labels = ( "admin"
+  ::: "search"
+  ::: "users"
+  ::: SNil )
 
 translator :: String -> Translator Labels
 translator country =
@@ -19,8 +22,12 @@ translator country =
 
 en :: Translation Labels
 en = fromRecord
-  { tbd: "To be decided" }
+  { admin: "Administration",
+    search: "Search",
+    users: "Users" }
 
 se :: Translation Labels
 se = fromRecord
-  { tbd: "Att bestämmas" }
+  { admin: "Administration",
+    search: "Sök",
+    users: "Användare" }

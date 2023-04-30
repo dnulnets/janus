@@ -98,13 +98,13 @@ component = H.mkComponent
                     [ Field.textInputReadOnly
                         (i18n # translate (label :: _ "username"))
                         (show user.username)
-                        [ HP.type_ HP.InputText ]
+                        [ HP.type_ HP.InputText]
                     ]
                 , HH.div [ css "col" ]
                     [ Field.textInputReadOnly
                         (i18n # translate (label :: _ "email"))
                         (show user.email)
-                        [ HP.type_ HP.InputText ]
+                        [ HP.type_ HP.InputText]
                     ]
                 ]
             , HH.input [ css "btn btn-primary", HP.type_ HP.InputButton, HP.value (i18n # translate (label :: _ "delete")), HE.onClick \_ -> Delete ]

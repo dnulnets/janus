@@ -154,7 +154,7 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
                 , HH.div [ css "col" ]
                     [ Field.textInput
                         { label: (i18n # translate (label :: _ "key")), state: fields.key, action: actions.key, country: i18n # currentLang }
-                        [ HP.type_ HP.InputText ]
+                        [ HP.type_ HP.InputText, HP.disabled true ]
                     ]
                 ]
             , HH.div [ css "row" ]

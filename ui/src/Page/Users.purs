@@ -2,7 +2,7 @@ module Janus.Page.Users where
 
 import Prelude
 
-import Data.Maybe (Maybe(..), isJust, fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Console (log)
 import Halogen as H
@@ -13,7 +13,7 @@ import Janus.Capability.Resource.User (class ManageUser, getUsers, nofUsers)
 import Janus.Component.HTML.Utils (css)
 import Janus.Component.Table as Table
 import Janus.Data.Profile (Profile)
-import Janus.Data.UUID (UUID(..))
+import Janus.Data.UUID (UUID)
 import Janus.Form.User.Create as UserCreate
 import Janus.Form.User.Delete as UserDelete
 import Janus.Form.User.Edit as UserEdit
@@ -21,7 +21,6 @@ import Janus.Lang.Users (Labels, translator)
 import Janus.Store as Store
 import Simple.I18n.Translator (Translator, currentLang, label, translate)
 import Type.Proxy (Proxy(..))
-import Web.HTML.Event.EventTypes (offline)
 
 type Input = { country :: String }
 
@@ -79,54 +78,49 @@ component = H.mkComponent
   convert { key: key, email: email, username: username, active: active } = { key: key, row: [ show username, show email, show active, show key ] }
 
   handleAction :: Action -> H.HalogenM State Action ChildSlots o m Unit
-  handleAction = case _ of
-    Initialize -> do
-      st <- H.get
-      ul <- map convert <$> getUsers (st.table.currentItem - 1) st.table.nofItemsPerPage
-      n <- nofUsers
-      H.modify_
-        ( \s -> s
-            { table
-                { nofItems = n
-                , rows = ul
-                , header =
-                    [ (st.i18n # translate (label :: _ "username"))
-                    , (st.i18n # translate (label :: _ "email"))
-                    , (st.i18n # translate (label :: _ "active"))
-                    , (st.i18n # translate (label :: _ "key"))
-                    ]
-                }
-            }
-        )
-      H.liftEffect $ log $ "Users.Initialize " <> show n
+  handleAction =  do
 
-    Receive i -> do
-      H.liftEffect $ log $ "Users.Receive " <> show i
-    HandleTable i -> do
-      handleTable i
-      H.liftEffect $ log $ "Users.HandleTable"
-    HandleCreate UserCreate.Cancelled -> do
-      H.modify_ (\s -> s { view = Table, key = Nothing })
-    HandleDelete UserDelete.Cancelled -> do
-      H.modify_ (\s -> s { view = Table, key = Nothing })
-    HandleEdit UserEdit.Cancelled -> do
-      H.modify_ (\s -> s { view = Table, key = Nothing })
-    HandleCreate UserCreate.Completed -> do
-      st <- H.get
-      ul <- map convert <$> getUsers (st.table.currentItem - 1) st.table.nofItemsPerPage
-      nof <- nofUsers
-      H.modify_ (\s -> s { view = Table, key = Nothing, table { nofItems = nof, rows = ul } })
-    HandleDelete UserDelete.Completed -> do
-      st <- H.get
-      ul <- map convert <$> getUsers (st.table.currentItem - 1) st.table.nofItemsPerPage
-      nof <- nofUsers
-      H.modify_ (\s -> s { view = Table, key = Nothing, table { nofItems = nof, rows = ul } })
-    HandleEdit UserEdit.Completed -> do
-      st <- H.get
-      ul <- map convert <$> getUsers (st.table.currentItem - 1) st.table.nofItemsPerPage
-      nof <- nofUsers
-      H.modify_ (\s -> s { view = Table, key = Nothing, table { nofItems = nof, rows = ul } })
+    let cancel = H.modify_ (\s -> s { view = Table, key = Nothing })
 
+        completed = do
+          st <- H.get
+          ul <- map convert <$> getUsers (st.table.currentItem - 1) st.table.nofItemsPerPage
+          nof <- nofUsers
+          H.modify_ (\s -> s { view = Table, key = Nothing, table { nofItems = nof, rows = ul } })
+
+    case _ of
+
+      Initialize -> do
+        st <- H.get
+        ul <- map convert <$> getUsers (st.table.currentItem - 1) st.table.nofItemsPerPage
+        n <- nofUsers
+        H.modify_
+          ( \s -> s
+              { table
+                  { nofItems = n
+                  , rows = ul
+                  , header =
+                      [ (st.i18n # translate (label :: _ "username"))
+                      , (st.i18n # translate (label :: _ "email"))
+                      , (st.i18n # translate (label :: _ "active"))
+                      , (st.i18n # translate (label :: _ "key"))
+                      ]
+                  }
+              }
+          )
+
+      Receive i -> do
+        handleAction Initialize
+        H.modify_ (\s -> s { i18n = translator i.country })
+
+      HandleTable i -> handleTable i
+
+      HandleCreate UserCreate.Cancelled -> cancel
+      HandleDelete UserDelete.Cancelled -> cancel
+      HandleEdit UserEdit.Cancelled -> cancel
+      HandleCreate UserCreate.Completed -> completed
+      HandleDelete UserDelete.Completed -> completed
+      HandleEdit UserEdit.Completed -> completed
 
   handleTable :: Table.Output -> H.HalogenM State Action ChildSlots o m Unit
   handleTable = case _ of

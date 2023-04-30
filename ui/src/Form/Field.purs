@@ -99,6 +99,7 @@ textInputReadOnly label value props =
                 , HP.id $ "j-" <> label
                 , HP.value value
                 , HP.readOnly true
+                , HP.disabled true
                 ]
                 props
             )
@@ -132,7 +133,7 @@ checkboxInputReadOnly
         HP.type_ HP.InputCheckbox, 
         HP.id $ "j-" <> label, 
         HP.checked value,
-        HP.readOnly true] props),
+        HP.readOnly true, HP.disabled true] props),
       HH.label [css "form-check-label", HP.for $ "j-" <> label] [HH.text label]
     ]
   ]
