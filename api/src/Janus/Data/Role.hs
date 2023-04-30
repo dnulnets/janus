@@ -25,36 +25,8 @@ import           GHC.Generics        (Generic)
 
 
 -- | The roles supported by the application
-data Role = User | Administrator | CreateObject | UpdateObject | DestroyObject | ReadObject
+data Role = User | Administrator | TeamLeader
     deriving (Eq, Show, Read, Generic, Ord)
 derivePersistField "Role"
 instance FromJSON Role
 instance ToJSON Role
-
-{--
--- | The user type, used by the application.
-data AssignedRole = AssignedRole
-  { -- | What kind of role it is
-    role   :: Role
-    -- | Object key, if any
-    , guid :: Maybe Text }
-  deriving (Show)
-
--- | Json parser for the user type.
-instance FromJSON AssignedRole where
-  parseJSON (Object v) =
-    AssignedRole
-      <$> v .: "role"
-      <*> v .:? "guid"
-  parseJSON _          = empty
-
--- | Json emitter for the user type.
-instance ToJSON AssignedRole where
-  -- this generates a Value
-  toJSON ar =
-    object ["role" .= role ar, "guid" .= guid ar]
-
-  -- this encodes directly to a bytestring Builder
-  toEncoding ar =
-    pairs ("role" .= role ar <> "guid" .= guid ar)
---}

@@ -46,6 +46,5 @@ User
 AssignedRole
     type Role.Role
     user UserId
-    object UUID Maybe
 |]
 

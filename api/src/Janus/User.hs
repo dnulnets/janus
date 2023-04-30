@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Redundant bracket" #-}
+{-# HLINT ignore "Use mapM_" #-}
 
 -- |
 -- Module      : Janus.Static
@@ -14,39 +15,47 @@
 -- This module contains the static part of the application that servers static pages.
 module Janus.User (app, UserResponse(..), LoginRequest(..)) where
 
-import           Control.Applicative       (Alternative (empty))
-import           Control.Monad.Catch
-import           Control.Monad.IO.Class    (MonadIO)
-import           Control.Monad.Reader      (ask)
-import           Control.Monad.Trans       (lift, liftIO)
-import           Data.Aeson                (FromJSON (parseJSON),
-                                            KeyValue ((.=)), ToJSON (toJSON),
-                                            Value (Object), object, (.:), (.:?))
-import           Data.Maybe
-import           Data.Text                 (Text)
-import           Data.Time.Clock.System    (SystemTime (systemSeconds),
-                                            getSystemTime)
-import           Data.UUID                 (fromString)
-import qualified Database.Persist.Sql      as DB
-import           Janus.Core                (JScottyM)
-import qualified Janus.Data.Config         as C
-import           Janus.Data.Model          (EntityField (..), Key (UserKey),
-                                            Unique (UniqueUserUsername),
-                                            User (User, userActive, userEmail, userPassword, userUsername))
-import qualified Janus.Data.Role           as R
-import           Janus.Data.User           (nofUsers)
-import           Janus.Data.UUID
-import           Janus.Settings            (Settings (config))
-import           Janus.Utils.Auth
-import           Janus.Utils.DB            (runDB)
-import           Janus.Utils.JWT           (createToken)
-import           Janus.Utils.Password      (authHashPassword,
-                                            authValidatePassword)
-import           Network.HTTP.Types.Status (badRequest400, created201,
-                                            internalServerError500, notFound404,
-                                            ok200, unauthorized401)
-import           Web.Scotty.Trans          (delete, get, json, jsonData, param,
-                                            post, put, rescue, status, text)
+import           Control.Applicative        (Alternative (empty))
+import           Control.Monad.Catch        (MonadCatch (..),
+                                             SomeException (SomeException))
+import           Control.Monad.IO.Class     (MonadIO)
+import           Control.Monad.Reader       (ask)
+import           Control.Monad.Trans        (lift, liftIO)
+import           Control.Monad.Trans.Reader (ReaderT)
+import           Data.Aeson                 (FromJSON (parseJSON),
+                                             KeyValue ((.=)), ToJSON (toJSON),
+                                             Value (Object), object, (.:),
+                                             (.:?))
+import           Data.Maybe                 (fromMaybe, listToMaybe, isJust, fromJust)
+import           Data.Text                  (Text)
+import           Data.Time.Clock.System     (SystemTime (systemSeconds),
+                                             getSystemTime)
+import           Data.UUID                  (fromString)
+import qualified Database.Persist.Sql       as DB
+import           Janus.Core                 (JScottyM)
+import qualified Janus.Data.Config          as C
+import           Janus.Data.Model           (AssignedRole (AssignedRole, assignedRoleType, assignedRoleUser),
+                                             EntityField (..),
+                                             Key (AssignedRoleKey, UserKey),
+                                             Unique (UniqueUserUsername),
+                                             User (User, userActive, userEmail, userPassword, userUsername))
+import qualified Janus.Data.Role            as R
+import           Janus.Data.User            (nofUsers)
+import           Janus.Data.UUID            (UUID)
+import           Janus.Settings             (Settings (config))
+import           Janus.Utils.Auth           (getAuthenticated, getToken,
+                                             roleRequired)
+import           Janus.Utils.DB             (runDB)
+import           Janus.Utils.JWT            (createToken)
+import           Janus.Utils.Password       (authHashPassword,
+                                             authValidatePassword)
+import           Network.HTTP.Types.Status  (badRequest400, created201,
+                                             internalServerError500,
+                                             notFound404, ok200,
+                                             unauthorized401)
+import           Web.Scotty.Trans           (delete, get, json, jsonData, param,
+                                             post, put, rescue, status)
+import qualified Data.Set as S
 
 -- | User information for the login response
 data UserResponse = UserResponse
@@ -84,11 +93,42 @@ data UpdateUserRequest = UpdateUserRequest
   }
   deriving (Show)
 
+-- | The response for retrieveing the roles
+data RoleResponse = RoleResponse
+  {
+    rrkey  :: UUID,
+    rrrole :: R.Role
+  }
+  deriving (Show)
+
+-- | The response for retrieveing the roles
+data UpdateRoleRequest = UpdateRoleRequest
+  {
+    urrkey  :: Maybe UUID,
+    urrrole :: R.Role
+  }
+  deriving (Show)
+
+instance ToJSON RoleResponse where
+  -- this generates a Value
+  toJSON (RoleResponse _key _role) =
+    object ["role" .= object ["key" .= _key, "role" .= _role]]
+
 instance ToJSON UserResponse where
   -- this generates a Value
   toJSON (UserResponse _key _username _email _active _token _password) =
     object ["user" .= object ["key" .= _key, "username" .= _username, "email" .= _email,
       "token" .= _token, "active" .= _active, "password" .= _password]]
+
+instance FromJSON UpdateRoleRequest where
+  parseJSON (Object v) = do
+    w <- v .: "role"
+    UpdateRoleRequest
+      <$> w
+      .:? "key"
+      <*> w
+      .: "role"
+  parseJSON _ = empty
 
 instance FromJSON UserResponse where
   parseJSON (Object v) = do
@@ -158,6 +198,8 @@ instance FromJSON LoginRequest where
 -- | DELETE /api/user     : Deletes a specified user
 -- | GET /api/users/count : Retrieves the number of registered users
 -- | GET /api/users?offset=<int>&n=<int>       : Retrieves the list of <n> users beginning at <offset>
+-- | GET /api/user/roles/<uuid> : Get all the roles for the specified user
+-- | POST /api/user/roles/<uuid> : Update all roles and delete roles for the specified user
 -- |
 app :: (MonadIO m, MonadCatch m) => JScottyM m ()
 app = do
@@ -198,6 +240,32 @@ app = do
     roleRequired [R.Administrator]
     nof <- map DB.unSingle <$> runDB nofUsers
     json $ fromMaybe 0 $ listToMaybe nof
+
+  -- |Returns with the users roles based on the user key
+  get "/api/user/roles/:uuid" $ do
+    roleRequired [R.Administrator]
+    uuid <- fromString <$> param "uuid"
+    case uuid of
+      Just k -> do
+        dbroles <- runDB $ DB.selectList [AssignedRoleUser DB.==. UserKey k] []
+        json $ map prepareRole dbroles
+      Nothing -> status notFound404
+
+  -- |Updates or add users roles based on the user key and role keys
+  post "/api/user/roles/:uuid" $ do
+    roleRequired [R.Administrator]
+    uuid <- fromString <$> param "uuid"
+    req <- jsonData
+    case uuid of
+      Just k -> do
+        dbroles <- runDB $ DB.selectList [AssignedRoleUser DB.==. UserKey k] []
+        let l = S.fromList $ map extractRoleKey dbroles
+        let r = S.fromList $ map (fromJust . urrkey) (filter roleFilter req)
+        let s = S.toList $ S.difference l r
+        sequence_ $ map (runDB . prepareRoleUpdate k) req
+        sequence_ $ map (runDB . prepareRoleDelete k) s
+        status ok200
+      Nothing -> status notFound404
 
   -- |Returns with the use based on the key
   get "/api/user/:uuid" $ do
@@ -264,9 +332,29 @@ app = do
     start <- param "offset" `rescue` (\_ -> pure 0)
     nof <- param "n" `rescue` (\_ -> pure $ fromIntegral $ (C.length . C.ui . config) settings)
     dbl <- runDB $ DB.selectList [] [DB.LimitTo nof, DB.OffsetBy start, DB.Asc UserUsername]
-    json $ map prepare dbl
+    json $ map prepareUser dbl
 
   where
-    prepare::DB.Entity User -> UserResponse
-    prepare (DB.Entity (UserKey key) u) = UserResponse {key=key, username = (userUsername u),
+
+    prepareUser::DB.Entity User -> UserResponse
+    prepareUser (DB.Entity (UserKey key) u) = UserResponse {key=key, username = (userUsername u),
       email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}
+
+    prepareRole::DB.Entity AssignedRole -> RoleResponse
+    prepareRole (DB.Entity (AssignedRoleKey key) r) = RoleResponse { rrkey=key, rrrole = assignedRoleType r}
+
+    extractRoleKey::DB.Entity AssignedRole -> UUID
+    extractRoleKey (DB.Entity (AssignedRoleKey k) _) = k
+
+    roleFilter::UpdateRoleRequest -> Bool
+    roleFilter urr = isJust $ urrkey urr
+   
+    prepareRoleUpdate::MonadIO m => UUID->UpdateRoleRequest->ReaderT DB.SqlBackend m (Key AssignedRole)
+    prepareRoleUpdate k (UpdateRoleRequest Nothing r) = do
+      DB.insert $ AssignedRole {assignedRoleType = r, assignedRoleUser = UserKey k}
+    prepareRoleUpdate k (UpdateRoleRequest (Just key) r) = do
+      DB.update (AssignedRoleKey key) [AssignedRoleType DB.=. r, AssignedRoleUser DB.=. UserKey k]
+      pure $ AssignedRoleKey k
+
+    prepareRoleDelete::MonadIO m => UUID->UUID->ReaderT DB.SqlBackend m ()
+    prepareRoleDelete u k = DB.deleteWhere [AssignedRoleId DB.==. AssignedRoleKey k, AssignedRoleUser DB.==. UserKey u]
