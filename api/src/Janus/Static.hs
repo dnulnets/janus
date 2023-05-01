@@ -16,7 +16,6 @@ module Janus.Static (app) where
 import           Control.Monad.IO.Class (MonadIO)
 import           Janus.Core             (JScottyM)
 import           Web.Scotty.Trans       (addHeader, file, get)
-import Control.Monad.Catch
 
 -- | The part of the application that serve static files.
 app :: (MonadIO m) =>
