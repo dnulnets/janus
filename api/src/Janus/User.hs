@@ -205,7 +205,7 @@ app :: (MonadIO m, MonadCatch m) => JScottyM m ()
 app = do
 
   -- |Handles a login request and returns with the token if the user is valid and active
-  post "/api/login" $ do
+  post "/api/login" $ ( do
     req <- jsonData
     settings <- lift ask
     dbuser <- runDB $ DB.getBy $ UniqueUserUsername (lrusername req)
@@ -221,10 +221,13 @@ app = do
         let userResponse = UserResponse {key = key, username = (userUsername user), email = (userEmail user),
           active = (userActive user), token = Just jwt, password = Nothing}
         json userResponse
-      _ -> status unauthorized401
+      _ -> status unauthorized401) `catch`
+    (\(SomeException e) -> do
+      status internalServerError500
+      liftIO $ print e)
 
   -- |Checks a token and returns with the user if the user is valid and active
-  get "/api/login" $ do
+  get "/api/login" $ ( do
 
     kau <- getAuthenticated
     t <- getToken
@@ -233,26 +236,35 @@ app = do
         let userResponse = UserResponse { key = k, username = (userUsername u),
           email = (userEmail u), active = (userActive u), token = t, password = Nothing}
         json userResponse
-      Nothing -> status unauthorized401
+      Nothing -> status unauthorized401) `catch`
+    (\(SomeException e) -> do
+      status internalServerError500
+      liftIO $ print e)
 
   -- |Returns with the number of users
-  get "/api/users/count" $ do
+  get "/api/users/count" $ ( do
     roleRequired [R.Administrator]
     nof <- map DB.unSingle <$> runDB nofUsers
-    json $ fromMaybe 0 $ listToMaybe nof
+    json $ fromMaybe 0 $ listToMaybe nof) `catch`
+    (\(SomeException e) -> do
+      status internalServerError500
+      liftIO $ print e)
 
   -- |Returns with the users roles based on the user key
-  get "/api/user/roles/:uuid" $ do
+  get "/api/user/roles/:uuid" $ ( do
     roleRequired [R.Administrator]
     uuid <- fromString <$> param "uuid"
     case uuid of
       Just k -> do
         dbroles <- runDB $ DB.selectList [AssignedRoleUser DB.==. UserKey k] []
         json $ map prepareRole dbroles
-      Nothing -> status notFound404
+      Nothing -> status notFound404) `catch`
+    (\(SomeException e) -> do
+      status internalServerError500
+      liftIO $ print e)
 
   -- |Updates or add users roles based on the user key and role keys
-  post "/api/user/roles/:uuid" $ do
+  post "/api/user/roles/:uuid" $ ( do
     roleRequired [R.Administrator]
     uuid <- fromString <$> param "uuid"
     req <- jsonData
@@ -265,10 +277,13 @@ app = do
         sequence_ $ map (runDB . prepareRoleUpdate k) req
         sequence_ $ map (runDB . prepareRoleDelete k) s
         status ok200
-      Nothing -> status notFound404
+      Nothing -> status notFound404) `catch`
+    (\(SomeException e) -> do
+      status internalServerError500
+      liftIO $ print e)
 
   -- |Returns with the use based on the key
-  get "/api/user/:uuid" $ do
+  get "/api/user/:uuid" $ ( do
     roleRequired [R.Administrator]
     uuid <- fromString <$> param "uuid"
     case uuid of
@@ -280,7 +295,10 @@ app = do
               email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}
             json userResponse
           Nothing -> status notFound404
-      Nothing -> status badRequest400
+      Nothing -> status badRequest400) `catch`
+    (\(SomeException e) -> do
+      status internalServerError500
+      liftIO $ print e)
 
   -- |Creates a user
   put "/api/user" $ (do
@@ -321,18 +339,21 @@ app = do
         runDB $ DB.delete $ UserKey k
         status ok200
       Nothing -> status badRequest400) `catch`
-      (\(SomeException e) -> do
-        status internalServerError500
-        liftIO $ print e)
+    (\(SomeException e) -> do
+      status internalServerError500
+      liftIO $ print e)
 
   -- |Returns with a list of users
-  get "/api/users" $ do
+  get "/api/users" $ ( do
     roleRequired [R.Administrator]
     settings <- lift ask
     start <- param "offset" `rescue` (\_ -> pure 0)
     nof <- param "n" `rescue` (\_ -> pure $ fromIntegral $ (C.length . C.ui . config) settings)
     dbl <- runDB $ DB.selectList [] [DB.LimitTo nof, DB.OffsetBy start, DB.Asc UserUsername]
-    json $ map prepareUser dbl
+    json $ map prepareUser dbl) `catch`
+    (\(SomeException e) -> do
+      status internalServerError500
+      liftIO $ print e)
 
   where
 
