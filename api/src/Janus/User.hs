@@ -36,7 +36,7 @@ import           Janus.Core                 (JScottyM)
 import qualified Janus.Data.Config          as C
 import           Janus.Data.Model           (AssignedRole (AssignedRole, assignedRoleType, assignedRoleUser),
                                              EntityField (..),
-                                             Key (AssignedRoleKey, UserKey),
+                                             Key (AssignedRoleKey, UserKey, unAssignedRoleKey),
                                              Unique (UniqueUserUsername),
                                              User (User, userActive, userEmail, userPassword, userUsername))
 import qualified Janus.Data.Role            as R
@@ -248,7 +248,7 @@ app = do
     case uuid of
       Just k -> do
         dbroles <- runDB $ DB.selectList [AssignedRoleUser DB.==. UserKey k] []
-        json $ map prepareRole dbroles
+        json $ map makeRoleResponse dbroles
       Nothing -> status notFound404
 
   -- |Updates or add users roles based on the user key and role keys
@@ -259,9 +259,9 @@ app = do
     case uuid of
       Just k -> do
         dbroles <- runDB $ DB.selectList [AssignedRoleUser DB.==. UserKey k] []
-        let l = S.fromList $ map extractRoleKey dbroles
-        let r = S.fromList $ map (fromJust . urrkey) (filter roleFilter req)
-        let s = S.toList $ S.difference l r
+        let l = S.fromList $ map (unAssignedRoleKey . DB.entityKey) dbroles
+            r = S.fromList $ map (fromJust . urrkey) (filter (isJust . urrkey) req)
+            s = S.toList $ S.difference l r
         sequence_ $ map (runDB . prepareRoleUpdate k) req
         sequence_ $ map (runDB . prepareRoleDelete k) s
         status ok200
@@ -332,22 +332,16 @@ app = do
     start <- param "offset" `rescue` (\_ -> pure 0)
     nof <- param "n" `rescue` (\_ -> pure $ fromIntegral $ (C.length . C.ui . config) settings)
     dbl <- runDB $ DB.selectList [] [DB.LimitTo nof, DB.OffsetBy start, DB.Asc UserUsername]
-    json $ map prepareUser dbl
+    json $ map makeUserResponse dbl
 
   where
 
-    prepareUser::DB.Entity User -> UserResponse
-    prepareUser (DB.Entity (UserKey key) u) = UserResponse {key=key, username = (userUsername u),
+    makeUserResponse::DB.Entity User -> UserResponse
+    makeUserResponse (DB.Entity (UserKey key) u) = UserResponse {key=key, username = (userUsername u),
       email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}
 
-    prepareRole::DB.Entity AssignedRole -> RoleResponse
-    prepareRole (DB.Entity (AssignedRoleKey key) r) = RoleResponse { rrkey=key, rrrole = assignedRoleType r}
-
-    extractRoleKey::DB.Entity AssignedRole -> UUID
-    extractRoleKey (DB.Entity (AssignedRoleKey k) _) = k
-
-    roleFilter::UpdateRoleRequest -> Bool
-    roleFilter urr = isJust $ urrkey urr
+    makeRoleResponse::DB.Entity AssignedRole -> RoleResponse
+    makeRoleResponse (DB.Entity (AssignedRoleKey key) r) = RoleResponse { rrkey=key, rrrole = assignedRoleType r}
    
     prepareRoleUpdate::MonadIO m => UUID->UpdateRoleRequest->ReaderT DB.SqlBackend m (Key AssignedRole)
     prepareRoleUpdate k (UpdateRoleRequest Nothing r) = do

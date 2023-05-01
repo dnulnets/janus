@@ -17,18 +17,13 @@ module Janus.Utils.DB (runDB) where
 import           Control.Monad.Reader        (MonadReader (ask))
 import           Control.Monad.Trans         (MonadIO, liftIO)
 import           Control.Monad.Trans.Reader  (ReaderT)
-import           Data.ByteString.Char8       (unpack)
-import           Data.Text                   (Text, pack)
-import           Data.Text.Encoding          (encodeUtf8)
 import           Database.Persist.Postgresql (runSqlPool)
-import           Database.Persist.Sql        (Key, SqlBackend, ToBackendKey, keyFromValues)
+import           Database.Persist.Sql        (SqlBackend)
 import           Janus.Settings              (Settings (..))
-import           Janus.Data.UUID
 
 -- | Runs an sql query and returns with the result
 runDB::(MonadReader Settings m, MonadIO m) => ReaderT SqlBackend IO b -> m b
 runDB query = do
     settings <- ask
     liftIO $ runSqlPool query (dbpool settings)
-
 
