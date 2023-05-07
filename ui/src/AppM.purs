@@ -30,7 +30,8 @@ import Janus.Store as Store
 import Routing.Duplex (print)
 import Routing.Hash (setHash)
 import Safe.Coerce (coerce)
-
+import Data.Either (hush, Either(..))
+import Effect.Console (log)
 
 -- | The definition of the application.
 newtype AppM a = AppM (StoreT Store.Action Store.Store Aff a)
@@ -77,7 +78,7 @@ instance manageUserAppM :: ManageUser AppM where
   getCurrentUser = do
     mbJson <- mkAuthRequest { endpoint: Login, method: Get }
     map (map _.user)
-      $ decode (CAR.object "User" { user: Profile.profileCodec }) mbJson
+      $ decode (CAR.object "User" { user: Profile.profileCodec }) $ hush mbJson
 
   updateUser user = do
     let
@@ -89,7 +90,7 @@ instance manageUserAppM :: ManageUser AppM where
   getUser uuid = do
     mbJson <- mkAuthRequest { endpoint: User uuid, method: Get }
     map (map _.user)
-      $ decode (CAR.object "User" { user: Profile.profileCodec }) mbJson
+      $ decode (CAR.object "User" { user: Profile.profileCodec }) $ hush mbJson
 
   deleteUser uuid = do
     void $ mkAuthRequest { endpoint: User uuid, method: Delete }
@@ -99,20 +100,23 @@ instance manageUserAppM :: ManageUser AppM where
       codec = CAR.object "User" { user: Profile.newProfileCodec }
       method = Put $ Just $ Codec.encode codec { user }
 
-    void $ mkAuthRequest { endpoint: CreateUser, method: method }
+    r <- mkAuthRequest { endpoint: CreateUser, method: method }
+    case r of
+      Left e -> pure $ Just e
+      Right _ -> pure Nothing
 
   getUsers o n = do
     let
       codec =  Codec.array (CAR.object "User" { user: Profile.profileCodec })
 
     mbJson <- mkAuthRequest { endpoint: Users {offset:o, n:n}, method: Get }
-    l <- decode codec mbJson
+    l <- decode codec $ hush mbJson
     pure $ fromMaybe [] $ map (map _.user) l
 
   nofUsers = do
     let codec = Codec.int
 
     mbJson <- mkAuthRequest { endpoint: NofUsers, method: Get }
-    l <- decode codec mbJson
+    l <- decode codec $ hush mbJson
     pure $ fromMaybe 0 l
     

@@ -1,35 +1,29 @@
 -- |The language support for the login form.
-module Janus.Lang.Form.User (translator, Labels (..)) where
+module Janus.Lang.Form.User (i18n, Phrases(..)) where
 
-import Prelude
-import Simple.I18n.Translation (Translation, fromRecord)
-import Simple.I18n.Translator (Translator, createTranslator, setLang)
-import Type.Proxy (Proxy(..))
-import Record.Extra (type (:::), SNil)
+import Data.Tuple (Tuple(Tuple))
+import Janus.Lang.I18n (Dictionary, I18n, createI18n)
+import Record (merge)
+import Janus.Lang.Message as MSG
 
 -- Symbols should be in alphabetic order.
-type Labels =
-    ( "active"
-  ::: "cancel"
-  ::: "create"
-  ::: "delete"
-  ::: "email"
-  ::: "invalid"
-  ::: "key"
-  ::: "password"
-  ::: "save"
-  ::: "username"
-  ::: SNil
-    )
+type Phrases = ( active::String,
+      cancel::String,
+      create::String,
+      delete::String,
+      email::String,
+      invalid::String,
+      key::String,
+      password::String,
+      save::String,
+      username::String)
 
-translator :: String -> Translator Labels
-translator country =
-  (createTranslator
-    (Proxy :: _ "en")
-    { en, se }) # setLang country
 
-en :: Translation Labels
-en = fromRecord
+i18n::I18n Phrases
+i18n = createI18n [Tuple "en-US" eng, Tuple "en-GB" eng, Tuple "sv-SE" swe] (Tuple "en-US" eng)
+
+eng :: Dictionary Phrases
+eng = merge
   { password: "Password"
   , username: "Username"
   , invalid: "Username or password is invalid"
@@ -40,10 +34,10 @@ en = fromRecord
   , save: "Save"
   , cancel: "Cancel"
   , delete: "Delete"
-  }
+  } MSG.eng
 
-se :: Translation Labels
-se = fromRecord
+swe :: Dictionary Phrases
+swe = merge
   { password: "Lösenord"
   , username: "Användarnamn"
   , invalid: "Användarnamn eller lösenord är felaktigt"
@@ -54,4 +48,4 @@ se = fromRecord
   , save: "Spara"
   , cancel: "Avbryt"
   , delete: "Delete"
-  }
+  } MSG.swe

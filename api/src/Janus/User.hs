@@ -26,7 +26,8 @@ import           Data.Aeson                 (FromJSON (parseJSON),
                                              KeyValue ((.=)), ToJSON (toJSON),
                                              Value (Object), object, (.:),
                                              (.:?))
-import           Data.Maybe                 (fromMaybe, listToMaybe, isJust, fromJust)
+import           Data.Maybe                 (fromJust, fromMaybe, isJust,
+                                             isNothing, listToMaybe)
 import           Data.Text                  (Text)
 import           Data.Time.Clock.System     (SystemTime (systemSeconds),
                                              getSystemTime)
@@ -34,6 +35,7 @@ import           Data.UUID                  (fromString)
 import qualified Database.Persist.Sql       as DB
 import           Janus.Core                 (JScottyM)
 import qualified Janus.Data.Config          as C
+import           Janus.Data.Message         (Message (..))
 import           Janus.Data.Model           (AssignedRole (AssignedRole, assignedRoleType, assignedRoleUser),
                                              EntityField (..),
                                              Key (AssignedRoleKey, UserKey, unAssignedRoleKey),
@@ -52,10 +54,11 @@ import           Janus.Utils.Password       (authHashPassword,
 import           Network.HTTP.Types.Status  (badRequest400, created201,
                                              internalServerError500,
                                              notFound404, ok200,
-                                             unauthorized401)
+                                             unauthorized401, conflict409)
 import           Web.Scotty.Trans           (delete, get, json, jsonData, param,
                                              post, put, rescue, status)
-import qualified Data.Set as S
+
+import qualified Data.Set                   as S
 
 -- | User information for the login response
 data UserResponse = UserResponse
@@ -305,10 +308,16 @@ app = do
     roleRequired [R.Administrator]
     req <- jsonData
     settings <- lift ask
-    pwd <- liftIO $ authHashPassword ((C.cost . C.password . config) settings) (curpassword req)
-    _ <- runDB $ DB.insert $ User { userUsername = (curusername req), userPassword = pwd,
-      userEmail = (curemail req), userActive = (curactive req)}
-    status created201) `catch`
+    dbuser <- runDB $ DB.getBy $ UniqueUserUsername (curusername req)
+    if isNothing dbuser then do
+      pwd <- liftIO $ authHashPassword ((C.cost . C.password . config) settings) (curpassword req)
+      _ <- runDB $ DB.insert $ User { userUsername = (curusername req), userPassword = pwd,
+        userEmail = (curemail req), userActive = (curactive req)}
+      status created201
+    else do
+      json USR001
+      status conflict409
+    ) `catch`
       (\(SomeException e) -> do
         status internalServerError500
         liftIO $ print e)
@@ -363,7 +372,7 @@ app = do
 
     makeRoleResponse::DB.Entity AssignedRole -> RoleResponse
     makeRoleResponse (DB.Entity (AssignedRoleKey key) r) = RoleResponse { rrkey=key, rrrole = assignedRoleType r}
-   
+
     prepareRoleUpdate::MonadIO m => UUID->UpdateRoleRequest->ReaderT DB.SqlBackend m (Key AssignedRole)
     prepareRoleUpdate k (UpdateRoleRequest Nothing r) = do
       DB.insert $ AssignedRole {assignedRoleType = r, assignedRoleUser = UserKey k}

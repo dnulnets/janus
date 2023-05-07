@@ -29,7 +29,7 @@ type CreateProfileFields = { | ProfileBase (password::String) }
 class Monad m <= ManageUser m where
   loginUser :: LoginFields -> m (Maybe Profile)
   getCurrentUser :: m (Maybe Profile)
-  createUser :: CreateProfileFields -> m Unit
+  createUser :: CreateProfileFields -> m (Maybe String)
   updateUser :: UpdateProfileFields -> m Unit
   getUser :: UUID -> m (Maybe Profile)
   deleteUser :: UUID -> m Unit

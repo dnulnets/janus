@@ -38,14 +38,14 @@ type TextInput action output =
   { label :: String
   , state :: F.FieldState String FormError output
   , action :: F.FieldAction action String FormError output
-  , country :: String
+  , locale :: String
   }
 
 type CheckboxInput action output =
   { label :: String
   , state :: F.FieldState Boolean Void output
   , action :: F.FieldAction action Boolean Void output
-  , country :: String
+  , locale :: String
   }
 
 textInput
@@ -53,7 +53,7 @@ textInput
    . TextInput action output
   -> Array (HP.IProp HTMLinput action)
   -> H.ComponentHTML action slots m
-textInput { label, state, action, country } props =
+textInput { label, state, action, locale } props =
   HH.fieldset
     []
     [ HH.div [css "mb-3"]
@@ -75,7 +75,7 @@ textInput { label, state, action, country } props =
         , maybeElem (state.result >>= either pure (const Nothing)) \err ->
             HH.div [css "j-invalid-feedback"]
             [
-              HH.text $ errorToString err country
+              HH.text $ errorToString err locale
             ]
       ]
     ]

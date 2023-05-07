@@ -6,10 +6,10 @@ module Janus.Api.Request
   , Token
   , defaultRequest
   , login
-  , readCountry
+  , readLocale
   , readToken
   , removeToken
-  , writeCountry
+  , writeLocale
   , writeToken
   )
   where
@@ -147,15 +147,15 @@ removeToken =
   removeItem tokenKey =<< localStorage =<< window
 
 -- |The key used in the broswers local storage for storing the token
-countryKey = "country" :: String
+localeKey = "locale" :: String
 
 -- |Reads the token from local storage.
-readCountry :: Effect (Maybe String)
-readCountry = do
-  str <- getItem countryKey =<< localStorage =<< window
+readLocale :: Effect (Maybe String)
+readLocale = do
+  str <- getItem localeKey =<< localStorage =<< window
   pure $ str
 
 -- |Writes the token to local storage.
-writeCountry :: String -> Effect Unit
-writeCountry str =
-  setItem countryKey str =<< localStorage =<< window
+writeLocale :: String -> Effect Unit
+writeLocale str =
+  setItem localeKey str =<< localStorage =<< window

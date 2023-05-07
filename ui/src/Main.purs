@@ -7,7 +7,7 @@ import Prelude
 
 import Affjax.Web (printError, request)
 import Janus.Api.Endpoint (Endpoint(..))
-import Janus.Api.Request (BaseURL(..), RequestMethod(..), defaultRequest, readToken, readCountry)
+import Janus.Api.Request (BaseURL(..), RequestMethod(..), defaultRequest, readToken, readLocale)
 import Janus.AppM (runAppM)
 import Janus.Component.Router as Router
 import Janus.Data.Profile (Profile)
@@ -41,7 +41,7 @@ main = HA.runHalogenAff do
     baseUrl = BaseURL ""
     logLevel = Dev
 
-  country <- liftEffect readCountry
+  locale <- liftEffect readLocale
   currentUser :: Maybe Profile ← (liftEffect readToken) >>= case _ of
     Nothing →
       pure Nothing
@@ -63,7 +63,7 @@ main = HA.runHalogenAff do
 
   let
     initialStore ∷ Store
-    initialStore = { baseUrl: baseUrl, logLevel: logLevel, currentUser: currentUser, country: fromMaybe "en" country }
+    initialStore = { baseUrl: baseUrl, logLevel: logLevel, currentUser: currentUser, locale: fromMaybe "en-US" locale }
 
   rootComponent ← runAppM initialStore Router.component
 

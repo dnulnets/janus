@@ -10,8 +10,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE UndecidableInstances       #-}
-{-# OPTIONS_GHC -Wno-missing-export-lists #-}
-{-# OPTIONS_GHC -Wno-name-shadowing #-}
+
 -- |
 -- Module      : Janus.Data.Model
 -- Description : Application database model

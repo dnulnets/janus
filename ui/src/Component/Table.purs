@@ -21,8 +21,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Janus.Capability.Navigate (class Navigate)
 import Janus.Component.HTML.Utils (css, prop)
-import Janus.Lang.Component.Table
-import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
+import Janus.Lang.Component.Table (i18n, Phrases)
+import Janus.Lang.I18n (I18n, setLocale)
 
 type Slot id = forall q. H.Slot q Output id
 
@@ -41,11 +41,11 @@ type Model =
 
 type Input = {
   model::Model
-  , country::String }
+  , locale::String }
 
 type State = {
   model::Model
-  , i18n :: Translator Labels }
+  , i18n :: I18n Phrases }
 
 data Output
   = GotoItem Int
@@ -75,14 +75,14 @@ component = H.mkComponent
   }
   where
 
-  initialState i = { i18n:translator i.country, model:i.model }
+  initialState i = { i18n: setLocale i18n i.locale, model:i.model }
 
   handleAction :: forall slots. Action -> H.HalogenM State Action slots Output m Unit
   handleAction = case _ of
 
     Receive i -> do
       H.liftEffect $ log $ "Table.Receive "
-      H.put { i18n:translator i.country, model:i.model }
+      H.put { i18n: setLocale i18n i.locale, model:i.model }
     DoGotoItem n -> do
       H.liftEffect $ log $ "Table.Gotopage " <> show n
       H.raise $ GotoItem n
@@ -103,29 +103,29 @@ component = H.mkComponent
     where
 
     top = HH.div [ css "row" ]
-      [ HH.div [ css "col d-flex align-items-center justify-content-start" ] [ HH.text $ (i18n # translate (label :: _ "shows")) <> 
-        show nofItemsPerPage <> (i18n # translate (label :: _ "objects")) ]
+      [ HH.div [ css "col d-flex align-items-center justify-content-start" ] [ HH.text $ (i18n.dictionary.shows) <> 
+        show nofItemsPerPage <> (i18n.dictionary.objects) ]
       , HH.div [ css "col d-flex align-items-center justify-content-end" ]
-          [ HH.a [ css "btn btn-primary btn-sm", prop "role" "button", HE.onClick \_ -> DoCreate ] [ HH.text (i18n # translate (label :: _ "create")) ] ]
+          [ HH.a [ css "btn btn-primary btn-sm", prop "role" "button", HE.onClick \_ -> DoCreate ] [ HH.text (i18n.dictionary.create) ] ]
       ]
 
     bottom = HH.div [ css "row" ]
       [ HH.div [ css "col d-flex align-items-start justify-content-start" ]
-          [ HH.text $ (i18n # translate (label :: _ "showobject")) <> show currentItem <> (i18n # translate (label :: _ "to")) <> 
-              show (currentItem - 1 + min nofItemsPerPage nofItems) <> (i18n # translate (label :: _ "of")) <> show nofItems
+          [ HH.text $ (i18n.dictionary.showobject) <> show currentItem <> (i18n.dictionary.to) <> 
+              show (currentItem - 1 + min nofItemsPerPage nofItems) <> (i18n.dictionary.of) <> show nofItems
           , HH.br []
-          , HH.text $ (i18n # translate (label :: _ "showpage")) <> show (page currentItem nofItemsPerPage) <> 
-              (i18n # translate (label :: _ "of")) <> show (page (nofItems-1) nofItemsPerPage)
+          , HH.text $ (i18n.dictionary.showpage) <> show (page currentItem nofItemsPerPage) <> 
+              (i18n.dictionary.of) <> show (page (nofItems-1) nofItemsPerPage)
           ]
       , HH.div [ css "col d-flex align-items-start justify-content-end" ]
           [ HH.ul [ css "pagination pagination-sm" ]
               ( [ HH.li [ css $ "page-item" <> if (page currentItem nofItemsPerPage) == 1 then " disabled" else "" ]
-                    [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem - nofItemsPerPage) ] [ HH.text (i18n # translate (label :: _ "previous")) ] ]
+                    [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem - nofItemsPerPage) ] [ HH.text i18n.dictionary.previous ] ]
                 ]
                   <> (map pageLink (range 1 (page (nofItems-1) nofItemsPerPage)))
                   <>
                     [ HH.li [ css $ "page-item" <> if (page currentItem nofItemsPerPage) == (page nofItems nofItemsPerPage) then " disabled" else "" ]
-                        [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem + nofItemsPerPage) ] [ HH.text (i18n # translate (label :: _ "next")) ] ]
+                        [ HH.a [ css "page-link", HE.onClick \_ -> DoGotoItem (currentItem + nofItemsPerPage) ] [ HH.text i18n.dictionary.next ] ]
                     ]
               )
           ]
@@ -138,10 +138,10 @@ component = H.mkComponent
     row true r = HH.tr [] $ (map value r.row) <>
       [ HH.td [ prop "style" "text-align:right" ]
           [ HH.a [ css "btn btn-primary btn-sm", HE.onClick \_ -> DoEdit r.key ]
-              [ HH.text (i18n # translate (label :: _ "edit")) ]
+              [ HH.text i18n.dictionary.edit ]
           , HH.span [] [ HH.text " " ]
           , HH.a [ css "btn btn-primary btn-sm", HE.onClick \_ -> DoDelete r.key ]
-              [ HH.text (i18n # translate (label :: _ "delete")) ]
+              [ HH.text i18n.dictionary.delete ]
           ]
       ]
     row false r = HH.tr [] $ map value r.row
@@ -153,7 +153,7 @@ component = H.mkComponent
     table = HH.div [ css "row" ]
       [ HH.div [ css "col" ]
           [ HH.table [ css "table table-striped style=\"width:100%\"" ]
-              [ HH.thead [] [ HH.tr [] $ (map head header) <> (if action then [ HH.th [ prop "style" "text-align:right" ] [ HH.text (i18n # translate (label :: _ "action")) ] ] else []) ]
+              [ HH.thead [] [ HH.tr [] $ (map head header) <> (if action then [ HH.th [ prop "style" "text-align:right" ] [ HH.text i18n.dictionary.action ] ] else []) ]
               , HH.tbody [] $ map (row action) rows
               ]
           ]

@@ -19,12 +19,12 @@ import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
-import Janus.Lang.Form.Login (translator, Labels)
-import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
+import Janus.Lang.Form.Login (i18n, Phrases)
+import Janus.Lang.I18n (I18n, setLocale)
 
 type Slot = forall q . H.Slot q Void Unit
 
-type Input = { redirect:: Boolean, country:: String}
+type Input = { redirect:: Boolean, locale:: String}
 
 type Form :: (Type -> Type -> Type -> Type) -> Row Type
 type Form f =
@@ -42,7 +42,7 @@ data Action
 type State =
   { form :: FormContext
   , loginError :: Boolean
-  , i18n ::  Translator Labels
+  , i18n :: I18n Phrases
   }
 
 component
@@ -62,13 +62,13 @@ component = F.formless { liftAction: Eval } mempty $ H.mkComponent
   }
   where
 
-  initialState context = { form: context, loginError: false, i18n: translator context.input.country }
+  initialState context = { form: context, loginError: false, i18n: setLocale i18n context.input.locale }
 
   handleAction :: Action -> H.HalogenM _ _ _ _ _ Unit
   handleAction = case _ of
     Receive context -> do
-        H.liftEffect $ log $ "Form.Login Country = " <> context.input.country
-        H.modify_ (\state -> state { form = context, i18n = state.i18n # setLang context.input.country})
+        H.liftEffect $ log $ "Form.Login Locale = " <> context.input.locale
+        H.modify_ (\state -> state { form = context, i18n = setLocale state.i18n context.input.locale})
     Eval action -> do
         F.eval action
 
@@ -97,14 +97,14 @@ component = F.formless { liftAction: Eval } mempty $ H.mkComponent
     [ whenElem loginError \_ ->
         HH.div
             [ css "j-invalid-feedback" ]
-            [ HH.text (i18n # translate (label :: _ "invalid")) ]
+            [ HH.text i18n.dictionary.invalid ]
     , HH.fieldset_
         [ Field.textInput
-            { label: (i18n # translate (label :: _ "uname")), state: fields.username, action: actions.username, country: i18n # currentLang }
+            { label: i18n.dictionary.uname, state: fields.username, action: actions.username, locale: i18n.locale }
             [ HP.type_ HP.InputText ]
         , Field.textInput
-            { label: (i18n # translate (label :: _ "pwd")), state: fields.password, action: actions.password, country: i18n # currentLang }
+            { label: i18n.dictionary.pwd, state: fields.password, action: actions.password, locale: i18n.locale }
             [ HP.type_ HP.InputPassword ]
-        , Field.submitButton "Log in"
+        , Field.submitButton i18n.dictionary.login
         ]
     ]

@@ -3,7 +3,7 @@ module Janus.Form.User.Create where
 
 import Prelude
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust, fromMaybe)
 import Effect.Aff.Class (class MonadAff)
 import Formless as F
 import Halogen as H
@@ -11,20 +11,20 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Janus.Capability.Resource.User (class ManageUser, createUser)
-import Janus.Component.HTML.Utils (css, whenElem)
+import Janus.Component.HTML.Utils (css, whenElem, prop, maybeElem)
 import Janus.Data.Email (Email)
 import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
-import Janus.Lang.Form.User (translator, Labels)
-import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
+import Janus.Lang.I18n (I18n, setLocale, message)
+import Janus.Lang.Form.User (i18n, Phrases(..))
 
 -- Slot definition for this form
 type Slot = forall q. H.Slot q Output Unit
 
 -- The form input
-type Input = { country :: String }
+type Input = { locale :: String }
 
 -- The form output
 data Output = 
@@ -56,7 +56,8 @@ data Action
 type State =
   { form :: FormContext
   , formError :: Boolean
-  , i18n :: Translator Labels
+  , i18n :: I18n Phrases
+  , error :: Maybe String
   }
 
 -- The form definiton
@@ -77,13 +78,13 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
   where
 
     -- The initial state of the component
-    initialState context = { form: context, formError: false, i18n: translator context.input.country }
+    initialState context = { form: context, formError: false, i18n: setLocale i18n context.input.locale, error: Nothing }
 
     -- The handler for the forms actions
     handleAction :: Action -> H.HalogenM _ _ _ _ _ Unit
     handleAction = case _ of
       Receive context -> do
-        H.modify_ (\state -> state { form = context, i18n = state.i18n # setLang context.input.country })
+        H.modify_ (\state -> state { form = context, i18n = setLocale i18n context.input.locale })
       Cancel -> do
         F.raise Cancelled
       Eval action -> do
@@ -94,8 +95,13 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
     handleQuery = do
       let
         onSubmit o = do
-          createUser o
-          F.raise Completed
+          e <- createUser o
+          case e of
+            Just estr -> do
+              i18n <- H.gets _.i18n
+              H.modify_ (\s -> s { error = Just (estr <> ":" <> (message i18n estr)) })
+            Nothing -> do
+              F.raise Completed
 
         validation =
           { username: V.required >=> V.minLength 3 >=> V.usernameFormat
@@ -108,39 +114,42 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
 
     -- Renders the component
     render :: State -> H.ComponentHTML Action () m
-    render { i18n: i18n, formError: formError, form: { formActions, fields, actions } } =
-      HH.form [ HE.onSubmit formActions.handleSubmit ]
-        [ whenElem formError \_ ->
-            HH.div
-              [ css "j-invalid-feedback" ]
-              [ HH.text (i18n # translate (label :: _ "invalid")) ]
-        , HH.fieldset_
-            [ HH.div [ css "row" ]
-                [ HH.div [ css "col" ]
-                    [ Field.textInput
-                        { label: (i18n # translate (label :: _ "username")), state: fields.username, action: actions.username, country: i18n # currentLang }
-                        [ HP.type_ HP.InputText ]
+    render { i18n: i18n, formError: formError, form: { formActions, fields, actions }, error:error } =
+      HH.div [] [
+          whenElem (isJust error) \_ -> HH.div [css "alert alert-danger", prop "role" "alert"][maybeElem error HH.text],
+          HH.form [ HE.onSubmit formActions.handleSubmit ]
+            [ whenElem formError \_ ->
+                HH.div
+                  [ css "j-invalid-feedback" ]
+                  [ HH.text (i18n.dictionary.invalid) ]
+            , HH.fieldset_
+                [ HH.div [ css "row" ]
+                    [ HH.div [ css "col" ]
+                        [ Field.textInput
+                            { label: (i18n.dictionary.username), state: fields.username, action: actions.username, locale: i18n.locale }
+                            [ HP.type_ HP.InputText ]
+                        ]
+                    , HH.div [ css "col" ]
+                        [ Field.textInput
+                            { label: (i18n.dictionary.email), state: fields.email, action: actions.email, locale: i18n.locale }
+                            [ HP.type_ HP.InputText ]
+                        ]
                     ]
-                , HH.div [ css "col" ]
-                    [ Field.textInput
-                        { label: (i18n # translate (label :: _ "email")), state: fields.email, action: actions.email, country: i18n # currentLang }
-                        [ HP.type_ HP.InputText ]
+                , HH.div [ css "row" ]
+                    [ HH.div [ css "col" ]
+                        [ Field.textInput
+                            { label: (i18n.dictionary.password), state: fields.password, action: actions.password, locale: i18n.locale}
+                            [ HP.type_ HP.InputPassword ]
+                        ],
+                        HH.div [ css "col align-self-end" ]
+                        [ Field.checkboxInput
+                            { label: (i18n.dictionary.active), state: fields.active, action: actions.active, locale: i18n.locale }
+                            []
+                        ]
                     ]
+                , Field.submitButton (i18n.dictionary.create)
+                , HH.span [] [HH.text (" ")]
+                , HH.input [ css "btn btn-primary", HP.type_ HP.InputButton, HP.value (i18n.dictionary.cancel), HE.onClick \_ -> Cancel ]
                 ]
-            , HH.div [ css "row" ]
-                [ HH.div [ css "col" ]
-                    [ Field.textInput
-                        { label: (i18n # translate (label :: _ "password")), state: fields.password, action: actions.password, country: i18n # currentLang }
-                        [ HP.type_ HP.InputPassword ]
-                    ],
-                    HH.div [ css "col align-self-end" ]
-                    [ Field.checkboxInput
-                        { label: (i18n # translate (label :: _ "active")), state: fields.active, action: actions.active, country: i18n # currentLang }
-                        []
-                    ]
-                ]
-            , Field.submitButton (i18n # translate (label :: _ "create"))
-            , HH.span [] [HH.text (" ")]
-            , HH.input [ css "btn btn-primary", HP.type_ HP.InputButton, HP.value (i18n # translate (label :: _ "cancel")), HE.onClick \_ -> Cancel ]
             ]
-        ]
+      ]

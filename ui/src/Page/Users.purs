@@ -17,12 +17,12 @@ import Janus.Data.UUID (UUID)
 import Janus.Form.User.Create as UserCreate
 import Janus.Form.User.Delete as UserDelete
 import Janus.Form.User.Edit as UserEdit
-import Janus.Lang.Users (Labels, translator)
+import Janus.Lang.I18n (I18n, setLocale)
+import Janus.Lang.Users (Phrases, i18n)
 import Janus.Store as Store
-import Simple.I18n.Translator (Translator, currentLang, label, translate)
 import Type.Proxy (Proxy(..))
 
-type Input = { country :: String }
+type Input = { locale :: String }
 
 data Action
   = Initialize
@@ -34,7 +34,7 @@ data Action
 
 data View = Table | Change | Remove | Create
 
-type State = { i18n :: Translator Labels, table :: Table.Model, key :: Maybe UUID, view :: View }
+type State = { i18n :: I18n Phrases, table :: Table.Model, key :: Maybe UUID, view :: View }
 
 -- |The componenets that build up the page
 type ChildSlots = (table :: Table.Slot Unit, 
@@ -61,7 +61,7 @@ component = H.mkComponent
   where
 
   initialState i =
-    { i18n: translator i.country
+    { i18n: setLocale i18n i.locale
     , table:
         { nofItems: 0
         , nofItemsPerPage: 5
@@ -100,18 +100,18 @@ component = H.mkComponent
                   { nofItems = n
                   , rows = ul
                   , header =
-                      [ (st.i18n # translate (label :: _ "username"))
-                      , (st.i18n # translate (label :: _ "email"))
-                      , (st.i18n # translate (label :: _ "active"))
-                      , (st.i18n # translate (label :: _ "key"))
+                      [ (st.i18n.dictionary.username)
+                      , (st.i18n.dictionary.email)
+                      , (st.i18n.dictionary.active)
+                      , (st.i18n.dictionary.key)
                       ]
                   }
               }
           )
 
       Receive i -> do
+        H.modify_ (\s -> s { i18n = setLocale i18n i.locale })
         handleAction Initialize
-        H.modify_ (\s -> s { i18n = translator i.country })
 
       HandleTable i -> handleTable i
 
@@ -142,14 +142,15 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action ChildSlots m
   render s = HH.div [ css "container mt-3" ]
-    [ HH.h1 [] [ HH.text (s.i18n # translate (label :: _ "title")) ]
+    [ 
+      HH.h1 [] [ HH.text (s.i18n.dictionary.title) ]
     , case s.view of
-        Table -> HH.slot (Proxy :: _ "table") unit Table.component { country: s.i18n # currentLang, model: s.table } HandleTable
+        Table -> HH.slot (Proxy :: _ "table") unit Table.component { locale: s.i18n.locale, model: s.table } HandleTable
         Change -> case s.key of
-          (Just key) -> HH.slot (Proxy :: _ "edit") unit UserEdit.component { country: s.i18n # currentLang, key: key} HandleEdit
+          (Just key) -> HH.slot (Proxy :: _ "edit") unit UserEdit.component { locale: s.i18n.locale, key: key} HandleEdit
           Nothing -> HH.div [][]
         Remove -> case s.key of
-          (Just key) -> HH.slot (Proxy :: _ "delete") unit UserDelete.component { country: s.i18n # currentLang, key: key} HandleDelete
+          (Just key) -> HH.slot (Proxy :: _ "delete") unit UserDelete.component { locale: s.i18n.locale, key: key} HandleDelete
           Nothing -> HH.div [][]
-        Create -> HH.slot (Proxy :: _ "user") unit UserCreate.component { country: s.i18n # currentLang } HandleCreate
+        Create -> HH.slot (Proxy :: _ "user") unit UserCreate.component { locale: s.i18n.locale } HandleCreate
     ]

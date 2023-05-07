@@ -10,8 +10,8 @@ import Janus.Data.UUID (UUID(..))
 import Data.Either (Either(..), note)
 import Data.Maybe (Maybe(..))
 import Data.String as String
-import Janus.Lang.Validation as Validation
-import Simple.I18n.Translator ( translate, label)
+import Janus.Lang.Validation (i18n)
+import Janus.Lang.I18n (setLocale)
 
 data FormError
   = Required
@@ -21,12 +21,15 @@ data FormError
   | InvalidUsername
 
 errorToString :: FormError -> String -> String
-errorToString fe country = case fe of
-  Required -> (Validation.translator country) # translate (label :: _ "required")
-  TooShort -> (Validation.translator country) # translate (label :: _ "tooShort")
-  TooLong -> (Validation.translator country) # translate (label :: _ "tooLong")
-  InvalidEmail -> (Validation.translator country) # translate (label :: _ "invalidEmail")
-  InvalidUsername -> (Validation.translator country) # translate (label :: _ "invalidUsername")
+errorToString fe locale = 
+  case fe of
+    Required -> d.dictionary.required
+    TooShort -> d.dictionary.tooShort
+    TooLong -> d.dictionary.tooLong
+    InvalidEmail -> d.dictionary.invalidEmail
+    InvalidUsername -> d.dictionary.invalidUsername
+  where
+    d = setLocale i18n locale
 
 -- |The input is required.
 required :: forall a. Eq a => Monoid a => a -> Either FormError a

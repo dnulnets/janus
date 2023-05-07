@@ -4,7 +4,7 @@ module Janus.Form.User.Edit where
 import Prelude
 
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Console (log)
 import Formless as F
@@ -13,21 +13,22 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Janus.Capability.Resource.User (class ManageUser, updateUser, getUser)
-import Janus.Component.HTML.Utils (css, whenElem)
+import Janus.Component.HTML.Utils (css, whenElem, prop)
 import Janus.Data.Email (Email)
 import Janus.Data.UUID (UUID)
 import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
-import Janus.Lang.Form.User (translator, Labels)
+import Janus.Lang.Form.User (i18n, Phrases(..))
+import Janus.Lang.I18n (I18n, setLocale)
 import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
 
 -- Slot definition for this form
 type Slot = forall q. H.Slot q Output Unit
 
 -- The form input
-type Input = { country :: String, key :: UUID }
+type Input = { locale :: String, key :: UUID }
 
 -- The form output
 data Output = 
@@ -61,8 +62,9 @@ data Action
 type State =
   { form :: FormContext
   , formError :: Boolean
-  , i18n :: Translator Labels
+  , i18n :: I18n Phrases
   , key :: UUID
+  , error :: Maybe String
   }
 
 -- The form definiton
@@ -84,7 +86,7 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
   where
 
     -- The initial state of the component
-    initialState context = { form: context, formError: false, i18n: translator context.input.country, key: context.input.key }
+    initialState context = { error:Nothing, form: context, formError: false, i18n: setLocale i18n context.input.locale, key: context.input.key }
 
     extract f p = f
           { username { value = show p.username }
@@ -111,7 +113,7 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
         { formActions, fields } <- H.gets _.form
         handleAction $ formActions.setFields $ fromMaybe (empty fields) ((extract fields) <$> q)
       Receive context -> do
-        H.modify_ (\state -> state { form = context, i18n = state.i18n # setLang context.input.country, key = context.input.key })
+        H.modify_ (\state -> state { form = context, i18n = setLocale i18n context.input.locale, key = context.input.key })
       Cancel -> do
         F.raise Cancelled
       Eval action -> do
@@ -123,7 +125,6 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
       let
         onSubmit o = do
           updateUser o
-          -- createUser o
           F.raise Completed
 
         validation =
@@ -138,45 +139,48 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
 
     -- Renders the component
     render :: State -> H.ComponentHTML Action () m
-    render { i18n: i18n, formError: formError, form: { formActions, fields, actions } } =
-      HH.form [ HE.onSubmit formActions.handleSubmit ]
-        [ whenElem formError \_ ->
-            HH.div
-              [ css "j-invalid-feedback" ]
-              [ HH.text (i18n # translate (label :: _ "invalid")) ]
-        , HH.fieldset_
-            [ HH.div [ css "row" ]
-                [ HH.div [ css "col" ]
-                    [ Field.textInput
-                        { label: (i18n # translate (label :: _ "username")), state: fields.username, action: actions.username, country: i18n # currentLang }
-                        [ HP.type_ HP.InputText ]
-                    ]
-                , HH.div [ css "col" ]
-                    [ Field.textInput
-                        { label: (i18n # translate (label :: _ "key")), state: fields.key, action: actions.key, country: i18n # currentLang }
-                        [ HP.type_ HP.InputText, HP.disabled true ]
-                    ]
-                ]
-            , HH.div [ css "row" ]
-                [ HH.div [ css "col" ]
-                    [ Field.textInput
-                        { label: (i18n # translate (label :: _ "email")), state: fields.email, action: actions.email, country: i18n # currentLang }
-                        [ HP.type_ HP.InputText ]
-                    ],
-                    HH.div [ css "col" ]
-                    [ Field.textInput
-                        { label: (i18n # translate (label :: _ "password")), state: fields.password, action: actions.password, country: i18n # currentLang }
-                        [ HP.type_ HP.InputPassword ]
-                    ]]
-            , HH.div [css "row"]
-                [ HH.div [ css "col align-self-end" ]
-                    [ Field.checkboxInput
-                        { label: (i18n # translate (label :: _ "active")), state: fields.active, action: actions.active, country: i18n # currentLang }
-                        []
-                    ]
-                ]
-            , Field.submitButton (i18n # translate (label :: _ "save"))
-            , HH.span [] [HH.text (" ")]
-            , HH.input [ css "btn btn-primary", HP.type_ HP.InputButton, HP.value (i18n # translate (label :: _ "cancel")), HE.onClick \_ -> Cancel ]
-            ]
+    render { error:error, i18n: i18n, formError: formError, form: { formActions, fields, actions } } =
+      HH.div [] [
+        whenElem (isJust error) \_ -> HH.div [css "alert alert-danger", prop "role" "alert"][ HH.text "Alert and danger ..."],
+        HH.form [ HE.onSubmit formActions.handleSubmit ]
+          [ whenElem formError \_ ->
+              HH.div
+                [ css "j-invalid-feedback" ]
+                [ HH.text (i18n.dictionary.invalid) ]
+          , HH.fieldset_
+              [ HH.div [ css "row" ]
+                  [ HH.div [ css "col" ]
+                      [ Field.textInput
+                          { label: (i18n.dictionary.username), state: fields.username, action: actions.username, locale: i18n.locale }
+                          [ HP.type_ HP.InputText ]
+                      ]
+                  , HH.div [ css "col" ]
+                      [ Field.textInput
+                          { label: (i18n.dictionary.key), state: fields.key, action: actions.key, locale: i18n.locale }
+                          [ HP.type_ HP.InputText, HP.disabled true ]
+                      ]
+                  ]
+              , HH.div [ css "row" ]
+                  [ HH.div [ css "col" ]
+                      [ Field.textInput
+                          { label: (i18n.dictionary.email), state: fields.email, action: actions.email, locale: i18n.locale }
+                          [ HP.type_ HP.InputText ]
+                      ],
+                      HH.div [ css "col" ]
+                      [ Field.textInput
+                          { label: (i18n.dictionary.password), state: fields.password, action: actions.password, locale: i18n.locale }
+                          [ HP.type_ HP.InputPassword ]
+                      ]]
+              , HH.div [css "row"]
+                  [ HH.div [ css "col align-self-end" ]
+                      [ Field.checkboxInput
+                          { label: (i18n.dictionary.active), state: fields.active, action: actions.active, locale: i18n.locale }
+                          []
+                      ]
+                  ]
+              , Field.submitButton (i18n.dictionary.save)
+              , HH.span [] [HH.text (" ")]
+              , HH.input [ css "btn btn-primary", HP.type_ HP.InputButton, HP.value (i18n.dictionary.cancel), HE.onClick \_ -> Cancel ]
+              ]
+          ]
         ]

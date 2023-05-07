@@ -25,6 +25,7 @@ library
                      , Janus.Data.Config
                      , Janus.Data.Role
                      , Janus.Data.UUID
+                     , Janus.Data.Message
                      , Janus.Core
                      , Janus.Utils.DB
                      , Janus.Data.Model

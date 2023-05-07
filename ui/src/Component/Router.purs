@@ -34,8 +34,8 @@ import Janus.Store as Store
 import Routing.Duplex as RD
 import Routing.Hash (getHash)
 import Type.Proxy (Proxy(..))
-import Simple.I18n.Translator (Translator, currentLang, label, translate)
-import Janus.Lang.Router (Labels, translator)
+import Janus.Lang.Router (i18n, Phrases)
+import Janus.Lang.I18n (I18n, setLocale)
 
 -- |The router page query messages used for navigation.
 data Query a = Navigate Route a
@@ -44,8 +44,8 @@ data Query a = Navigate Route a
 type State =
   { route :: Maybe Route
   , currentUser :: Maybe Profile
-  , country :: String
-  , i18n :: Translator Labels
+  , locale :: String
+  , i18n :: I18n Phrases
   }
 
 -- |The actions for the router page.
@@ -72,7 +72,7 @@ component
   => ManageUser m
   => H.Component Query Unit Void m
 component = connect selectAll $ H.mkComponent
-  { initialState: \{ context: ctx } -> { route: Nothing, currentUser: ctx.currentUser, country: ctx.country, i18n: translator ctx.country}
+  { initialState: \{ context: ctx } -> { route: Nothing, currentUser: ctx.currentUser, locale: ctx.locale, i18n: setLocale i18n ctx.locale}
   , render
   , eval: H.mkEval $ H.defaultEval
       { handleQuery = handleQuery
@@ -93,8 +93,8 @@ component = connect selectAll $ H.mkComponent
 
     Receive { context: ctx } -> do
       H.liftEffect $ log $ "Router.Receive User = " <> show (show <$> (_.username <$> (ctx.currentUser)))
-      H.liftEffect $ log $ "Router.Receive Country = " <> ctx.country
-      H.modify_ _ { currentUser = ctx.currentUser, country = ctx.country, i18n = translator ctx.country }
+      H.liftEffect $ log $ "Router.Receive Locale = " <> ctx.locale
+      H.modify_ _ { currentUser = ctx.currentUser, locale = ctx.locale, i18n = setLocale i18n ctx.locale }
 
   handleQuery :: forall a. Query a -> H.HalogenM State Action ChildSlots Void m (Maybe a)
   handleQuery = case _ of
@@ -113,28 +113,28 @@ component = connect selectAll $ H.mkComponent
   -- Display the login page instead of the expected page if there is no current user; a simple
   -- way to restrict access.
   authorize :: State -> H.ComponentHTML Action ChildSlots m -> H.ComponentHTML Action ChildSlots m
-  authorize { currentUser: currentUser, country: country } html = case currentUser of
+  authorize { currentUser: currentUser, locale: locale } html = case currentUser of
     Nothing -> do
-      HH.slot (Proxy :: _ "login") unit Login.component { redirect: false, country: country} absurd
+      HH.slot (Proxy :: _ "login") unit Login.component { redirect: false, locale: locale} absurd
     Just _ ->
       html
 
   render :: State -> H.ComponentHTML Action ChildSlots m
-  render state@{ route: route, currentUser: currentUser, country: country, i18n: i18n } = case route of
+  render state@{ route: route, currentUser: currentUser, locale: locale, i18n: i18n } = case route of
     Just r -> case r of
       Home -> authorize state do
         HH.div [][menu i18n currentUser Home, main $ HH.slot_ (Proxy :: _ "home") unit Home.component Home.Unit]
       Dashboard -> authorize state do
         HH.div [][menu i18n currentUser Dashboard, main $ HH.slot_ (Proxy :: _ "dashboard") unit Dashboard.component unit]
       Users -> authorize state do
-        HH.div [][menu i18n currentUser Users, main $ HH.slot_ (Proxy :: _ "users") unit Users.component {country:country}]
+        HH.div [][menu i18n currentUser Users, main $ HH.slot_ (Proxy :: _ "users") unit Users.component {locale:locale}]
       Login -> do
-        HH.slot_ (Proxy :: _ "login") unit Login.component { redirect: true, country: country }
+        HH.slot_ (Proxy :: _ "login") unit Login.component { redirect: true, locale: locale }
     Nothing ->
       full $ HH.div_ [ HH.text "Oh no! That page wasn't found." ]
 
 -- | Creates the html for the menu bar that is used at the top of the application user interface.
-menu :: forall i p. Translator Labels -> Maybe Profile -> Route -> HH.HTML i p
+menu :: forall i p. I18n Phrases -> Maybe Profile -> Route -> HH.HTML i p
 menu i18n _currentUser _route =
 
   HH.nav [css "navbar navbar-expand-md navbar-light fixed-top bg-light", prop "role" "navigation", HP.id "j-navbar-top"]
@@ -151,7 +151,7 @@ menu i18n _currentUser _route =
         [
           navItemDropdown "j-drop1" "Dropdown1" [navItem Home [HH.text "Home"]],
           navItemDropdown "j-drop2" "Dropdown2" [navItem Dashboard [HH.text "Dashboard"]],
-          navItemDropdown "j-drop2" (i18n # translate (label :: _ "admin")) [navItem Users [HH.text (i18n # translate (label :: _ "users"))]]
+          navItemDropdown "j-drop2" i18n.dictionary.admin [navItem Users [HH.text i18n.dictionary.users]]
         ],
         span "Product:" "SMP",
         span "Team:" "Fragglarna"
@@ -181,8 +181,8 @@ menu i18n _currentUser _route =
 
   search = HH.form 
     [css "d-flex", prop "role" "search", HP.action "/search", HP.method HP.GET]
-    [HH.input [css "form-control me-2", HP.type_ HP.InputSearch, HP.name "what", HP.placeholder (i18n # translate (label :: _ "search")), 
-      HPA.label (i18n # translate (label :: _ "search"))]
+    [HH.input [css "form-control me-2", HP.type_ HP.InputSearch, HP.name "what", HP.placeholder i18n.dictionary.search, 
+      HPA.label i18n.dictionary.search]
      ]
 
   span s t = HH.span [css "navbar-text pe-3"] [HH.span [css "fw-bold"] [HH.text s], HH.span [][HH.text " "], HH.text t]

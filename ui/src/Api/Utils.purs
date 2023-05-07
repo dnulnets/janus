@@ -1,29 +1,35 @@
 module Janus.Api.Utils
   ( authenticate
-  , mkAuthRequest
   , decode
+  , mkAuthRequest
   , mkRequest
   )
   where
 
 import Prelude
 
-import Affjax.Web (request)
+import Affjax.Web (request, printError, Response(..), Error)
+import Affjax.StatusCode (StatusCode(..))
 import Janus.Api.Request (BaseURL, RequestTemplate, Token, defaultRequest, readToken, writeToken)
 import Janus.Capability.LogMessages (class LogMessages, logError)
 import Janus.Capability.Now (class Now)
 import Janus.Data.Profile (Profile)
 import Janus.Store (Action(..), Store)
-import Data.Argonaut.Core (Json)
+import Data.Argonaut.Core (Json, toString)
 import Data.Bifunctor (rmap)
 import Data.Codec.Argonaut (JsonCodec, printJsonDecodeError)
 import Data.Codec.Argonaut as CA
 import Data.Either (Either(..), hush)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Halogen.Store.Monad (class MonadStore, getStore, updateStore)
+import Effect.Console (log)
+
+convertBody::Either Error (Response Json) -> Either String Json
+convertBody (Left _) = Left $ "\"JAN002\""
+convertBody (Right {body:body, status: (StatusCode status)}) = if status>= 200 && status<300 then Right body else Left $ fromMaybe "\"JAN001\"" $ toString body
 
 -- |Performs a request based on the template and returns with the result.
 mkRequest
@@ -43,12 +49,13 @@ mkAuthRequest
    . MonadAff m
   => MonadStore Action Store m
   => RequestTemplate
-  -> m (Maybe Json)
+  -> m (Either String Json)
 mkAuthRequest opts = do
   { baseUrl } <- getStore
   token <- liftEffect readToken
   response <- liftAff $ request $ defaultRequest baseUrl token opts
-  pure $ hush $ map _.body response
+  pure $ convertBody response
+  -- pure $ hush $ map _.body response
 
 -- |Authenticate the user and return with the profile and token. It also sets the token in the browser local
 -- |storage.
