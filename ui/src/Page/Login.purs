@@ -21,7 +21,6 @@ import Janus.Form.Login as L
 import Janus.Lang.Login (Phrases(..), i18n)
 import Type.Proxy (Proxy(..))
 import Janus.Lang.I18n (I18n, Dictionary, setLocale)
-import Simple.I18n.Translator (Translator, label, setLang, currentLang, translate)
 import Halogen.Store.Monad (class MonadStore, updateStore)
 import Janus.Store as Store
 

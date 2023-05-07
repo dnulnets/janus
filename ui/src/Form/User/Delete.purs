@@ -23,7 +23,6 @@ import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
 import Janus.Lang.Form.User (i18n, Phrases(..))
 import Janus.Lang.I18n (I18n, setLocale)
-import Simple.I18n.Translator (Translator, currentLang, label, setLang, translate)
 
 -- Slot definition for this form
 type Slot = forall q. H.Slot q Output Unit
