@@ -3,25 +3,19 @@ module Janus.Form.User.Delete where
 
 import Prelude
 
-import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
-import Effect.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Janus.Capability.Navigate (class Navigate)
 import Janus.Capability.Resource.User (class ManageUser, deleteUser, getUser)
-import Janus.Component.HTML.Utils (css, whenElem)
-import Janus.Data.Email (Email)
-import Janus.Data.Profile (Profile(..))
+import Janus.Component.HTML.Utils (css)
+import Janus.Data.Profile (Profile)
 import Janus.Data.UUID (UUID)
-import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
-import Janus.Form.Validation (FormError)
-import Janus.Form.Validation as V
-import Janus.Lang.Form.User (i18n, Phrases(..))
+import Janus.Lang.Form.User (i18n, Phrases)
 import Janus.Lang.I18n (I18n, setLocale)
 
 -- Slot definition for this form

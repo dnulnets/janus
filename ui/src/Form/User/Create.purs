@@ -3,7 +3,7 @@ module Janus.Form.User.Create where
 
 import Prelude
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..), isJust, fromMaybe)
+import Data.Maybe (Maybe(..), isJust)
 import Effect.Aff.Class (class MonadAff)
 import Formless as F
 import Halogen as H
@@ -18,7 +18,7 @@ import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
 import Janus.Lang.I18n (I18n, setLocale, message)
-import Janus.Lang.Form.User (i18n, Phrases(..))
+import Janus.Lang.Form.User (i18n, Phrases)
 
 -- Slot definition for this form
 type Slot = forall q. H.Slot q Output Unit

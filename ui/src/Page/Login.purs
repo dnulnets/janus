@@ -18,9 +18,9 @@ import Janus.Capability.Navigate (class Navigate)
 import Janus.Component.HTML.Fragments (full)
 import Janus.Component.HTML.Utils (css, prop)
 import Janus.Form.Login as L
-import Janus.Lang.Login (Phrases(..), i18n)
+import Janus.Lang.Login (Phrases, i18n)
 import Type.Proxy (Proxy(..))
-import Janus.Lang.I18n (I18n, Dictionary, setLocale)
+import Janus.Lang.I18n (I18n, setLocale)
 import Halogen.Store.Monad (class MonadStore, updateStore)
 import Janus.Store as Store
 

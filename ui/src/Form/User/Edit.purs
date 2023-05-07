@@ -6,7 +6,6 @@ import Prelude
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Console (log)
 import Formless as F
 import Halogen as H
 import Halogen.HTML as HH
@@ -20,7 +19,7 @@ import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
-import Janus.Lang.Form.User (i18n, Phrases(..))
+import Janus.Lang.Form.User (i18n, Phrases)
 import Janus.Lang.I18n (I18n, setLocale)
 
 -- Slot definition for this form
