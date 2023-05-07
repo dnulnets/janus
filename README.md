@@ -13,4 +13,6 @@ The project is in an early design and startup phase. It started 2023-01-10 and I
 
 The frontend application is built with purescript using halogen. The backend api and static file server is built with haskell using scotty.
 
-It is just the rest of the application left ;-)
+### News
+
+The core structure of the application UI is in place together with i18n-support, login and administrative functions for users and roles. The corresponding backend REST-api in haskell and postgresql is also in place. So you can start the application, login and administer users. I know, not very impressive so far, but is is needed to move on.
