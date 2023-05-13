@@ -11,8 +11,8 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Janus.Capability.Resource.User (class ManageUser, updateUser, getUser)
-import Janus.Component.HTML.Utils (css, whenElem, prop)
+import Janus.Capability.Resource.User (class ManageUser, updateUser, getUser, getRoles)
+import Janus.Component.HTML.Utils (css, whenElem, prop, maybeElem)
 import Janus.Data.Email (Email)
 import Janus.Data.UUID (UUID)
 import Janus.Data.Username (Username)
@@ -20,7 +20,9 @@ import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
 import Janus.Lang.Form.User (i18n, Phrases)
-import Janus.Lang.I18n (I18n, setLocale)
+import Janus.Lang.I18n (I18n, setLocale, message)
+import Effect.Console (log)
+import Janus.Data.Error
 
 -- Slot definition for this form
 type Slot = forall q. H.Slot q Output Unit
@@ -113,6 +115,9 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
       Receive context -> do
         H.modify_ (\state -> state { form = context, i18n = setLocale i18n context.input.locale, key = context.input.key })
       Cancel -> do
+        key <- H.gets _.form.input.key
+        r <- getRoles key
+        H.liftEffect $ log $ show r
         F.raise Cancelled
       Eval action -> do
         F.eval action
@@ -122,8 +127,13 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
     handleQuery = do
       let
         onSubmit o = do
-          updateUser o
-          F.raise Completed
+          err <- updateUser o
+          case err of
+            Just ae -> do
+              i18n <- H.gets _.i18n
+              H.modify_ (\s -> s { error = Just (flash i18n ae) })
+            Nothing -> do
+              F.raise Completed
 
         validation =
           { username: V.required >=> V.minLength 3 >=> V.usernameFormat
@@ -137,9 +147,9 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
 
     -- Renders the component
     render :: State -> H.ComponentHTML Action () m
-    render { error:error, i18n: i18n, formError: formError, form: { formActions, fields, actions } } =
+    render { error:error, i18n: i18n, formError: formError, form: { formActions, fields, actions }} =
       HH.div [] [
-        whenElem (isJust error) \_ -> HH.div [css "alert alert-danger", prop "role" "alert"][ HH.text "Alert and danger ..."],
+        whenElem (isJust error) \_ -> HH.div [css "alert alert-danger", prop "role" "alert"][ maybeElem error HH.text],
         HH.form [ HE.onSubmit formActions.handleSubmit ]
           [ whenElem formError \_ ->
               HH.div

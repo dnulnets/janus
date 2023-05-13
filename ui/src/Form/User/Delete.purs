@@ -3,7 +3,7 @@ module Janus.Form.User.Delete where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -11,9 +11,10 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Janus.Capability.Navigate (class Navigate)
 import Janus.Capability.Resource.User (class ManageUser, deleteUser, getUser)
-import Janus.Component.HTML.Utils (css)
+import Janus.Component.HTML.Utils (css, prop, whenElem, maybeElem)
 import Janus.Data.Profile (Profile)
 import Janus.Data.UUID (UUID)
+import Janus.Data.Error (flash)
 import Janus.Form.Field as Field
 import Janus.Lang.Form.User (i18n, Phrases)
 import Janus.Lang.I18n (I18n, setLocale)
@@ -42,7 +43,8 @@ data Action
 type State =
   { key :: UUID
   , user :: Maybe Profile
-  , i18n :: I18n Phrases }
+  , i18n :: I18n Phrases
+  , error :: Maybe String}
 
 -- The form definiton
 component
@@ -57,13 +59,13 @@ component = H.mkComponent
   , eval: H.mkEval $ H.defaultEval
       { receive = Just <<< Receive
       , handleAction = handleAction
-      , initialize = Just Initialize 
+      , initialize = Just Initialize
       }
   } 
   where
 
     -- The initial state of the component
-    initialState context = { i18n: setLocale i18n context.locale, key: context.key, user:Nothing}
+    initialState context = { i18n: setLocale i18n context.locale, key: context.key, user:Nothing, error:Nothing}
 
     -- The handler for the forms actions
     handleAction :: Action -> H.HalogenM _ _ _ _ _ Unit
@@ -77,17 +79,23 @@ component = H.mkComponent
         handleAction Initialize
       Delete -> do
         key <- H.gets _.key
-        deleteUser key
-        H.raise Completed
+        err <- deleteUser key
+        case err of
+          Just ae -> do
+            i18n <- H.gets _.i18n
+            H.modify_ (\s -> s { error = Just (flash i18n ae) })
+          Nothing -> do
+            H.raise Completed
       Cancel -> do
         H.raise Cancelled
 
     -- Renders the component
     render :: State -> H.ComponentHTML Action () m
     render { user: Nothing } = HH.div [][]
-    render { i18n: i18n, user: Just user } =
+    render { i18n: i18n, user: Just user, error: error } =
       HH.div [ ]
-        [ HH.div [ css "row" ]
+        [ whenElem (isJust error) \_ -> HH.div [css "alert alert-danger", prop "role" "alert"][maybeElem error HH.text]
+        , HH.div [ css "row" ]
                 [ HH.div [ css "col" ]
                     [ Field.textInputReadOnly
                         (i18n.dictionary.username)

@@ -29,4 +29,4 @@ setLocale t l =
     locale = if member l t.dictionaries then l else fst t.default
 
 message::forall r . I18n r->String->String
-message t k = fromMaybe t.dictionary.fallback $ lookup k t.dictionary.messages
+message t k = k <> ": " <> (fromMaybe t.dictionary.fallback $ lookup k t.dictionary.messages)

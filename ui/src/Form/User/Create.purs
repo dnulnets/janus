@@ -19,6 +19,8 @@ import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
 import Janus.Lang.I18n (I18n, setLocale, message)
 import Janus.Lang.Form.User (i18n, Phrases)
+import Janus.Data.Error
+import Effect.Console (log)
 
 -- Slot definition for this form
 type Slot = forall q. H.Slot q Output Unit
@@ -95,11 +97,11 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
     handleQuery = do
       let
         onSubmit o = do
-          e <- createUser o
-          case e of
-            Just estr -> do
+          err <- createUser o
+          case err of
+            Just ae -> do
               i18n <- H.gets _.i18n
-              H.modify_ (\s -> s { error = Just (estr <> ":" <> (message i18n estr)) })
+              H.modify_ (\s -> s { error = Just (flash i18n ae) })
             Nothing -> do
               F.raise Completed
 

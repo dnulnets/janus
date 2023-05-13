@@ -29,13 +29,14 @@ import           Data.Aeson                 (FromJSON (parseJSON),
 import           Data.Maybe                 (fromJust, fromMaybe, isJust,
                                              isNothing, listToMaybe)
 import           Data.Text                  (Text)
+import           Data.Text.Lazy             (pack)
 import           Data.Time.Clock.System     (SystemTime (systemSeconds),
                                              getSystemTime)
 import           Data.UUID                  (fromString)
 import qualified Database.Persist.Sql       as DB
 import           Janus.Core                 (JScottyM)
 import qualified Janus.Data.Config          as C
-import           Janus.Data.Message         (Message (..))
+import           Janus.Data.Message         (Message (..), JanusError (..))
 import           Janus.Data.Model           (AssignedRole (AssignedRole, assignedRoleType, assignedRoleUser),
                                              EntityField (..),
                                              Key (AssignedRoleKey, UserKey, unAssignedRoleKey),
@@ -51,12 +52,12 @@ import           Janus.Utils.DB             (runDB)
 import           Janus.Utils.JWT            (createToken)
 import           Janus.Utils.Password       (authHashPassword,
                                              authValidatePassword)
-import           Network.HTTP.Types.Status  (badRequest400, created201,
-                                             internalServerError500,
+import           Network.HTTP.Types.Status  (badRequest400, conflict409,
+                                             created201, internalServerError500,
                                              notFound404, ok200,
-                                             unauthorized401, conflict409)
+                                             unauthorized401)
 import           Web.Scotty.Trans           (delete, get, json, jsonData, param,
-                                             post, put, rescue, status)
+                                             post, put, rescue, status, text)
 
 import qualified Data.Set                   as S
 
@@ -254,7 +255,7 @@ app = do
       liftIO $ print e)
 
   -- |Returns with the users roles based on the user key
-  get "/api/user/roles/:uuid" $ ( do
+  get "/api/user/:uuid/roles" $ ( do
     roleRequired [R.Administrator]
     uuid <- fromString <$> param "uuid"
     case uuid of
@@ -267,7 +268,7 @@ app = do
       liftIO $ print e)
 
   -- |Updates or add users roles based on the user key and role keys
-  post "/api/user/roles/:uuid" $ ( do
+  post "/api/user/:uuid/roles" $ ( do
     roleRequired [R.Administrator]
     uuid <- fromString <$> param "uuid"
     req <- jsonData
@@ -315,10 +316,11 @@ app = do
         userEmail = (curemail req), userActive = (curactive req)}
       status created201
     else do
-      json USR001
+      json $ JanusError { code = USR001, extra = Nothing }
       status conflict409
     ) `catch`
       (\(SomeException e) -> do
+        json $ JanusError { code = JAN001, extra = Just $ show e }
         status internalServerError500
         liftIO $ print e)
 

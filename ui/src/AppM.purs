@@ -32,6 +32,7 @@ import Routing.Hash (setHash)
 import Safe.Coerce (coerce)
 import Data.Either (hush, Either(..))
 import Effect.Console (log)
+import Janus.Data.Role as Role
 
 -- | The definition of the application.
 newtype AppM a = AppM (StoreT Store.Action Store.Store Aff a)
@@ -84,8 +85,10 @@ instance manageUserAppM :: ManageUser AppM where
     let
       codec = CAR.object "User" { user: Profile.profileWithPasswordCodec }
       method = Post $ Just $ Codec.encode codec { user }
-
-    void $ mkAuthRequest { endpoint: User user.key, method: method }
+    r <- mkAuthRequest { endpoint: User user.key, method: method }
+    case r of
+      Left e -> pure $ Just e
+      Right _ -> pure Nothing
 
   getUser uuid = do
     mbJson <- mkAuthRequest { endpoint: User uuid, method: Get }
@@ -93,13 +96,15 @@ instance manageUserAppM :: ManageUser AppM where
       $ decode (CAR.object "User" { user: Profile.profileCodec }) $ hush mbJson
 
   deleteUser uuid = do
-    void $ mkAuthRequest { endpoint: User uuid, method: Delete }
-  
+    r <- mkAuthRequest { endpoint: User uuid, method: Delete }
+    case r of
+      Left e -> pure $ Just e
+      Right _ -> pure Nothing
+ 
   createUser user = do
     let
       codec = CAR.object "User" { user: Profile.newProfileCodec }
       method = Put $ Just $ Codec.encode codec { user }
-
     r <- mkAuthRequest { endpoint: CreateUser, method: method }
     case r of
       Left e -> pure $ Just e
@@ -108,15 +113,19 @@ instance manageUserAppM :: ManageUser AppM where
   getUsers o n = do
     let
       codec =  Codec.array (CAR.object "User" { user: Profile.profileCodec })
-
     mbJson <- mkAuthRequest { endpoint: Users {offset:o, n:n}, method: Get }
     l <- decode codec $ hush mbJson
     pure $ fromMaybe [] $ map (map _.user) l
 
   nofUsers = do
     let codec = Codec.int
-
     mbJson <- mkAuthRequest { endpoint: NofUsers, method: Get }
     l <- decode codec $ hush mbJson
     pure $ fromMaybe 0 l
-    
+
+  getRoles u = do
+    let
+      codec =  Codec.array (CAR.object "Role" { role: Role.roleCodec })
+    mbJson <- mkAuthRequest { endpoint: Role u, method: Get }
+    l <- decode codec $ hush mbJson
+    pure $ fromMaybe [] $ map (map _.role) l
