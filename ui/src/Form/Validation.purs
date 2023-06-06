@@ -3,15 +3,17 @@ module Janus.Form.Validation where
 
 import Prelude
 
-import Janus.Data.Email (Email(..))
-import Janus.Data.Username (Username)
-import Janus.Data.Username as Username
-import Janus.Data.UUID (UUID(..))
 import Data.Either (Either(..), note)
 import Data.Maybe (Maybe(..))
 import Data.String as String
-import Janus.Lang.Validation (i18n)
+import Data.Tuple (Tuple)
+import Halogen.HTML (a)
+import Janus.Data.Email (Email(..))
+import Janus.Data.UUID (UUID(..))
+import Janus.Data.Username (Username)
+import Janus.Data.Username as Username
 import Janus.Lang.I18n (setLocale)
+import Janus.Lang.Validation (i18n)
 
 data FormError
   = Required

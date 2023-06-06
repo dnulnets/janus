@@ -5,6 +5,7 @@ module Main (main) where
 
 import Prelude
 
+import Effect.Console (log)
 import Affjax.Web (printError, request)
 import Janus.Api.Endpoint (Endpoint(..))
 import Janus.Api.Request (BaseURL(..), RequestMethod(..), defaultRequest, readToken, readLocale)
@@ -35,6 +36,8 @@ main ∷ Effect Unit
 main = HA.runHalogenAff do
 
   body ← HA.awaitBody
+
+  H.liftEffect $ log "Janus Version 0.1"
 
   let
     -- baseUrl = BaseURL "http://localhost:8080" -- Has to get the origin, will fixa later!

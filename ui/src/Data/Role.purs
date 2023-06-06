@@ -1,4 +1,10 @@
-module Janus.Data.Role (Role(..), RoleType(..), codec, roleCodec) where
+module Janus.Data.Role
+  ( Role(..)
+  , RoleType(..)
+  , allRoles
+  , codec
+  , roleCodec
+  ) where
 
 import Prelude
 
@@ -13,6 +19,7 @@ import Janus.Data.UUID as UUID
 
 data RoleType = User | Administrator | TeamLeader
 derive instance eqRoleType :: Eq RoleType
+derive instance ordRoleType :: Ord RoleType
 
 instance showRole :: Show RoleType where
   show r = case r of
@@ -38,3 +45,6 @@ roleCodec =
     { key: CAC.maybe UUID.codec,
       role: codec
     }
+
+allRoles::Array Role
+allRoles = [{key:Nothing, role:User}, {key:Nothing, role:Administrator}, {key:Nothing, role:TeamLeader}]

@@ -36,6 +36,7 @@
   , "tuples"
   , "web-events"
   , "web-html"
+  , "web-promise"
   , "web-storage"
   , "web-uievents"
   ]

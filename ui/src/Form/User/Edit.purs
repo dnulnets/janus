@@ -158,30 +158,30 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
           , HH.fieldset_
               [ HH.div [ css "row" ]
                   [ HH.div [ css "col" ]
-                      [ Field.textInput
+                      [ Field.text
                           { label: (i18n.dictionary.username), state: fields.username, action: actions.username, locale: i18n.locale }
                           [ HP.type_ HP.InputText ]
                       ]
                   , HH.div [ css "col" ]
-                      [ Field.textInput
+                      [ Field.text
                           { label: (i18n.dictionary.key), state: fields.key, action: actions.key, locale: i18n.locale }
                           [ HP.type_ HP.InputText, HP.disabled true ]
                       ]
                   ]
               , HH.div [ css "row" ]
                   [ HH.div [ css "col" ]
-                      [ Field.textInput
+                      [ Field.text
                           { label: (i18n.dictionary.email), state: fields.email, action: actions.email, locale: i18n.locale }
                           [ HP.type_ HP.InputText ]
                       ],
                       HH.div [ css "col" ]
-                      [ Field.textInput
+                      [ Field.text
                           { label: (i18n.dictionary.password), state: fields.password, action: actions.password, locale: i18n.locale }
                           [ HP.type_ HP.InputPassword ]
                       ]]
               , HH.div [css "row"]
                   [ HH.div [ css "col align-self-end" ]
-                      [ Field.checkboxInput
+                      [ Field.checkbox
                           { label: (i18n.dictionary.active), state: fields.active, action: actions.active, locale: i18n.locale }
                           []
                       ]

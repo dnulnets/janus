@@ -26,17 +26,18 @@ import           Database.Persist.Sql            ((==.))
 import qualified Database.Persist.Sql            as DB
 import           Janus.Core                      (JActionM)
 import qualified Janus.Data.Config               as C
+import           Janus.Data.Message              (JanusError (..), Message (..))
 import           Janus.Data.Model                (AssignedRole (assignedRoleType),
                                                   EntityField (AssignedRoleUser),
-                                                  Key(UserKey),
-                                                  User (userActive), UserId)
+                                                  Key (UserKey),
+                                                  User (userActive))
 import           Janus.Data.Role
 import           Janus.Settings                  (Settings (..))
 import           Janus.Utils.DB                  (runDB)
 import           Janus.Utils.JWT                 (getSubject)
 import           Network.HTTP.Types              (unauthorized401)
 import           Network.Wai.Middleware.HttpAuth (extractBearerAuth)
-import           Web.Scotty.Trans                (finish, header, status)
+import           Web.Scotty.Trans                (finish, header, json, status)
 
 -- |Returns with the user that is authenticated with this request.
 getAuthenticated::(MonadIO m) => JActionM m (Maybe (Key User, User))
@@ -78,12 +79,15 @@ authenticationRequired = do
             case dbuser of
               Just user | userActive user -> pure ()
               _                           -> do
+                json $ JanusError { code = JAN004, extra = Nothing }
                 status unauthorized401
                 finish
           Nothing -> do
+            json $ JanusError { code = JAN004, extra = Nothing }
             status unauthorized401
             finish
       _ -> do
+        json $ JanusError { code = JAN004, extra = Nothing }
         status unauthorized401
         finish
 
@@ -105,15 +109,19 @@ roleRequired lor = do
                 if h
                   then pure ()
                 else do
+                  json $ JanusError { code = JAN004, extra = Nothing }
                   status unauthorized401
                   finish
               _ -> do
+                json $ JanusError { code = JAN004, extra = Nothing }
                 status unauthorized401
                 finish
           Nothing -> do
+            json $ JanusError { code = JAN004, extra = Nothing }
             status unauthorized401
             finish
       _ -> do
+        json $ JanusError { code = JAN004, extra = Nothing }
         status unauthorized401
         finish
 

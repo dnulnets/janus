@@ -1,10 +1,15 @@
 -- |This module contains the form for creating a new user.
 module Janus.Form.User.Create where
 
+import Janus.Data.Error
+import Janus.Data.UUID
 import Prelude
+
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), isJust)
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Console (log)
 import Formless as F
 import Halogen as H
 import Halogen.HTML as HH
@@ -13,14 +18,14 @@ import Halogen.HTML.Properties as HP
 import Janus.Capability.Resource.User (class ManageUser, createUser)
 import Janus.Component.HTML.Utils (css, whenElem, prop, maybeElem)
 import Janus.Data.Email (Email)
+import Janus.Data.Role (RoleType)
+import Janus.Data.Role as RT
 import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
 import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
-import Janus.Lang.I18n (I18n, setLocale, message)
 import Janus.Lang.Form.User (i18n, Phrases)
-import Janus.Data.Error
-import Effect.Console (log)
+import Janus.Lang.I18n (I18n, setLocale, message)
 
 -- Slot definition for this form
 type Slot = forall q. H.Slot q Output Unit
@@ -31,7 +36,7 @@ type Input = { locale :: String }
 -- The form output
 data Output = 
     Completed -- The form is completed 
-  | Cancelled -- Theform is cancelled
+  | Cancelled -- The form is cancelled
 
 -- The form
 type Form :: (Type -> Type -> Type -> Type) -> Row Type
@@ -40,13 +45,15 @@ type Form f =
   , email :: f String FormError Email
   , active :: f Boolean Void Boolean
   , password :: f String FormError String
+  , role :: f (Array RoleType) Void (Array RoleType)
   )
+
 type FormContext = F.FormContext (Form F.FieldState) (Form (F.FieldAction Action)) Input Action
 type FormlessAction = F.FormlessAction (Form F.FieldState)
 
 -- Inital values of the forms inputs
-initialValue :: { username :: String, email :: String, active :: Boolean, password :: String }
-initialValue = { username: "", email: "", active: true, password: "" }
+initialValue :: { username :: String, email :: String, active :: Boolean, password :: String, role :: Array RoleType}
+initialValue = { username: "", email: "", active: true, password: "", role: [] }
 
 -- The actions the form generate
 data Action
@@ -97,7 +104,8 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
     handleQuery = do
       let
         onSubmit o = do
-          err <- createUser o
+          err <- createUser {active:o.active, email:o.email, password:o.password, username:o.username}
+          H.liftEffect $ log $ show o.role
           case err of
             Just ae -> do
               i18n <- H.gets _.i18n
@@ -110,6 +118,7 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
           , password: V.required >=> V.minLength 2 >=> V.maxLength 20
           , email: V.required >=> V.minLength 3 >=> V.emailFormat
           , active: Right
+          , role: Right
           }
 
       F.handleSubmitValidate onSubmit F.validate validation
@@ -127,26 +136,42 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
             , HH.fieldset_
                 [ HH.div [ css "row" ]
                     [ HH.div [ css "col" ]
-                        [ Field.textInput
+                        [ Field.text
                             { label: (i18n.dictionary.username), state: fields.username, action: actions.username, locale: i18n.locale }
                             [ HP.type_ HP.InputText ]
                         ]
                     , HH.div [ css "col" ]
-                        [ Field.textInput
+                        [ Field.text
                             { label: (i18n.dictionary.email), state: fields.email, action: actions.email, locale: i18n.locale }
                             [ HP.type_ HP.InputText ]
                         ]
                     ]
                 , HH.div [ css "row" ]
                     [ HH.div [ css "col" ]
-                        [ Field.textInput
+                        [ Field.text
                             { label: (i18n.dictionary.password), state: fields.password, action: actions.password, locale: i18n.locale}
                             [ HP.type_ HP.InputPassword ]
                         ],
                         HH.div [ css "col align-self-end" ]
-                        [ Field.checkboxInput
+                        [ Field.checkbox
                             { label: (i18n.dictionary.active), state: fields.active, action: actions.active, locale: i18n.locale }
                             []
+                        ]
+                    ]
+                , HH.div [css "row"]
+                    [
+                      HH.div [css "col"]
+                        [
+                          Field.multiSelect
+                            {label: (i18n.dictionary.active), state: fields.role, action: actions.role, locale: i18n.locale, 
+                            options: [
+                              {option: RT.User, render: "User", props: []},
+                              {option: RT.Administrator, render: "Administrator", props: []},
+                              {option: RT.TeamLeader, render: "Team Leader", props: []} ] }
+                        ],
+                      HH.div [css "col"]
+                        [
+
                         ]
                     ]
                 , Field.submitButton (i18n.dictionary.create)

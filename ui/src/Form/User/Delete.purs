@@ -10,11 +10,12 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Janus.Capability.Navigate (class Navigate)
-import Janus.Capability.Resource.User (class ManageUser, deleteUser, getUser)
+import Janus.Capability.Resource.User (class ManageUser, deleteUser, getRoles, getUser)
 import Janus.Component.HTML.Utils (css, prop, whenElem, maybeElem)
-import Janus.Data.Profile (Profile)
-import Janus.Data.UUID (UUID)
 import Janus.Data.Error (flash)
+import Janus.Data.Profile (Profile)
+import Janus.Data.Role (Role)
+import Janus.Data.UUID (UUID)
 import Janus.Form.Field as Field
 import Janus.Lang.Form.User (i18n, Phrases)
 import Janus.Lang.I18n (I18n, setLocale)
@@ -43,6 +44,7 @@ data Action
 type State =
   { key :: UUID
   , user :: Maybe Profile
+  , roles :: Array Role
   , i18n :: I18n Phrases
   , error :: Maybe String}
 
@@ -65,7 +67,7 @@ component = H.mkComponent
   where
 
     -- The initial state of the component
-    initialState context = { i18n: setLocale i18n context.locale, key: context.key, user:Nothing, error:Nothing}
+    initialState context = { i18n: setLocale i18n context.locale, key: context.key, user:Nothing, roles:[], error:Nothing}
 
     -- The handler for the forms actions
     handleAction :: Action -> H.HalogenM _ _ _ _ _ Unit
@@ -73,7 +75,8 @@ component = H.mkComponent
       Initialize -> do
         key <- H.gets _.key
         q <- getUser key
-        H.modify_ (\state -> state { user = q })
+        r <- getRoles key
+        H.modify_ (\state -> state { user = q, roles = r })
       Receive i -> do
         H.modify_ (\state -> state { i18n = setLocale i18n i.locale, key = i.key })
         handleAction Initialize
@@ -97,18 +100,23 @@ component = H.mkComponent
         [ whenElem (isJust error) \_ -> HH.div [css "alert alert-danger", prop "role" "alert"][maybeElem error HH.text]
         , HH.div [ css "row" ]
                 [ HH.div [ css "col" ]
-                    [ Field.textInputReadOnly
+                    [ Field.textReadOnly
                         (i18n.dictionary.username)
                         (show user.username)
                         [ HP.type_ HP.InputText]
                     ]
                 , HH.div [ css "col" ]
-                    [ Field.textInputReadOnly
+                    [ Field.textReadOnly
                         (i18n.dictionary.email)
                         (show user.email)
                         [ HP.type_ HP.InputText]
                     ]
                 ]
+          , HH.div [css "ro"][
+              HH.div [css "col"][
+                
+              ]
+            ]
             , HH.input [ css "btn btn-primary", HP.type_ HP.InputButton, HP.value (i18n.dictionary.delete), HE.onClick \_ -> Delete ]
             , HH.span [] [HH.text (" ")]
             , HH.input [ css "btn btn-primary", HP.type_ HP.InputButton, HP.value (i18n.dictionary.cancel), HE.onClick \_ -> Cancel ]

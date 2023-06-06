@@ -99,10 +99,10 @@ component = F.formless { liftAction: Eval } mempty $ H.mkComponent
             [ css "j-invalid-feedback" ]
             [ HH.text i18n.dictionary.invalid ]
     , HH.fieldset_
-        [ Field.textInput
+        [ Field.text
             { label: i18n.dictionary.uname, state: fields.username, action: actions.username, locale: i18n.locale }
             [ HP.type_ HP.InputText ]
-        , Field.textInput
+        , Field.text
             { label: i18n.dictionary.pwd, state: fields.password, action: actions.password, locale: i18n.locale }
             [ HP.type_ HP.InputPassword ]
         , Field.submitButton i18n.dictionary.login
