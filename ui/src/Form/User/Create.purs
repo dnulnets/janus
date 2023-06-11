@@ -167,9 +167,9 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
                           Field.multiSelect
                             {label: (i18n.dictionary.roles), state: fields.roles, action: actions.roles, locale: i18n.locale, 
                             options: [
-                              {option: RT.User, render: "User", props: []},
-                              {option: RT.Administrator, render: "Administrator", props: []},
-                              {option: RT.TeamLeader, render: "Team Leader", props: []} ] }
+                              {option: RT.User, render: show RT.User, props: []},
+                              {option: RT.Administrator, render: show RT.Administrator, props: []},
+                              {option: RT.TeamLeader, render: show RT.TeamLeader, props: []} ] }
                         ],
                       HH.div [css "col"]
                         [

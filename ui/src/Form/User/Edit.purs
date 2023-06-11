@@ -1,19 +1,23 @@
 -- |This module contains the form for creating a new user.
 module Janus.Form.User.Edit where
 
+import Janus.Data.Error
 import Prelude
 
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Console (log)
 import Formless as F
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Janus.Capability.Resource.User (class ManageUser, updateUser, getUser, getRoles)
+import Janus.Capability.Resource.User (class ManageUser, updateUser, getUser, getRoles, updateRoles)
 import Janus.Component.HTML.Utils (css, whenElem, prop, maybeElem)
 import Janus.Data.Email (Email)
+import Janus.Data.Role (RoleType)
+import Janus.Data.Role as RT
 import Janus.Data.UUID (UUID)
 import Janus.Data.Username (Username)
 import Janus.Form.Field as Field
@@ -21,8 +25,6 @@ import Janus.Form.Validation (FormError)
 import Janus.Form.Validation as V
 import Janus.Lang.Form.User (i18n, Phrases)
 import Janus.Lang.I18n (I18n, setLocale, message)
-import Effect.Console (log)
-import Janus.Data.Error
 
 -- Slot definition for this form
 type Slot = forall q. H.Slot q Output Unit
@@ -43,13 +45,14 @@ type Form f =
   , active :: f Boolean Void Boolean
   , password :: f String FormError (Maybe String)
   , key :: f String FormError UUID
+  , roles :: f (Array RoleType) Void (Array RoleType)
   )
 type FormContext = F.FormContext (Form F.FieldState) (Form (F.FieldAction Action)) Input Action
 type FormlessAction = F.FormlessAction (Form F.FieldState)
 
 -- Inital values of the forms inputs
-initialValue :: { username :: String, email :: String, active :: Boolean, password :: String, key :: String }
-initialValue = { username: "", email: "", active: true, password: "", key: ""}
+initialValue :: { username :: String, email :: String, active :: Boolean, password :: String, key :: String, roles :: Array RoleType }
+initialValue = { username: "", email: "", active: true, password: "", key: "", roles: []}
 
 -- The actions the form generate
 data Action
@@ -88,12 +91,13 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
     -- The initial state of the component
     initialState context = { error:Nothing, form: context, formError: false, i18n: setLocale i18n context.input.locale, key: context.input.key }
 
-    extract f p = f
+    extract f r p = f
           { username { value = show p.username }
           , password { value = "" }
           , email { value = show p.email }
           , active { value = p.active }
           , key { value = show p.key}
+          , roles { value = r }
           }
 
     empty f = f
@@ -102,6 +106,7 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
           , email { value = "" }
           , active { value = true }
           , key { value = ""}
+          , roles { value = [] }
           }
 
     -- The handler for the forms actions
@@ -110,8 +115,9 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
       Initialize -> do
         key <- H.gets _.form.input.key
         q <- getUser key
+        r <- getRoles key
         { formActions, fields } <- H.gets _.form
-        handleAction $ formActions.setFields $ fromMaybe (empty fields) ((extract fields) <$> q)
+        handleAction $ formActions.setFields $ fromMaybe (empty fields) ((extract fields (map (_.role) r)) <$> q)
       Receive context -> do
         H.modify_ (\state -> state { form = context, i18n = setLocale i18n context.input.locale, key = context.input.key })
       Cancel -> do
@@ -127,13 +133,19 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
     handleQuery = do
       let
         onSubmit o = do
-          err <- updateUser o
+          err <- updateUser {active:o.active, email:o.email, password:o.password, username:o.username, key:o.key}
           case err of
             Just ae -> do
               i18n <- H.gets _.i18n
               H.modify_ (\s -> s { error = Just (flash i18n ae) })
             Nothing -> do
-              F.raise Completed
+              rerr <- updateRoles o.key $ map (\rt->{key:Nothing, role:rt}) o.roles
+              case rerr of
+                Just ae -> do
+                  i18n <- H.gets _.i18n
+                  H.modify_ (\s -> s { error = Just (flash i18n ae) })
+                Nothing -> do
+                  F.raise Completed
 
         validation =
           { username: V.required >=> V.minLength 3 >=> V.usernameFormat
@@ -141,6 +153,7 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
           , email: V.required >=> V.minLength 3 >=> V.emailFormat
           , active: Right
           , key: V.required >=> V.uuidFormat
+          , roles: Right
           }
 
       F.handleSubmitValidate onSubmit F.validate validation
@@ -180,11 +193,20 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
                           [ HP.type_ HP.InputPassword ]
                       ]]
               , HH.div [css "row"]
-                  [ HH.div [ css "col align-self-end" ]
+                  [ HH.div [ css "col align-self-start" ]
                       [ Field.checkbox
                           { label: (i18n.dictionary.active), state: fields.active, action: actions.active, locale: i18n.locale }
                           []
-                      ]
+                      ],
+                    HH.div [css "col"]
+                      [
+                        Field.multiSelect
+                          {label: (i18n.dictionary.roles), state: fields.roles, action: actions.roles, locale: i18n.locale, 
+                          options: [
+                            {option: RT.User, render: show RT.User, props: []},
+                            {option: RT.Administrator, render: show RT.Administrator, props: []},
+                            {option: RT.TeamLeader, render: show RT.TeamLeader, props: []} ] }
+                      ]                      
                   ]
               , Field.submitButton (i18n.dictionary.save)
               , HH.span [] [HH.text (" ")]
