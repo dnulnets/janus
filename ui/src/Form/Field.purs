@@ -166,25 +166,25 @@ multiSelect
   => MultiSelect action input output
   -> H.ComponentHTML action slots m
 multiSelect { label, state, action, options } =
-  HH.div_
-    [ HH.label_ [ HH.text label ]
-    , HH.fieldset_ $ options <#> \{ option, render, props } ->
-        HH.label_
-          [ HH.input $ flip append props
-              [ HP.type_ HP.InputCheckbox
-              , HP.name action.key
-              , HP.checked $ isJust $ elemIndex option state.value
-              , HE.onChecked (\b -> handleChecked b option)
-              , HE.onBlur action.handleBlur
-              ]
-          , HH.text render
-          ]
-    ]
-
+    HH.fieldset_ [
+      HH.div [ css "mb-3" ] 
+        ([HH.legend [css "col-form-label"][ HH.text label ]] <> (options <#> \{ option, render, props } ->
+          HH.div [css "form-check"][
+            HH.input $ flip append props
+                [ css "form-check-input"
+                , HP.type_ HP.InputCheckbox
+                , HP.name action.key
+                , HP.checked $ isJust $ elemIndex option state.value
+                , HE.onChecked (\b -> handleChecked b option)
+                , HE.onBlur action.handleBlur
+                ],
+            HH.label [css "form-check-label"] [ HH.text render]
+          ]))
+      ]
+      
     where
 
       handleChecked b o = if b then
                           action.handleChange $ nub $ cons o state.value
                         else
                           action.handleChange $ delete o state.value
-

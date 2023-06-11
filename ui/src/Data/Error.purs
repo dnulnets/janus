@@ -25,7 +25,7 @@ flash::forall r . I18n r -> Error -> String
 flash i18n {code:code, status:status, extra:extra} = message i18n code
   <> 
   case status of
-    Just s -> ", " <> ", RC=" <> show s
+    Just s -> ", RC=" <> show s
     Nothing -> ""
   <>
   case extra of

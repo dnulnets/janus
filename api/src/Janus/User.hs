@@ -32,7 +32,7 @@ import           Data.Text                  (Text)
 import           Data.Text.Lazy             (pack)
 import           Data.Time.Clock.System     (SystemTime (systemSeconds),
                                              getSystemTime)
-import           Data.UUID                  (fromString)
+import           Data.UUID                  (fromString, toString)
 import qualified Database.Persist.Sql       as DB
 import           Janus.Core                 (JScottyM)
 import qualified Janus.Data.Config          as C
@@ -232,7 +232,6 @@ app = do
 
   -- |Checks a token and returns with the user if the user is valid and active
   get "/api/login" $ ( do
-
     kau <- getAuthenticated
     t <- getToken
     case kau of
@@ -312,8 +311,16 @@ app = do
     dbuser <- runDB $ DB.getBy $ UniqueUserUsername (curusername req)
     if isNothing dbuser then do
       pwd <- liftIO $ authHashPassword ((C.cost . C.password . config) settings) (curpassword req)
-      _ <- runDB $ DB.insert $ User { userUsername = (curusername req), userPassword = pwd,
-        userEmail = (curemail req), userActive = (curactive req)}
+      (UserKey k) <- runDB $ DB.insert $ User { userUsername = (curusername req), userPassword = pwd, userEmail = (curemail req), userActive = (curactive req)}
+      dbuser <- runDB $ DB.get $ UserKey k
+      case dbuser of
+          Just u -> do
+            let userResponse = UserResponse { key = k, username = (userUsername u),
+              email = (userEmail u), active = (userActive u), token = Nothing, password = Nothing}
+            json userResponse
+          Nothing -> do
+            json $ JanusError { code = USR002, extra = Just $ toString k }
+            status notFound404      
       status created201
     else do
       json $ JanusError { code = USR001, extra = Nothing }

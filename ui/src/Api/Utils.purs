@@ -11,10 +11,10 @@ import Prelude
 import Affjax.StatusCode (StatusCode(..))
 import Affjax.Web (Error, Response(..), printError, request)
 import Data.Argonaut.Core (Json, toString)
+import Data.Argonaut.Parser (jsonParser)
 import Data.Bifunctor (rmap)
 import Data.Codec.Argonaut (JsonCodec, printJsonDecodeError)
 import Data.Codec.Argonaut as CA
-import Data.Argonaut.Parser (jsonParser)
 import Data.Either (Either(..), hush)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
@@ -32,7 +32,7 @@ import Janus.Store (Action(..), Store)
 convertBody::Either Error (Response Json) -> Either E.Error Json
 convertBody (Left e) = Left { code:"JAN002", status:Nothing, extra: Just (printError e)}
 convertBody (Right {body:body, status: (StatusCode status)}) = if status>= 200 && status<300 then Right body else 
-  case decode_ E.errorCodec (Just body) of
+  case decode_ E.errorCodec body of
     Left e -> Left {code:"JAN002", status:Just status, extra: Just e}
     Right b -> Left $ b {status = Just status}
 
@@ -84,16 +84,14 @@ authenticate req fields = do
       pure (Just profile)
 
 -- |Decodes the json to its type and write any erros in the log.
-decode :: forall m a. LogMessages m => Now m => JsonCodec a -> Maybe Json -> m (Maybe a)
-decode _ Nothing = logError "Response malformed" *> pure Nothing
-decode codec (Just json) = case CA.decode codec json of
-  Left err -> logError (printJsonDecodeError err) *> pure Nothing
-  Right response -> pure (Just response)
+decode :: forall m a. LogMessages m => Now m => JsonCodec a -> Json -> m (Either E.Error a)
+decode codec json = case CA.decode codec json of
+  Left err -> logError (printJsonDecodeError err) *> (pure $ Left {code:"JAN005", status: Nothing, extra: Just $ printJsonDecodeError err})
+  Right response -> pure $ Right response
 
 -- |Decodes the json to its type and write any erros in the log.
-decode_ :: forall a. JsonCodec a -> Maybe Json -> Either String a
-decode_ _ Nothing = Left "Response malformed"
-decode_ codec (Just json) = case CA.decode codec json of
+decode_ :: forall a. JsonCodec a -> Json -> Either String a
+decode_ codec json = case CA.decode codec json of
   Left err -> Left $ printJsonDecodeError err
   Right response -> Right response
 

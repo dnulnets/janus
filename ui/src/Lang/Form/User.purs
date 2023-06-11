@@ -16,7 +16,8 @@ type Phrases = ( active::String,
       key::String,
       password::String,
       save::String,
-      username::String)
+      username::String,
+      roles::String)
 
 
 i18n::I18n Phrases
@@ -34,6 +35,7 @@ eng = merge
   , save: "Save"
   , cancel: "Cancel"
   , delete: "Delete"
+  , roles: "Roles"
   } MSG.eng
 
 swe :: Dictionary Phrases
@@ -48,4 +50,5 @@ swe = merge
   , save: "Spara"
   , cancel: "Avbryt"
   , delete: "Delete"
+  , roles: "Roles"
   } MSG.swe

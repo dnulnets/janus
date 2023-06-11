@@ -26,7 +26,8 @@ data Message = JAN001 -- Unknown error
     | JAN002 -- Communication problem with the server (client side error)
     | JAN003 -- System error, typical 500
     | JAN004 -- Not authorized
-    | USR001      -- Username already exists
+    | USR001 -- Username already exists
+    | USR002 -- Could not find new user 
     deriving (Eq, Show, Read, Generic, Ord)
 instance FromJSON Message
 instance ToJSON Message

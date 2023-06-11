@@ -6,10 +6,13 @@ import Prelude
 
 import Data.Codec.Argonaut as Codec
 import Data.Codec.Argonaut.Record as CAR
+import Data.Either (hush, Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Traversable (sequence)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Console (log)
 import Effect.Console as Console
 import Effect.Now as Now
 import Halogen as H
@@ -24,15 +27,14 @@ import Janus.Capability.Now (class Now)
 import Janus.Capability.Resource.User (class ManageUser)
 import Janus.Data.Log as Log
 import Janus.Data.Profile as Profile
+import Janus.Data.Role as Role
 import Janus.Data.Route as Route
 import Janus.Store (Action(..), LogLevel(..), Store)
 import Janus.Store as Store
 import Routing.Duplex (print)
 import Routing.Hash (setHash)
 import Safe.Coerce (coerce)
-import Data.Either (hush, Either(..))
-import Effect.Console (log)
-import Janus.Data.Role as Role
+import Web.HTML.Event.EventTypes (offline)
 
 -- | The definition of the application.
 newtype AppM a = AppM (StoreT Store.Action Store.Store Aff a)
@@ -78,8 +80,14 @@ instance manageUserAppM :: ManageUser AppM where
 
   getCurrentUser = do
     mbJson <- mkAuthRequest { endpoint: Login, method: Get }
-    map (map _.user)
-      $ decode (CAR.object "User" { user: Profile.profileCodec }) $ hush mbJson
+    case mbJson of
+      Left e -> pure Nothing
+      Right j -> do
+        d <- decode (CAR.object "User" { user: Profile.profileCodec }) j
+        case d of
+          Left e -> pure Nothing
+          Right r -> pure $ Just $ r.user
+
 
   updateUser user = do
     let
@@ -92,8 +100,13 @@ instance manageUserAppM :: ManageUser AppM where
 
   getUser uuid = do
     mbJson <- mkAuthRequest { endpoint: User uuid, method: Get }
-    map (map _.user)
-      $ decode (CAR.object "User" { user: Profile.profileCodec }) $ hush mbJson
+    case mbJson of
+      Left e -> pure Nothing
+      Right j -> do
+        d <- decode (CAR.object "User" { user: Profile.profileCodec }) j
+        case d of
+          Left e -> pure Nothing
+          Right r -> pure $ Just $ r.user
 
   deleteUser uuid = do
     r <- mkAuthRequest { endpoint: User uuid, method: Delete }
@@ -105,27 +118,50 @@ instance manageUserAppM :: ManageUser AppM where
     let
       codec = CAR.object "User" { user: Profile.newProfileCodec }
       method = Put $ Just $ Codec.encode codec { user }
-    r <- mkAuthRequest { endpoint: CreateUser, method: method }
-    case r of
-      Left e -> pure $ Just e
-      Right _ -> pure Nothing
+    mbJson <- mkAuthRequest { endpoint: CreateUser, method: method }
+    d <- join <$> (sequence $ (decode (CAR.object "User" { user: Profile.profileCodec })) <$> mbJson)
+    pure $ (_.user) <$> d
 
   getUsers o n = do
     let
       codec =  Codec.array (CAR.object "User" { user: Profile.profileCodec })
     mbJson <- mkAuthRequest { endpoint: Users {offset:o, n:n}, method: Get }
-    l <- decode codec $ hush mbJson
-    pure $ fromMaybe [] $ map (map _.user) l
+    case mbJson of
+      Left e -> pure []
+      Right j -> do
+        d <- decode codec j
+        case d of
+          Left e -> pure []
+          Right r -> pure $ map (_.user) r
 
   nofUsers = do
     let codec = Codec.int
     mbJson <- mkAuthRequest { endpoint: NofUsers, method: Get }
-    l <- decode codec $ hush mbJson
-    pure $ fromMaybe 0 l
-
+    case mbJson of
+      Left e -> pure 0
+      Right j -> do
+        l <- decode codec j
+        case l of
+          Left e -> pure 0
+          Right r -> pure r
+          
   getRoles u = do
     let
       codec =  Codec.array (CAR.object "Role" { role: Role.roleCodec })
     mbJson <- mkAuthRequest { endpoint: Role u, method: Get }
-    l <- decode codec $ hush mbJson
-    pure $ fromMaybe [] $ map (map _.role) l
+    case mbJson of
+      Left e -> pure []
+      Right j -> do
+        d <- decode codec j
+        case d of
+          Left e -> pure []
+          Right r -> pure $ map (_.role) r
+
+  updateRoles u ar = do
+    let
+      codec =  Codec.array (CAR.object "Role" { role: Role.roleCodec })
+      method = Post $ Just $ Codec.encode codec (map (\r-> {role: r}) ar)
+    r <- mkAuthRequest { endpoint: Role u, method: method }
+    case r of
+      Left e -> pure $ Just e
+      Right _ -> pure Nothing

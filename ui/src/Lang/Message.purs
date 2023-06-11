@@ -12,7 +12,9 @@ eng = {
     , Tuple "JAN002" "Communication failure to the server"
     , Tuple "JAN003" "Server error"
     , Tuple "JAN004" "You are not authorized"
+    , Tuple "JAN005" "Malformed response from server"
     , Tuple "USR001" "Username already exists"
+    , Tuple "USR002" "Unable to find new user"
   ]
   , fallback: "Unknown error message"
   }
@@ -24,7 +26,9 @@ swe = {
     , Tuple "JAN002" "Kommunikationsproblem med servern"
     , Tuple "JAN003" "Systemfel"
     , Tuple "JAN004" "Du är inte behörig"
+    , Tuple "JAN005" "Felformaterat svar från servern"
     , Tuple "USR001" "Användarnamnet finns redan"
+    , Tuple "USR002" "Kan ej hitta den nya användaren"
   ]
   , fallback: "Okänt felmeddelande"
   }

@@ -15,7 +15,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Janus.Capability.Resource.User (class ManageUser, createUser)
+import Janus.Capability.Resource.User (class ManageUser, createUser, updateRoles)
 import Janus.Component.HTML.Utils (css, whenElem, prop, maybeElem)
 import Janus.Data.Email (Email)
 import Janus.Data.Role (RoleType)
@@ -45,15 +45,15 @@ type Form f =
   , email :: f String FormError Email
   , active :: f Boolean Void Boolean
   , password :: f String FormError String
-  , role :: f (Array RoleType) Void (Array RoleType)
+  , roles :: f (Array RoleType) Void (Array RoleType)
   )
 
 type FormContext = F.FormContext (Form F.FieldState) (Form (F.FieldAction Action)) Input Action
 type FormlessAction = F.FormlessAction (Form F.FieldState)
 
 -- Inital values of the forms inputs
-initialValue :: { username :: String, email :: String, active :: Boolean, password :: String, role :: Array RoleType}
-initialValue = { username: "", email: "", active: true, password: "", role: [] }
+initialValue :: { username :: String, email :: String, active :: Boolean, password :: String, roles :: Array RoleType}
+initialValue = { username: "", email: "", active: true, password: "", roles: [] }
 
 -- The actions the form generate
 data Action
@@ -104,13 +104,15 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
     handleQuery = do
       let
         onSubmit o = do
-          err <- createUser {active:o.active, email:o.email, password:o.password, username:o.username}
-          H.liftEffect $ log $ show o.role
-          case err of
-            Just ae -> do
+          r <- createUser {active:o.active, email:o.email, password:o.password, username:o.username}
+          H.liftEffect $ log $ show o.roles
+          case r of
+            Left ae -> do
               i18n <- H.gets _.i18n
               H.modify_ (\s -> s { error = Just (flash i18n ae) })
-            Nothing -> do
+            Right u -> do
+              q <- updateRoles u.key $ map (\rt->{key:Nothing, role:rt}) o.roles
+              H.liftEffect $ log $ show q
               F.raise Completed
 
         validation =
@@ -118,7 +120,7 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
           , password: V.required >=> V.minLength 2 >=> V.maxLength 20
           , email: V.required >=> V.minLength 3 >=> V.emailFormat
           , active: Right
-          , role: Right
+          , roles: Right
           }
 
       F.handleSubmitValidate onSubmit F.validate validation
@@ -163,7 +165,7 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
                       HH.div [css "col"]
                         [
                           Field.multiSelect
-                            {label: (i18n.dictionary.active), state: fields.role, action: actions.role, locale: i18n.locale, 
+                            {label: (i18n.dictionary.roles), state: fields.roles, action: actions.roles, locale: i18n.locale, 
                             options: [
                               {option: RT.User, render: "User", props: []},
                               {option: RT.Administrator, render: "Administrator", props: []},

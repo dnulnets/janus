@@ -10,6 +10,7 @@ module Janus.Capability.Resource.User
   , deleteUser
   , nofUsers
   , getRoles
+  , updateRoles
   , class ManageUser
   )
   where
@@ -17,6 +18,7 @@ module Janus.Capability.Resource.User
 import Prelude
 
 import Data.Maybe (Maybe)
+import Data.Either (Either)
 import Halogen (HalogenM, lift)
 import Janus.Api.Request (LoginFields)
 import Janus.Data.Profile (Profile, ProfileBase)
@@ -32,13 +34,14 @@ type CreateProfileFields = { | ProfileBase (password::String) }
 class Monad m <= ManageUser m where
   loginUser :: LoginFields -> m (Maybe Profile)
   getCurrentUser :: m (Maybe Profile)
-  createUser :: CreateProfileFields -> m (Maybe Error)
+  createUser :: CreateProfileFields -> m (Either Error Profile)
   updateUser :: UpdateProfileFields -> m (Maybe Error)
   getUser :: UUID -> m (Maybe Profile)
   deleteUser :: UUID -> m (Maybe Error)
   getUsers :: Int->Int->m (Array Profile)
   nofUsers :: m (Int)
   getRoles :: UUID -> m (Array Role)
+  updateRoles :: UUID -> Array Role -> m (Maybe Error)
 
 -- |Helper to avoid lifting
 instance manageUserHalogenM :: ManageUser m => ManageUser (HalogenM st act slots msg m) where
@@ -51,3 +54,4 @@ instance manageUserHalogenM :: ManageUser m => ManageUser (HalogenM st act slots
   getUsers o n = lift $ getUsers o n
   nofUsers = lift nofUsers
   getRoles = lift <<< getRoles
+  updateRoles i r = lift $ updateRoles i r 
