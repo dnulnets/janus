@@ -112,7 +112,6 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
               H.modify_ (\s -> s { error = Just (flash i18n ae) })
             Right u -> do
               q <- updateRoles u.key $ map (\rt->{key:Nothing, role:rt}) o.roles
-              H.liftEffect $ log $ show q
               F.raise Completed
 
         validation =

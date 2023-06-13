@@ -4,7 +4,7 @@ module Janus.Form.User.Edit where
 import Janus.Data.Error
 import Prelude
 
-import Data.Either (Either(..))
+import Data.Either (Either(..), fromRight)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Console (log)
@@ -117,7 +117,8 @@ component = F.formless { liftAction: Eval } initialValue $ H.mkComponent
         q <- getUser key
         r <- getRoles key
         { formActions, fields } <- H.gets _.form
-        handleAction $ formActions.setFields $ fromMaybe (empty fields) ((extract fields (map (_.role) r)) <$> q)
+        handleAction $ formActions.setFields $ fromRight (empty fields) ((extract fields (map (_.role) r)) <$> q)
+
       Receive context -> do
         H.modify_ (\state -> state { form = context, i18n = setLocale i18n context.input.locale, key = context.input.key })
       Cancel -> do

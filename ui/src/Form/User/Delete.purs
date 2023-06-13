@@ -4,6 +4,7 @@ module Janus.Form.User.Delete where
 import Prelude
 
 import Data.Maybe (Maybe(..), isJust)
+import Data.Either (hush, blush)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -76,7 +77,7 @@ component = H.mkComponent
         key <- H.gets _.key
         q <- getUser key
         r <- getRoles key
-        H.modify_ (\state -> state { user = q, roles = r })
+        H.modify_ (\state -> state { user = hush q, roles = r, error = flash i18n <$> (blush q) })
       Receive i -> do
         H.modify_ (\state -> state { i18n = setLocale i18n i.locale, key = i.key })
         handleAction Initialize

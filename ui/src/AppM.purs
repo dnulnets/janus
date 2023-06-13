@@ -100,13 +100,8 @@ instance manageUserAppM :: ManageUser AppM where
 
   getUser uuid = do
     mbJson <- mkAuthRequest { endpoint: User uuid, method: Get }
-    case mbJson of
-      Left e -> pure Nothing
-      Right j -> do
-        d <- decode (CAR.object "User" { user: Profile.profileCodec }) j
-        case d of
-          Left e -> pure Nothing
-          Right r -> pure $ Just $ r.user
+    d <- join <$> (sequence $ (decode (CAR.object "User" { user: Profile.profileCodec })) <$> mbJson)
+    pure $ (_.user) <$> d
 
   deleteUser uuid = do
     r <- mkAuthRequest { endpoint: User uuid, method: Delete }

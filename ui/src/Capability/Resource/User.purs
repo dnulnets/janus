@@ -36,7 +36,7 @@ class Monad m <= ManageUser m where
   getCurrentUser :: m (Maybe Profile)
   createUser :: CreateProfileFields -> m (Either Error Profile)
   updateUser :: UpdateProfileFields -> m (Maybe Error)
-  getUser :: UUID -> m (Maybe Profile)
+  getUser :: UUID -> m (Either Error Profile)
   deleteUser :: UUID -> m (Maybe Error)
   getUsers :: Int->Int->m (Array Profile)
   nofUsers :: m (Int)
